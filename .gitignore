@@ -1,8 +1,10 @@
 node_modules/
 .tmp/
+bower_components/
+coverage/
+.sass-cache/
+.idea/
+.sublime-gulp.cache
 
-web/bower_components/
-web/.sass-cache/
-web/.tmp/
-web/.sublime-gulp.cache
+web/dist
 web/src/instant-bundle.js

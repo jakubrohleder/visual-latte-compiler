@@ -19,7 +19,7 @@
 
     var isDown = true;
 
-    setInterval(changeIcon, 10);
+    $interval(changeIcon, 10);
 
     $log.debug('runBlock end');
 

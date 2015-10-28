@@ -12,10 +12,16 @@ var gutil = require('gulp-util');
  *  The main paths of your project handle these with care
  */
 exports.paths = {
-  src: 'src',
-  dist: 'dist',
-  tmp: '.tmp',
-  e2e: 'e2e'
+  web : {
+    src: 'web/src',
+    dist: 'web/dist',
+    tmp: 'web/.tmp',
+    e2e: 'web/e2e'
+  },
+  lib: {
+    src: 'src',
+    e2e: 'e2e'
+  }
 };
 
 exports.overrides = {

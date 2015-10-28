@@ -1,4 +1,14 @@
-<div class="ui segment">
+<h5 class="ui top attached header">
+  Debug
+  <a href="" style="float: right; font-weight: normal; color: #777;" ng-click="showDebug = !showDebug">
+    <i ng-show="showDebug" class="chevron up icon"></i>
+    <i ng-hide="showDebug" class="chevron down icon"></i>
+    <span>
+      hide
+    </span>
+  </a>
+</h5>
+<div class="ui attached segment" ng-show="showDebug">
   <h4 class="ui header">Error</h4>
   <hr>
   <json-formatter json="data.error" open="1"></json-formatter>

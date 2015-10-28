@@ -9,7 +9,7 @@
       restrict: 'E',
       templateUrl: 'app/components/code-area/code-area.html',
       scope: {
-        code: '=data',
+        code: '=',
         error: '='
       },
       controller: controller

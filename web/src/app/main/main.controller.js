@@ -6,8 +6,7 @@
     .controller('MainController', MainController);
 
   /** @ngInject */
-  function MainController($scope, require) {
-    var instant = require('instant');
+  function MainController($scope, instant) {
     $scope.parse = parse;
     $scope.code = '1+1+a;\n2+2;';
     $scope.data = {};

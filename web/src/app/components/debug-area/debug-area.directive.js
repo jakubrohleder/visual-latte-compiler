@@ -20,6 +20,8 @@
           $scope.code = code.match(/[^\r\n]+/g);
         }
       });
+
+      $scope.showDebug = true;
     }
   }
 

@@ -4,7 +4,7 @@
 
   angular
     .module('instantCompiler')
-    .constant('require', require)
+    .constant('instant', require('instant'))
     .constant('Favico', Favico)
     .constant('jQuery', $);
 
