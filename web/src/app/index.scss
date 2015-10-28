@@ -1,0 +1,31 @@
+/* Do not remove the comments below. It's the markers used by wiredep to inject
+   sass dependencies when defined in the bower.json of your dependencies */
+// bower:scss
+// endbower
+
+.ui.main.text.container {
+  padding-top: 5em;
+}
+
+.CodeMirror {
+  border-radius: 0.28571429rem;
+  border: #CCC 1px solid;
+}
+
+.error-text {
+  border: 1px red solid;
+  border-radius: 0.2rem;
+}
+
+.error-marker {
+  padding-left: 5px;
+  background-color: #FFF4F4;
+  color: #EE95A1;
+  border-top: 1px solid darken(#FFF4F4, 4%);
+  border-bottom: 1px solid darken(#FFF4F4, 4%);
+}
+
+/* Do not remove the comments below. It's the markers used by gulp-inject to inject
+   all your sass files automatically */
+// injector
+// endinjector
