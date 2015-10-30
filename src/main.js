@@ -1,4 +1,4 @@
-/* global require:false */
+/* global require:false*/
 
 var grammar = require('./syntax.json');
 var Parser = require('jison').Parser;

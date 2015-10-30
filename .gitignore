@@ -8,3 +8,10 @@ coverage/
 
 web/dist
 web/src/instant-bundle.js
+
+*.j
+*.ll
+*.class
+*.bc
+insc_jvm
+insc_llvm

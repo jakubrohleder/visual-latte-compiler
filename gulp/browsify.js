@@ -16,5 +16,6 @@ gulp.task('browsify', function () {
     })
     .pipe($.rename('instant-bundle.js'))
     .pipe(gulp.dest(conf.paths.web.src))
+    .pipe(gulp.dest('dist'))
     .pipe(browserSync.reload({ stream: true }));
 });
