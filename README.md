@@ -25,11 +25,11 @@ $ node dist/instant-bundle.js
 
 [Install node.js](#node-package-only)
 
-Install Node Package Manager (npm):
+Install Node Package Manager (npm) and tar:
 
 ~~~bash
 #Fedora/CentOS
-$ sudo yum install npm
+$ sudo yum install npm tar
 
 #OSX
 # it comes shipped with node
