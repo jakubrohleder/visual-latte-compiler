@@ -27,26 +27,26 @@
       ],
 
       "p": [
-         ["stmt", "yy.data.program.push($1);"],
-         ["p ; stmt", "yy.data.program.push($3);"]
+         ["stmt", "yy.data.lines.push($1);"],
+         ["p ; stmt", "yy.data.lines.push($3);"]
       ],
 
       "stmt": [
-         ["id = e", "yy.data.env[$1] = true; $$ = {type: 'stmt', value: '=', left:$1, right: $3}"],
+         ["id = e", "yy.data.env[$1.value] = {type: $3.type, index: yy.data.locals++}; $$ = {nodeType: 'stmt', value: '=', left:$1, right: $3, height: $3.height + 1, type: $3.type}"],
          ["e", "$$ = $1"]
       ],
 
       "id": [
-         ["STRING", "$$ = String(yytext)"]
+         ["STRING", "$$ = {nodeType: 'string', type: 'string', value: String(yytext), height: 0}"]
       ],
 
       "e" :[
-         ["e + e",  "$$ = {type: 'exp', value: '+', left:$1, right: $3}"],
-         ["e - e",  "$$ = {type: 'exp', value: '-', left:$1, right: $3}"],
-         ["e * e",  "$$ = {type: 'exp', value: '*', left:$1, right: $3}"],
-         ["e / e",  "$$ = {type: 'exp', value: '/', left:$1, right: $3}"],
-         ["id",     "if(yy.data.env[$1] !== true) {parseError('Undeclared variable \"' + $1 + '\" at line ' + yylineno + ':' + this._$.first_column, {token: $1, line: yylineno, loc: this._$, parse: true})} $$ = $1"],
-         ["NUMBER", "$$ = Number(yytext)"]
+         ["e + e",  "$$ = {nodeType: 'exp', value: '+', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
+         ["e - e",  "$$ = {nodeType: 'exp', value: '-', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
+         ["e * e",  "$$ = {nodeType: 'exp', value: '*', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
+         ["e / e",  "$$ = {nodeType: 'exp', value: '/', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
+         ["id",     "if(yy.data.env[$1.value] === undefined) {parseError('Undeclared variable \"' + $1 + '\" at line ' + yylineno + ':' + this._$.first_column, {token: $1, line: yylineno, loc: this._$, parse: true})} $$ = $1"],
+         ["NUMBER", "$$ = {nodeType: 'number', type: 'number', value: Number(yytext), height: 0}"]
       ]
    }
 }
