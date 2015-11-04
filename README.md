@@ -4,38 +4,17 @@
 
 ### Node package only
 
-Install nodejs:
+Install nodejs, Package Manager (npm) and tar:
 
 ~~~bash
 #Fedora/CentOS
-$ sudo yum install nodejs
+$ sudo yum install nodejs npm tar
 
 #OSX
 $ brew install node
 ~~~
 
-Run bundle
-
-~~~bash
-$ node dist/instant-bundle.js
-~~~
-
-
-### Self hosted web version
-
-[Install node.js](#node-package-only)
-
-Install Node Package Manager (npm) and tar:
-
-~~~bash
-#Fedora/CentOS
-$ sudo yum install npm tar
-
-#OSX
-# it comes shipped with node
-~~~
-
-Update it:
+Update npm:
 
 ~~~bash
 #Fedora/CentOS
@@ -45,6 +24,35 @@ $ sudo npm install -g npm
 $ npm install -g npm
 ~~~
 
+Install project node dependencies locally:
+
+~~~bash
+#From project root
+
+$ npm install
+~~~
+
+Exec Makefile:
+
+~~~bash
+#From project root
+
+$ make
+~~~
+
+Generate llvm or jvm code for .ins file:
+
+~~~bash
+#From project root
+
+$ ./insc_jvm codefile.ins #generates codefile.j and code Codefile.class
+$ ./insc_llvm codefile.ins #generates codefile.ll and code codefile.bc
+~~~
+
+### Self hosted web version
+
+[Install node.js and npm](#node-package-only)
+
 Install [bower](http://bower.io/) and [gulp](http://gulpjs.com/) globally:
 
 ~~~bash
@@ -53,14 +61,6 @@ $ sudo npm install -g gulp bower
 
 #OSX
 $ npm install -g gulp bower
-~~~
-
-Install project node dependencies locally:
-
-~~~bash
-#From project root
-
-$ npm install
 ~~~
 
 Install project bower dependencies locally:
