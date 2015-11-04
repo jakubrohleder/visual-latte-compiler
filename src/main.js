@@ -22,14 +22,12 @@ function parse(code) {
   return parser.parse(code);
 }
 
-function compileJVM(tree, filename) {
-  var compiledCode = JVM.compile(tree, filename);
-  // console.log(compiledCode);
+function compileJVM(tree, className) {
+  var compiledCode = JVM.compile(tree, className);
   return compiledCode;
 }
 
-function compileLLVM(tree, filename) {
-  var compiledCode = LLVM.compile(tree, filename);
-  // console.log(compiledCode);
+function compileLLVM(tree, className) {
+  var compiledCode = LLVM.compile(tree, className);
   return compiledCode;
 }

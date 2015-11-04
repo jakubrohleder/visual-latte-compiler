@@ -2,6 +2,7 @@
   "name": "instantCompiler",
   "version": "0.1.0",
   "dependencies": {
+    "exec": "^0.2.1",
     "jison": "git+https://github.com/zaach/jison.git"
   },
   "scripts": {

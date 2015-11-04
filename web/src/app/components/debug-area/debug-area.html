@@ -9,6 +9,14 @@
   </a>
 </h5>
 <div class="ui attached segment" ng-show="showDebug">
+  <h4 class="ui header">LLVM</h4>
+  <hr>
+  <json-formatter json="data.llvm" open="1"></json-formatter>
+
+  <h4 class="ui header">JVM</h4>
+  <hr>
+  <json-formatter json="data.jvm" open="1"></json-formatter>
+
   <h4 class="ui header">Error</h4>
   <hr>
   <json-formatter json="data.error" open="1"></json-formatter>
@@ -16,12 +24,4 @@
   <h4 class="ui header">Tree</h4>
   <hr>
   <json-formatter json="data.tree" open="1"></json-formatter>
-
-  <h4 class="ui header">JVM</h4>
-  <hr>
-  <json-formatter json="data.jvm" open="1"></json-formatter>
-
-  <h4 class="ui header">LLVM</h4>
-  <hr>
-  <json-formatter json="data.llvm" open="1"></json-formatter>
 </div>
