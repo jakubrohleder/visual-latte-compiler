@@ -16045,7 +16045,7 @@ function _compile(program) {
       code.push(label + ' = load i32* %' + node.value);
     } else if (node.nodeType === 'number') {
       label = '%t' + labelsCount++;
-      tmpCode = label + ' = add i32 0, ' + node.value;
+      code.push(label + ' = add i32 0, ' + node.value);
     }
 
     return {
