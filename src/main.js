@@ -1,5 +1,3 @@
-/* global require:false*/
-
 var grammar = require('./syntax.json');
 var Parser = require('jison').Parser;
 var JVM = require('./jvm.js');

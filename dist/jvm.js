@@ -16,7 +16,7 @@ if (args[0] === undefined) {
       if(err) {
         return console.log(err);
       } else {
-        child_process.exec('java -jar Jasmin/jasmin.jar ' + filename + '.j -d .', function(err) {
+        child_process.exec('java -jar '+ __dirname + '/Jasmin/jasmin.jar ' + filename + '.j -d .', function(err) {
           if(err) {
             return console.log(err);
           }
