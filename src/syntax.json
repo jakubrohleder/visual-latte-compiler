@@ -45,7 +45,7 @@
          ["e - e",  "$$ = {nodeType: 'exp', value: '-', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
          ["e * e",  "$$ = {nodeType: 'exp', value: '*', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
          ["e / e",  "$$ = {nodeType: 'exp', value: '/', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["id",     "if(yy.data.env[$1.value] === undefined) {parseError('Undeclared variable \"' + $1 + '\" at line ' + yylineno + ':' + this._$.first_column, {token: $1, line: yylineno, loc: this._$, parse: true})} $$ = $1"],
+         ["id",     "if(yy.data.env[$1.value] === undefined) {parseError('Undeclared variable \"' + $1.value + '\" at line ' + yylineno + ':' + this._$.first_column, {token: $1, line: yylineno, loc: this._$, parse: true})} $$ = $1"],
          ["NUMBER", "$$ = {nodeType: 'number', type: 'number', value: Number(yytext), height: 0}"]
       ]
    }
