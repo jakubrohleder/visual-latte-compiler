@@ -26,8 +26,11 @@ if (args[0] === undefined) {
         }
       });
     } catch(err) {
-      console.log(err.message);
+      if (err && err.message) {
+        console.log(err.message);
+      } else {
+        throw err;
+      }
     }
-    
   });
 }

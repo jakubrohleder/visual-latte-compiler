@@ -15,3 +15,4 @@ web/src/instant-bundle.js
 *.bc
 insc_jvm
 insc_llvm
+*.ins
