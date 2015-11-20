@@ -11,18 +11,23 @@ if (args[0] === undefined) {
   console.error('Need file with instant sourcecode *.ins');
 } else {
   fs.readFile(args[0], 'utf8', function(err, data) {
-    var tree = instant.parse(data);
-    var compiled = instant.compileJVM(tree, className);
-    fs.writeFile(filedir + '/' + filename + '.j', compiled.code, function(err) {
-      if(err) {
-        return console.log(err);
-      } else {
-        child_process.exec('java -jar '+ __dirname + '/Jasmin/jasmin.jar ' + filedir + '/' + filename + '.j -d ' + filedir, function(err) {
-          if(err) {
-            return console.log(err);
-          }
-        });
-      }
-    });
+    try {
+      var tree = instant.parse(data);
+      var compiled = instant.compileJVM(tree, className);
+      fs.writeFile(filedir + '/' + filename + '.j', compiled.code, function(err) {
+        if(err) {
+          return console.log(err);
+        } else {
+          child_process.exec('java -jar '+ __dirname + '/Jasmin/jasmin.jar ' + filedir + '/' + filename + '.j -d ' + filedir, function(err) {
+            if(err) {
+              return console.log(err);
+            }
+          });
+        }
+      });
+    } catch(err) {
+      console.log(err.message);
+    }
+    
   });
 }

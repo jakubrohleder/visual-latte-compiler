@@ -11,18 +11,22 @@ if (args[0] === undefined) {
   console.error('Need file with instant sourcecode *.ins');
 } else {
   fs.readFile(args[0], 'utf8', function(err, data) {
-    var tree = instant.parse(data);
-    var compiled = instant.compileLLVM(tree, className);
-    fs.writeFile(filedir + '/' + filename + '.ll', compiled.code, function(err) {
-      if(err) {
-        return console.log(err);
-      } else {
-        child_process.exec('llvm-as ' + filedir + '/' + filename + '.ll', function(err) {
-          if(err) {
-            return console.log(err);
-          }
-        });
-      }
-    });
+    try {
+      var tree = instant.parse(data);
+      var compiled = instant.compileLLVM(tree, className);
+      fs.writeFile(filedir + '/' + filename + '.ll', compiled.code, function(err) {
+        if(err) {
+          return console.log(err);
+        } else {
+          child_process.exec('llvm-as ' + filedir + '/' + filename + '.ll', function(err) {
+            if(err) {
+              return console.log(err);
+            }
+          });
+        }
+      });
+    } catch(err) {
+      console.log(err.message);
+    }
   });
 }
