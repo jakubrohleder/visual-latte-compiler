@@ -25,14 +25,23 @@ function _compile(program) {
   for (var i = 0; i < program.lines.length; i++) {
     var line = compileNode(program.lines[i]);
 
-    while(currentStack > 0) {
-      currentStack--;
-      line.push('pop');
+    if(currentStack > 0) {
+      line.push('getstatic java/lang/System/out Ljava/io/PrintStream;');
+      currentStack++;
+      compiled.stack = currentStack > compiled.stack ? currentStack : compiled.stack;
+      line.push('swap');
+      line.push('invokevirtual java/io/PrintStream/print(I)V');
+      currentStack -= 2;
+      line.push('getstatic java/lang/System/out Ljava/io/PrintStream;');
+      line.push('ldc "\n"');
+      line.push('invokevirtual java/io/PrintStream/print(Ljava/lang/String;)V');
     }
 
     compiled.mainCode.push('.line ' + (i+1));
     compiled.mainCode.push(line);
   }
+
+  compiled.mainCode.push('return');
 
   return compiled;
 
@@ -72,7 +81,7 @@ function _compile(program) {
       code.push('iload ' + env[node.value].index);
       currentStack++;
     } else if (node.nodeType === 'number') {
-      code.push('bipush ' + node.value);
+      code.push('sipush ' + node.value);
       currentStack++;
     }
 

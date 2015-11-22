@@ -23,7 +23,7 @@
 
    "bnf": {
       "expressions": [
-         ["p ; EOF",   "return yy.data;"]
+         ["p EOF",   "return yy.data;"]
       ],
 
       "p": [

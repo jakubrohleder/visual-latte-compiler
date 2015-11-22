@@ -9,7 +9,8 @@
   function MainController($scope, instant) {
     $scope.parse = parse;
     $scope.code = 'a = 1-2*3;';
-    // $scope.code += '\nb = 2*a;';
+    $scope.code += '\nb = 2*a;';
+    $scope.code += '\nb';
     $scope.data = {};
     $scope.$watch('code', function (code) {
       $scope.data = parse(code);
