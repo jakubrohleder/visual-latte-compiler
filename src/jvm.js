@@ -33,7 +33,7 @@ function _compile(program) {
       line.push('invokevirtual java/io/PrintStream/print(I)V');
       currentStack -= 2;
       line.push('getstatic java/lang/System/out Ljava/io/PrintStream;');
-      line.push('ldc "\n"');
+      line.push('ldc "\\n"');
       line.push('invokevirtual java/io/PrintStream/print(Ljava/lang/String;)V');
     }
 
