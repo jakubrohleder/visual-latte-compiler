@@ -35,8 +35,8 @@ function _compile(program) {
 
     if(program.lines[i].nodeType === 'exp' || program.lines[i].nodeType === 'string' || program.lines[i].nodeType === 'number') {
       var tl = '%t' + labelsCount++;
-      compiled.mainCode.push('  ' + tl + ' = getelementptr [4 x i8]* @dnl, i32 0, i32 0') 
-      compiled.mainCode.push('  call i32 (i8*, ...)* @printf(i8* ' + tl + ', i32 ' + line.label + ')');      
+      compiled.mainCode.push('  ' + tl + ' = bitcast [4 x i8]* @dnl to i8*')
+      compiled.mainCode.push('  call i32 @printf(i8* ' + tl +', i32 ' + line.label + ')');
     }
   }
 
@@ -117,7 +117,7 @@ function generateHeader() {
   header += '; (LLVM syntax, http://llvm.org/docs/LangRef.html)\n\n';
 
   header += '@dnl = internal constant [4 x i8] c"%d\\0A\\00"\n';
-  header += 'declare i32 @printf(i8*, ...)\n\n';
+  header += 'declare i32 @printf(i8*, i32)\n\n';
 
   return header;
 }
