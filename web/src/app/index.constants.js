@@ -3,7 +3,7 @@
   'use strict';
 
   angular
-    .module('instantCompiler')
+    .module('visualLatteCompiler')
     .constant('instant', require('instant'))
     .constant('Favico', Favico)
     .constant('jQuery', $);

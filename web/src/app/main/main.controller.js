@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('instantCompiler')
+    .module('visualLatteCompiler')
     .controller('MainController', MainController);
 
   /** @ngInject */

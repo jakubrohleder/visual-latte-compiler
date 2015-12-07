@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('instantCompiler')
+    .module('visualLatteCompiler')
     .config(routerConfig);
 
   /** @ngInject */

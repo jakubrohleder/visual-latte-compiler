@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  angular.module('instantCompiler')
+  angular.module('visualLatteCompiler')
     .directive('codeArea', codeArea);
 
   function codeArea() {

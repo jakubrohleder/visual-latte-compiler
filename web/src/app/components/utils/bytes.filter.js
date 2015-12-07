@@ -3,7 +3,7 @@
 (function() {
   'use strict';
 
-  angular.module('instantCompiler')
+  angular.module('visualLatteCompiler')
     .filter('bytes', bytes);
 
   function bytes() {

@@ -2,7 +2,7 @@
   'use strict';
   /* global $:false*/
 
-  var app = angular.module('instantCompiler');
+  var app = angular.module('visualLatteCompiler');
 
   $.each($.site.settings.modules, function(index, module) {
     var fn = $.fn[module];
