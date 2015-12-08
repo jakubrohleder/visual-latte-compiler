@@ -4,8 +4,7 @@
 
   angular
     .module('visualLatteCompiler')
-    .constant('instant', require('instant'))
+    .constant('latte', require('latte'))
     .constant('Favico', Favico)
     .constant('jQuery', $);
-
 })();

@@ -1,55 +1,168 @@
 {
-   "comment": "Instant parser",
+   "comment": "Latte language parser",
    "lex": {
       "rules": [
          ["\\s+",                    "/* skip whitespace */"],
+         ["true",                    "return 'TRUE'"],
+         ["false",                   "return 'FALSE'"],
+         ["if",                      "return 'IF'"],
+         ["else",                    "return 'ELSE'"],
+         ["while",                   "return 'WHILE'"],
+         ["int",                     "return 'INTEGER'"],
+         ["string",                  "return 'STRING'"],
+         ["boolean",                 "return 'BOOLEAN'"],
+         ["void",                    "return 'VOID'"],
+         ["return",                  "return 'RETURN'"],
          ["[0-9]+",                  "return 'NUMBER'"],
-         ["[a-zA-Z_][0-9a-zA-Z_]*",  "return 'STRING'"],
+         ["[a-zA-Z_][0-9a-zA-Z_]*",  "return 'LITERAL'"],
+         ["\\+\\+",                  "return 'INCR'"],
+         ["--",                      "return 'DECR'"],
          ["\\*",                     "return '*'"],
          ["\\/",                     "return '/'"],
          ["-",                       "return '-'"],
          ["\\+",                     "return '+'"],
          ["=",                       "return '='"],
+         ["<",                       "return '<'"],
+         ["<=",                      "return '<='"],
+         [">",                       "return '>'"],
+         [">=",                      "return '>='"],
+         ["==",                      "return '=='"],
+         ["!=",                      "return '!='"],
          [";",                       "return ';'"],
+         [",",                       "return ','"],
          ["$",                       "return 'EOF'"],
+         ["!",                       "return '!'"],
+         ["%",                       "return '%'"],
+         ["&&",                      "return '&&'"],
+         ["\\|\\|",                  "return '||'"],
          ["\\(",                     "return '('"],
-         ["\\)",                     "return ')'"]
+         ["\\)",                     "return ')'"],
+         ["\\]",                     "return ']'"],
+         ["\\[",                     "return '['"],
+         ["\\{",                     "return '{'"],
+         ["\\}",                     "return '}'"]
       ]
    },
 
    "operators": [
-      ["right", "+" ],
-      ["left", "-"],
-      ["left", "*", "/"]
+      ["left", "&&", "||"],
+      ["left", "<", "<=", ">", ">=", "==", "!=", "RELOP"],
+      ["left", "-", "+", "ADDOP"],
+      ["left", "*", "/", "%", "MULOP"],
+      ["nonassoc", "INCR", "DECR"],
+      ["nonassoc", "UMINUS", "NEGATION"],
+      ["nonassoc", "IF_WITHOUT_ELSE"],
+      ["nonassoc", "ELSE"]
    ],
 
    "bnf": {
-      "expressions": [
-         ["p EOF",   "return yy.data;"]
+      "Program": [
+         ["TopDefs EOF",   "return yy.data;"]
       ],
 
-      "p": [
-         ["stmt", "yy.data.lines.push($1);"],
-         ["p ; stmt", "yy.data.lines.push($3);"]
+      "TopDefs": [
+         ["TopDef", ""],
+         ["TopDefs TopDef", ""]
       ],
 
-      "stmt": [
-         ["id = e", "yy.data.env[$1.value] = {type: $3.type, index: yy.data.locals++}; $$ = {nodeType: 'stmt', value: '=', left:$1, right: $3, height: $3.height + 1, type: $3.type}"],
-         ["e", "$$ = $1"]
+      "TopDef": [
+         ["Type Ident ( Args ) Block", ""]
       ],
 
-      "id": [
-         ["STRING", "$$ = {nodeType: 'string', type: 'string', value: String(yytext), height: 0}"]
+      "Args": [
+         ["", ""],
+         ["Arg", ""],
+         ["Args , Arg", ""]
       ],
 
-      "e" :[
-         ["e + e",  "$$ = {nodeType: 'exp', value: '+', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["e - e",  "$$ = {nodeType: 'exp', value: '-', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["e * e",  "$$ = {nodeType: 'exp', value: '*', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["e / e",  "$$ = {nodeType: 'exp', value: '/', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["id",     "if(yy.data.env[$1.value] === undefined) {parseError('Undeclared variable \"' + $1.value + '\" at line ' + yylineno + ':' + this._$.first_column, {token: $1, line: yylineno, loc: this._$, parse: true})} $$ = $1"],
-         ["NUMBER", "$$ = {nodeType: 'number', type: 'number', value: Number(yytext), height: 0}"],
-         ["( e )",  "$$ = $2"]
+      "Arg": [
+         ["Type Ident", ""]
+      ],
+
+      "Block": [
+         ["{ Stmts }", ""]
+      ],
+
+      "Stmts": [
+         ["Stmt", ""],
+         ["Stmts Stmt", ""]
+      ],
+
+      "Stmt": [
+         ["Block", ""],
+         ["Type Items ;", ""],
+         ["Ident = Expr ;", ""],
+         ["Ident INCR ;", ""],
+         ["Ident DECR ;", ""],
+         ["RETURN Expr ;", ""],
+         ["RETURN ;", ""],
+         ["IF ( Expr ) Stmt", "", {"prec": "IF_WITHOUT_ELSE"}],
+         ["IF ( Expr ) Stmt ELSE Stmt", "", {"prec": "IF_WITH_ELSE"}],
+         ["WHILE ( Expr ) Stmt", ""],
+         ["Expr ;", ""],
+         [";", ""]
+      ],
+
+      "Items": [
+         ["Item", ""],
+         ["Items , Item", ""]
+      ],
+
+      "Item": [
+         ["Ident", ""],
+         ["Ident = Expr", ""]
+      ],
+
+      "Type": [
+         ["INTEGER", ""],
+         ["STRING", ""],
+         ["BOOLEAN", ""],
+         ["VOID", ""]
+      ],
+
+      "Ident": [
+         ["LITERAL", ""]
+      ],
+
+      "Exprs": [
+         ["Expr", ""],
+         ["Exprs , Expr", ""]
+      ],
+
+      "Expr": [
+         ["Ident", ""],
+         ["NUMBER", ""],
+         ["TRUE", ""],
+         ["FALSE", ""],
+         ["Ident ( Exprs )", ""],
+         ["- Expr", "", {"prec": "UMINUS"}],
+         ["! Expr", "", {"prec": "NEGATION"}],
+         ["Expr MulOp Expr", "", {"prec": "MULOP"}],
+         ["Expr AddOp Expr", "", {"prec": "ADDOP"}],
+         ["Expr RelOp Expr", "", {"prec": "RELOP"}],
+         ["Expr && Expr", ""],
+         ["Expr || Expr", ""],
+         ["( Expr )", "$$ = $2"]
+      ],
+
+      "AddOp": [
+         ["+", ""],
+         ["-", ""]
+      ],
+
+      "MulOp": [
+         ["*", ""],
+         ["/", ""],
+         ["%", ""]
+      ],
+
+      "RelOp": [
+         ["<", ""],
+         ["<=", ""],
+         [">", ""],
+         [">=", ""],
+         ["==", ""],
+         ["!=", ""]
       ]
    }
 }

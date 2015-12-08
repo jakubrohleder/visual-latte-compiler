@@ -38,6 +38,6 @@ gulp.task('watch', ['inject'], function () {
   });
 
   gulp.watch(path.join(conf.paths.lib.src, '/**/*.*'), function() {
-    gulp.start('browsify');
+    gulp.start('browserify');
   });
 });

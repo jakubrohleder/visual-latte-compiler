@@ -1,299 +1,813 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
-(function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
+/*! @preserve
+ * Hjson v1.7.4
+ * http://hjson.org
+ *
+ * Copyright 2014, 2015 Christian Zangl, MIT license
+ * Details and documentation:
+ * https://github.com/laktak/hjson-js
+ *
+ * This code is based on the the JSON version by Douglas Crockford:
+ * https://github.com/douglascrockford/JSON-js (json_parse.js, json2.js)
+ */
 
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length - 1; i >= 0; i--) {
-    var last = parts[i];
-    if (last === '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
+/*
 
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
-}
-
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
-};
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-  var resolvedPath = '',
-      resolvedAbsolute = false;
-
-  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-    var path = (i >= 0) ? arguments[i] : process.cwd();
-
-    // Skip empty and invalid entries
-    if (typeof path !== 'string') {
-      throw new TypeError('Arguments to path.resolve must be strings');
-    } else if (!path) {
-      continue;
-    }
-
-    resolvedPath = path + '/' + resolvedPath;
-    resolvedAbsolute = path.charAt(0) === '/';
-  }
-
-  // At this point the path should be resolved to a full absolute path, but
-  // handle relative paths to be safe (might happen when process.cwd() fails)
-
-  // Normalize the path
-  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-  var isAbsolute = exports.isAbsolute(path),
-      trailingSlash = substr(path, -1) === '/';
-
-  // Normalize the path
-  path = normalizeArray(filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-
-  return (isAbsolute ? '/' : '') + path;
-};
-
-// posix version
-exports.isAbsolute = function(path) {
-  return path.charAt(0) === '/';
-};
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(filter(paths, function(p, index) {
-    if (typeof p !== 'string') {
-      throw new TypeError('Arguments to path.join must be strings');
-    }
-    return p;
-  }).join('/'));
-};
+  This file creates a Hjson object:
 
 
-// path.relative(from, to)
-// posix version
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
+    Hjson.parse(text, options)
 
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
+      options {
+        keepWsc     boolean, keep white space and comments. This is useful
+                    if you want to edit an hjson file and save it while
+                    preserving comments (default false)
+      }
+
+      This method parses Hjson text to produce an object or array.
+      It can throw a SyntaxError exception.
+
+
+    Hjson.stringify(value, options)
+
+      value         any JavaScript value, usually an object or array.
+
+      options {     all options are
+
+        keepWsc     boolean, keep white space. See parse.
+
+        bracesSameLine
+                    boolean, makes braces appear on the same line as the key
+                    name. Default false.
+
+        emitRootBraces
+                    boolean, show braces for the root object. Default true.
+
+        quotes      string, controls how strings are displayed.
+                    "min"     - no quotes whenever possible (default)
+                    "always"  - always use quotes
+
+        space       specifies the indentation of nested structures. If it is
+                    a number, it will specify the number of spaces to indent
+                    at each level. If it is a string (such as '\t' or '  '),
+                    it contains the characters used to indent at each level.
+
+        eol         specifies the EOL sequence (default is set by
+                    Hjson.setEndOfLine())
+      }
+
+      This method produces Hjson text from a JavaScript value.
+
+      Values that do not have JSON representations, such as undefined or
+      functions, will not be serialized. Such values in objects will be
+      dropped; in arrays they will be replaced with null.
+      stringify(undefined) returns undefined.
+
+
+    Hjson.endOfLine()
+    Hjson.setEndOfLine(eol)
+
+      Gets or sets the stringify EOL sequence ('\n' or '\r\n').
+      When running with node.js this defaults to os.EOL.
+
+
+    Hjson.rt { parse, stringify }
+
+      This is a shortcut to roundtrip your comments when reading and updating
+      a config file. It is the same as specifying the keepWsc option for the
+      parse and stringify functions.
+
+
+    OBSOLETE: Hjson.bracesSameLine()
+    OBSOLETE: Hjson.setBracesSameLine(b)
+
+      OBSOLETE: use stringify options instead of this global setting.
+      Gets or sets if braces should appear on the same line (for stringify).
+
+
+  This is a reference implementation. You are free to copy, modify, or
+  redistribute.
+
+
+*/
+
+var Hjson = (function () {
+  "use strict";
+
+  var EOL = '\n';
+  var defaultBracesSameLine = false;
+
+  var tryParseNumber = function (text, stopAtNext) {
+    // Parse a number value.
+
+    var number, string = '', leadingZeros = 0, testLeading = true;
+    var at = 0;
+    var ch;
+    function next() {
+      ch = text.charAt(at);
+      at++;
+      return ch;
     }
 
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
+    next();
+    if (ch === '-') {
+      string = '-';
+      next();
+    }
+    while (ch >= '0' && ch <= '9') {
+      if (testLeading) {
+        if (ch == '0') leadingZeros++;
+        else testLeading = false;
+      }
+      string += ch;
+      next();
+    }
+    if (testLeading) leadingZeros--; // single 0 is allowed
+    if (ch === '.') {
+      string += '.';
+      while (next() && ch >= '0' && ch <= '9')
+        string += ch;
+    }
+    if (ch === 'e' || ch === 'E') {
+      string += ch;
+      next();
+      if (ch === '-' || ch === '+') {
+        string += ch;
+        next();
+      }
+      while (ch >= '0' && ch <= '9') {
+        string += ch;
+        next();
+      }
     }
 
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
+    // skip white/to (newline)
+    while (ch && ch <= ' ') next();
 
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-exports.sep = '/';
-exports.delimiter = ':';
-
-exports.dirname = function(path) {
-  var result = splitPath(path),
-      root = result[0],
-      dir = result[1];
-
-  if (!root && !dir) {
-    // No dirname whatsoever
-    return '.';
-  }
-
-  if (dir) {
-    // It has a dirname, strip trailing slash
-    dir = dir.substr(0, dir.length - 1);
-  }
-
-  return root + dir;
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPath(path)[2];
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPath(path)[3];
-};
-
-function filter (xs, f) {
-    if (xs.filter) return xs.filter(f);
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        if (f(xs[i], i, xs)) res.push(xs[i]);
-    }
-    return res;
-}
-
-// String.prototype.substr - negative index don't work in IE8
-var substr = 'ab'.substr(-1) === 'b'
-    ? function (str, start, len) { return str.substr(start, len) }
-    : function (str, start, len) {
-        if (start < 0) start = str.length + start;
-        return str.substr(start, len);
-    }
-;
-
-}).call(this,require("1YiZ5S"))
-},{"1YiZ5S":3}],3:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
+    if (stopAtNext) {
+      // end scan if we find a control character like ,}] or a comment
+      if (ch === ',' || ch === '}' || ch === ']' ||
+        ch === '#' || ch === '/' && (text[at] === '/' || text[at] === '*')) ch = 0;
     }
 
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
+    number = +string;
+    if (ch || leadingZeros || !isFinite(number)) {
+      return undefined;
     }
+    else return number;
+  };
 
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
+  var hjson_parse = (function () {
+
+    // This is a function that can parse a Hjson text, producing a JavaScript
+    // data structure. It is a simple, recursive descent parser. It does not use
+    // eval or regular expressions, so it can be used as a model for implementing
+    // a JSON parser in other languages.
+
+    // We are defining the function inside of another function to avoid creating
+    // global variables.
+
+    var text;
+    var at;   // The index of the current character
+    var ch;   // The current character
+    var escapee = {
+      '"': '"',
+      '\\': '\\',
+      '/': '/',
+      b:  '\b',
+      f:  '\f',
+      n:  '\n',
+      r:  '\r',
+      t:  '\t'
     };
-})();
+    var keepWsc; // keep whitespace
 
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
+    // Call error when something is wrong.
+    var error = function (m) {
+      var i, col=0, line=1;
+      for (i = at-1; i > 0 && text[i] !== '\n'; i--, col++) {}
+      for (; i > 0; i--) if (text[i] === '\n') line++;
+      throw new Error(m + " at line " + line + "," + col + " >>>" + text.substr(at-col, 20) + " ...");
+    };
 
-function noop() {}
+    var next = function (c) {
+      // If a c parameter is provided, verify that it matches the current character.
 
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
+      if (c && c !== ch)
+        error("Expected '" + c + "' instead of '" + ch + "'");
 
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
+      // Get the next character. When there are no more characters,
+      // return the empty string.
+
+      ch = text.charAt(at);
+      at++;
+      return ch;
+    };
+
+    var peek = function (offs) {
+      // range check is not required
+      return text.charAt(at + offs);
+    };
+
+    var string = function () {
+      // Parse a string value.
+      var hex, i, string = '', uffff;
+
+      // When parsing for string values, we must look for " and \ characters.
+      if (ch === '"') {
+        while (next()) {
+          if (ch === '"') {
+            next();
+            return string;
+          }
+          if (ch === '\\') {
+            next();
+            if (ch === 'u') {
+              uffff = 0;
+              for (i = 0; i < 4; i++) {
+                hex = parseInt(next(), 16);
+                if (!isFinite(hex))
+                  break;
+                uffff = uffff * 16 + hex;
+              }
+              string += String.fromCharCode(uffff);
+            }
+            else if (typeof escapee[ch] === 'string') string += escapee[ch];
+            else break;
+          }
+          else string += ch;
+        }
+      }
+      error("Bad string");
+    };
+
+    var mlString = function () {
+      // Parse a multiline string value.
+      var string = '', triple = 0;
+
+      // we are at ''' +1 - get indent
+      var indent = 0;
+      while (true) {
+        var c=peek(-indent-5);
+        if (!c || c === '\n') break;
+        indent++;
+      }
+
+      var skipIndent = function () {
+        var skip = indent;
+        while (ch && ch <= ' ' && ch !== '\n' && skip-- > 0) next();
+      };
+
+      // skip white/to (newline)
+      while (ch && ch <= ' ' && ch !== '\n') next();
+      if (ch === '\n') { next(); skipIndent(); }
+
+      // When parsing multiline string values, we must look for ' characters.
+      while (true) {
+        if (!ch) error("Bad multiline string");
+        else if (ch === '\'') {
+          triple++;
+          next();
+          if (triple === 3) {
+            if (string.slice(-1) === '\n') string=string.slice(0, -1); // remove last EOL
+            return string;
+          }
+          else continue;
+        }
+        else while (triple > 0) {
+          string += '\'';
+          triple--;
+        }
+        if (ch === '\n') {
+          string += '\n';
+          next();
+          skipIndent();
+        }
+        else {
+          if (ch !== '\r') string += ch;
+          next();
+        }
+      }
+    };
+
+    var keyname = function () {
+      // quotes for keys are optional in Hjson
+      // unless they include {}[],: or whitespace.
+
+      if (ch === '"') return string();
+
+      var name = "";
+      while (true) {
+        if (ch === ':') {
+          if (!name) error("Found ':' but no key name (for an empty key name use quotes)");
+          return name;
+        }
+        else if (ch <= ' ' || ch === '{' || ch === '}' || ch === '[' || ch === ']' || ch === ',')
+          error("Found '" + ch + "' where a key name was expected (check your syntax or use quotes if the key name includes {}[],: or whitespace)");
+
+        name += ch;
+        next();
+      }
+    };
+
+    var white = function () {
+      while (ch) {
+        // Skip whitespace.
+        while (ch && ch <= ' ') next();
+        // Hjson allows comments
+        if (ch === '#' || ch === '/' && peek(0) === '/') {
+          while (ch && ch !== '\n') next();
+        }
+        else if (ch === '/' && peek(0) === '*')
+        {
+          next(); next();
+          while (ch && !(ch === '*' && peek(0) === '/')) next();
+          if (ch) { next(); next(); }
+        }
+        else break;
+      }
+    };
+
+    var tfnns = function () {
+      // Hjson strings can be quoteless
+      // returns string, true, false, or null.
+      var value = ch;
+      while (next()) {
+        if (value.length === 3 && value === "'''") return mlString();
+        var isEol = ch === '\r' || ch === '\n';
+        if (isEol || ch === ',' ||
+          ch === '}' || ch === ']' ||
+          ch === '#' ||
+          ch === '/' && (peek(0) === '/' || peek(0) === '*')
+          ) {
+          var chf = value[0];
+          switch (chf) {
+            case 'f': if (value.trim() === "false") return false; break;
+            case 'n': if (value.trim() === "null") return null; break;
+            case 't': if (value.trim() === "true") return true; break;
+            default:
+              if (chf === '-' || chf >= '0' && chf <= '9') {
+                var n = tryParseNumber(value);
+                if (n !== undefined) return n;
+              }
+          }
+          if (isEol) {
+            // remove any whitespace at the end (ignored in quoteless strings)
+            return value.trim();
+          }
+        }
+        value += ch;
+      }
+
+      error("End of input while parsing a value");
+    };
+
+    var getComment = function (wat) {
+      var i;
+      wat--;
+      // remove trailing whitespace
+      for (i = at - 2; i > wat && text[i] <= ' ' && text[i] !== '\n'; i--);
+      // but only up to EOL
+      if (text[i] === '\n') i--;
+      if (text[i] === '\r') i--;
+      var res = text.substr(wat, i-wat+1);
+      for (i = 0; i < res.length; i++)
+        if (res[i] > ' ') return res;
+      return "";
+    };
+
+    var array = function () {
+      // Parse an array value.
+      // assumeing ch === '['
+
+      var array = [];
+      var kw, wat;
+      if (keepWsc) {
+        if (Object.defineProperty) Object.defineProperty(array, "__WSC__", { enumerable: false, writable: true });
+        array.__WSC__ = kw = [];
+      }
+
+      next();
+      wat = at;
+      white();
+      if (kw) kw.push(getComment(wat));
+      if (ch === ']') {
+        next();
+        return array;  // empty array
+      }
+
+      while (ch) {
+        array.push(value());
+        wat = at;
+        white();
+        // in Hjson the comma is optional and trailing commas are allowed
+        if (ch === ',') { next(); wat = at; white(); }
+        if (kw) kw.push(getComment(wat));
+        if (ch === ']') {
+          next();
+          return array;
+        }
+        white();
+      }
+
+      error("End of input while parsing an array (did you forget a closing ']'?)");
+    };
+
+    var object = function (withoutBraces) {
+      // Parse an object value.
+
+      var key, object = {};
+      var kw, wat;
+      if (keepWsc) {
+        if (Object.defineProperty) Object.defineProperty(object, "__WSC__", { enumerable: false, writable: true });
+        object.__WSC__ = kw = { c: {}, o: []  };
+        if (withoutBraces) kw.noRootBraces = true;
+      }
+
+      function pushWhite(key) { kw.c[key]=getComment(wat); if (key) kw.o.push(key); }
+
+      if (!withoutBraces) {
+        // assuming ch === '{'
+        next();
+        wat = at;
+      }
+      else wat = 1;
+
+      white();
+      if (kw) pushWhite("");
+      if (ch === '}' && !withoutBraces) {
+        next();
+        return object;  // empty object
+      }
+      while (ch) {
+        key = keyname();
+        white();
+        next(':');
+        // duplicate keys overwrite the previous value
+        object[key] = value();
+        wat = at;
+        white();
+        // in Hjson the comma is optional and trailing commas are allowed
+        if (ch === ',') { next(); wat = at; white(); }
+        if (kw) pushWhite(key);
+        if (ch === '}' && !withoutBraces) {
+          next();
+          return object;
+        }
+        white();
+      }
+
+      if (withoutBraces) return object;
+      else error("End of input while parsing an object (did you forget a closing '}'?)");
+    };
+
+    var value = function () {
+      // Parse a Hjson value. It could be an object, an array, a string, a number or a word.
+
+      white();
+      switch (ch) {
+        case '{': return object();
+        case '[': return array();
+        case '"': return string();
+        default: return tfnns();
+      }
+    };
+
+    var rootValue = function () {
+      // Braces for the root object are optional
+
+      white();
+      switch (ch) {
+        case '{': return object();
+        case '[': return array();
+      }
+
+      // look if we are dealing with a single JSON value (true/false/null/num/"")
+      // if it is multiline we assume it's a Hjson object without root braces.
+      for (var i = 0; i < text.length; i++)
+        if (text[i] === '\n') return object(true);
+      return value();
+    };
+
+    // Return the hjson_parse function. It will have access to all of the above
+    // functions and variables.
+
+    return function (source, options) {
+      var result;
+
+      keepWsc = options && options.keepWsc;
+      text = source;
+      at = 0;
+      ch = ' ';
+      result = rootValue();
+      white();
+      if (ch) error("Syntax error, found trailing characters");
+
+      return result;
+    };
+  }());
+
+
+  var hjson_stringify = (function () {
+
+    var needsEscape = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+    var needsQuotes = /[\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g; // like needsEscape but without \\ and \"
+    var needsEscapeML = /'''|[\x00-\x09\x0b\x0c\x0e-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g; // ''' || (needsQuotes but without \n and \r)
+    var startsWithKeyword = /^(true|false|null)\s*((,|\]|\}|#|\/\/|\/\*).*)?$/;
+    var meta =
+    {  // table of character substitutions
+      '\b': '\\b',
+      '\t': '\\t',
+      '\n': '\\n',
+      '\f': '\\f',
+      '\r': '\\r',
+      '"' : '\\"',
+      '\\': '\\\\'
+    };
+    var needsEscapeName = /[,\{\[\}\]\s]/;
+    var gap = '';
+    var indent = '  ';
+    // options
+    var eol, keepWsc, bracesSameLine, quoteAlways, emitRootBraces;
+
+    function isWhite(c) { return c <= ' '; }
+
+    function quoteReplace(string) {
+      return string.replace(needsEscape, function (a) {
+        var c = meta[a];
+        if (typeof c === 'string') return c;
+        else return '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
+      });
+    }
+
+    function quote(string, gap, hasComment, isRootObject) {
+      if (!string) return '""';
+
+      needsQuotes.lastIndex = 0;
+      startsWithKeyword.lastIndex = 0;
+      var doEscape = quoteAlways || hasComment || needsQuotes.test(string);
+
+      // Check if we can insert this string without quotes
+      // see hjson syntax (must not parse as true, false, null or number)
+
+      var first = string[0], last = string[string.length-1];
+      if (doEscape ||
+        isWhite(first) ||
+        first === '"' ||
+        first === '#' ||
+        first === '/' && (string[1] === '*' || string[1] === '/') ||
+        first === '{' ||
+        first === '[' ||
+        isWhite(last) ||
+        tryParseNumber(string, true) !== undefined ||
+        startsWithKeyword.test(string)) {
+
+        // If the string contains no control characters, no quote characters, and no
+        // backslash characters, then we can safely slap some quotes around it.
+        // Otherwise we first check if the string can be expressed in multiline
+        // format or we must replace the offending characters with safe escape
+        // sequences.
+
+        needsEscape.lastIndex = 0;
+        needsEscapeML.lastIndex = 0;
+        if (!needsEscape.test(string)) return '"' + string + '"';
+        else if (!needsEscapeML.test(string) && !isRootObject) return mlString(string, gap);
+        else return '"' + quoteReplace(string) + '"';
+      }
+      else {
+        // return without quotes
+        return string;
+      }
+    }
+
+    function mlString(string, gap) {
+      // wrap the string into the ''' (multiline) format
+
+      var i, a = string.replace(/\r/g, "").split('\n');
+      gap += indent;
+
+      if (a.length === 1) {
+        // The string contains only a single line. We still use the multiline
+        // format as it avoids escaping the \ character (e.g. when used in a
+        // regex).
+        return "'''" + a[0] + "'''";
+      }
+      else {
+        var res = eol + gap + "'''";
+        for (i = 0; i < a.length; i++) {
+          res += eol;
+          if (a[i]) res += gap + a[i];
+        }
+        return res + eol + gap + "'''";
+      }
+    }
+
+    function quoteName(name) {
+      if (!name) return '""';
+
+      // Check if we can insert this name without quotes
+
+      if (needsEscapeName.test(name)) {
+        needsEscape.lastIndex = 0;
+        return '"' + (needsEscape.test(name) ? quoteReplace(name) : name) + '"';
+      }
+      else {
+        // return without quotes
+        return name;
+      }
+    }
+
+    function str(value, hasComment, noIndent, isRootObject) {
+      // Produce a string from value.
+
+      function startsWithNL(str) { return str && str[str[0] === '\r' ? 1 : 0] === '\n'; }
+      function testWsc(str) { return str && !startsWithNL(str); }
+      function wsc(str) {
+        if (!str) return "";
+        for (var i = 0; i < str.length; i++) {
+          var c = str[i];
+          if (c === '\n' ||
+            c === '#' ||
+            c === '/' && (str[i+1] === '/' || str[i+1] === '*')) break;
+          if (c > ' ') return ' # ' + str;
+        }
+        return str;
+      }
+
+      // What happens next depends on the value's type.
+
+      switch (typeof value) {
+        case 'string':
+          return quote(value, gap, hasComment, isRootObject);
+
+        case 'number':
+          // JSON numbers must be finite. Encode non-finite numbers as null.
+          return isFinite(value) ? String(value) : 'null';
+
+        case 'boolean':
+          return String(value);
+
+        case 'object':
+          // If the type is 'object', we might be dealing with an object or an array or
+          // null.
+
+          // Due to a specification blunder in ECMAScript, typeof null is 'object',
+          // so watch out for that case.
+
+          if (!value) return 'null';
+
+          var kw, kwl; // whitespace & comments
+          if (keepWsc) kw = value.__WSC__;
+
+          var isArray = Object.prototype.toString.apply(value) === '[object Array]';
+          var showBraces = isArray || !isRootObject || (kw ? !kw.noRootBraces : emitRootBraces);
+
+          // Make an array to hold the partial results of stringifying this object value.
+          var mind = gap;
+          if (showBraces) gap += indent;
+          var eolMind = eol + mind;
+          var eolGap = eol + gap;
+          var prefix = noIndent || bracesSameLine ? '' : eolMind;
+          var partial = [];
+
+          var i, length; // loop
+          var k, v; // key, value
+
+          if (isArray) {
+            // The value is an array. Stringify every element. Use null as a placeholder
+            // for non-JSON values.
+
+            for (i = 0, length = value.length; i < length; i++) {
+              if (kw) partial.push(wsc(kw[i]) + eolGap);
+              partial.push(str(value[i], kw ? testWsc(kw[i + 1]) : false, true) || 'null');
+            }
+            if (kw) partial.push(wsc(kw[i]) + eolMind);
+
+            // Join all of the elements together, separated with newline, and wrap them in
+            // brackets.
+
+            if (kw) v = prefix + '[' + partial.join('') + ']';
+            else if (partial.length === 0) v = '[]';
+            else v = prefix + '[' + eolGap + partial.join(eolGap) + eolMind + ']';
+          }
+          else {
+            // Otherwise, iterate through all of the keys in the object.
+
+            if (kw) {
+              kwl = wsc(kw.c[""]);
+              var keys=kw.o.slice();
+              for (k in value) {
+                if (Object.prototype.hasOwnProperty.call(value, k) && keys.indexOf(k) < 0)
+                  keys.push(k);
+              }
+
+              for (i = 0, length = keys.length; i < length; i++) {
+                k = keys[i];
+                if (showBraces || i>0 || kwl) partial.push(kwl + eolGap);
+                kwl = wsc(kw.c[k]);
+                v = str(value[k], testWsc(kwl));
+                if (v) partial.push(quoteName(k) + (startsWithNL(v) ? ':' : ': ') + v);
+              }
+              if (showBraces || kwl) partial.push(kwl + eolMind);
+            }
+            else {
+              for (k in value) {
+                if (Object.prototype.hasOwnProperty.call(value, k)) {
+                  v = str(value[k]);
+                  if (v) partial.push(quoteName(k) + (startsWithNL(v) ? ':' : ': ') + v);
+                }
+              }
+            }
+
+            // Join all of the member texts together, separated with newlines
+            if (partial.length === 0) v = '{}';
+            else if (showBraces) {
+              // and wrap them in braces
+              if (kw) v = prefix + '{' + partial.join('') + '}';
+              else v = prefix + '{' + eolGap + partial.join(eolGap) + eolMind + '}';
+            }
+            else v = partial.join(kw ? '' : eolGap);
+          }
+
+          gap = mind;
+          return v;
+      }
+    }
+
+    // Return the hjson_stringify function. It will have access to all of the above
+    // functions and variables.
+
+    return function (value, opt) {
+      var i, space;
+
+      eol = EOL;
+      indent = '  ';
+      keepWsc = false;
+      bracesSameLine = defaultBracesSameLine;
+      emitRootBraces = true;
+      quoteAlways = false;
+
+      if (opt && typeof opt === 'object') {
+        if (opt.eol === '\n' || opt.eol === '\r\n') eol = opt.eol;
+        space = opt.space;
+        keepWsc = opt.keepWsc;
+        bracesSameLine = opt.bracesSameLine || defaultBracesSameLine;
+        emitRootBraces = opt.emitRootBraces;
+        quoteAlways = opt.quotes === 'always';
+      }
+
+      // If the space parameter is a number, make an indent string containing that
+      // many spaces. If it is a string, it will be used as the indent string.
+
+      if (typeof space === 'number') {
+        indent = '';
+        for (i = 0; i < space; i++) indent += ' ';
+      }
+      else if (typeof space === 'string')
+        indent = space;
+
+      // Return the result of stringifying the value.
+      return str(value, null, true, true);
+    };
+  }());
+
+  return {
+    parse: hjson_parse,
+    stringify: hjson_stringify,
+    endOfLine: function() { return EOL; },
+    setEndOfLine: function(eol) {
+      if (eol === '\n' || eol === '\r\n') EOL = eol;
+    },
+    bracesSameLine: function() { return defaultBracesSameLine; },
+    setBracesSameLine: function(v) { defaultBracesSameLine = v; },
+
+    // round trip shortcut
+    rt: {
+      parse: function(text, options) {
+        (options=options||{}).keepWsc=true;
+        return hjson_parse(text, options);
+      },
+      stringify: function(value, options) {
+        (options=options||{}).keepWsc=true;
+        return hjson_stringify(value, options);
+      },
+    },
+  };
+
+}());
+
+// node.js
+if (typeof module === "object") {
+  if (typeof require === "function") {
+    var os=require('os');
+    Hjson.setEndOfLine(os.EOL);
+  }
+  module.exports=Hjson;
 }
 
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],4:[function(require,module,exports){
+},{"os":33}],3:[function(require,module,exports){
 (function (process){
 // Jison, an LR(0), SLR(1), LARL(1), LR(1) Parser Generator
 // Zachary Carter <zach@carter.name>
@@ -2215,8 +2729,8 @@ return function Parser (g, options) {
 
 })();
 
-}).call(this,require("1YiZ5S"))
-},{"../package.json":33,"./util/set":5,"./util/typal":6,"1YiZ5S":3,"JSONSelect":7,"ebnf-parser":8,"escodegen":12,"esprima":29,"fs":1,"jison-lex":31,"path":2}],5:[function(require,module,exports){
+}).call(this,require('_process'))
+},{"../package.json":32,"./util/set":4,"./util/typal":5,"JSONSelect":6,"_process":35,"ebnf-parser":7,"escodegen":11,"esprima":28,"fs":1,"jison-lex":30,"path":34}],4:[function(require,module,exports){
 // Set class to wrap arrays
 
 var typal = require("./typal").typal;
@@ -2311,7 +2825,7 @@ if (typeof exports !== 'undefined')
     exports.Set = Set;
 
 
-},{"./typal":6}],6:[function(require,module,exports){
+},{"./typal":5}],5:[function(require,module,exports){
 /*
  * Introduces a typal object to make classical/prototypal patterns easier
  * Plus some AOP sugar
@@ -2403,7 +2917,7 @@ return {
 if (typeof exports !== 'undefined')
     exports.typal = typal;
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /*! Copyright (c) 2011, Lloyd Hilaiel, ISC License */
 /*
  * This is the JSONSelect reference implementation, in javascript.  This
@@ -2977,7 +3491,7 @@ if (typeof exports !== 'undefined')
     exports.compile = compile;
 })(typeof exports === "undefined" ? (window.JSONSelect = {}) : exports);
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var bnf = require("./parser").parser,
     ebnf = require("./ebnf-transform"),
     jisonlex = require("lex-parser");
@@ -3020,7 +3534,7 @@ var parseLex = function (text) {
 };
 
 
-},{"./ebnf-transform":9,"./parser":10,"lex-parser":32}],9:[function(require,module,exports){
+},{"./ebnf-transform":8,"./parser":9,"lex-parser":31}],8:[function(require,module,exports){
 var EBNF = (function(){
     var parser = require('./transform-parser.js');
 
@@ -3157,7 +3671,7 @@ var EBNF = (function(){
 exports.transform = EBNF.transform;
 
 
-},{"./transform-parser.js":11}],10:[function(require,module,exports){
+},{"./transform-parser.js":10}],9:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.11 */
 /*
@@ -3961,8 +4475,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("1YiZ5S"))
-},{"./ebnf-transform":9,"1YiZ5S":3,"fs":1,"path":2}],11:[function(require,module,exports){
+}).call(this,require('_process'))
+},{"./ebnf-transform":8,"_process":35,"fs":1,"path":34}],10:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.11 */
 /*
@@ -4593,8 +5107,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("1YiZ5S"))
-},{"1YiZ5S":3,"fs":1,"path":2}],12:[function(require,module,exports){
+}).call(this,require('_process'))
+},{"_process":35,"fs":1,"path":34}],11:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -6880,8 +7394,8 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./package.json":28,"estraverse":13,"esutils":16,"source-map":17}],13:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./package.json":27,"estraverse":12,"esutils":15,"source-map":16}],12:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -7572,7 +8086,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7664,7 +8178,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7783,7 +8297,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":14}],16:[function(require,module,exports){
+},{"./code":13}],15:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7817,7 +8331,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":14,"./keyword":15}],17:[function(require,module,exports){
+},{"./code":13,"./keyword":14}],16:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -7827,7 +8341,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":23,"./source-map/source-map-generator":24,"./source-map/source-node":25}],18:[function(require,module,exports){
+},{"./source-map/source-map-consumer":22,"./source-map/source-map-generator":23,"./source-map/source-node":24}],17:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7926,7 +8440,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":26,"amdefine":27}],19:[function(require,module,exports){
+},{"./util":25,"amdefine":26}],18:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8070,7 +8584,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":20,"amdefine":27}],20:[function(require,module,exports){
+},{"./base64":19,"amdefine":26}],19:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8114,7 +8628,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":27}],21:[function(require,module,exports){
+},{"amdefine":26}],20:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8196,7 +8710,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":27}],22:[function(require,module,exports){
+},{"amdefine":26}],21:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -8284,7 +8798,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":26,"amdefine":27}],23:[function(require,module,exports){
+},{"./util":25,"amdefine":26}],22:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8861,7 +9375,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":18,"./base64-vlq":19,"./binary-search":21,"./util":26,"amdefine":27}],24:[function(require,module,exports){
+},{"./array-set":17,"./base64-vlq":18,"./binary-search":20,"./util":25,"amdefine":26}],23:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9263,7 +9777,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":18,"./base64-vlq":19,"./mapping-list":22,"./util":26,"amdefine":27}],25:[function(require,module,exports){
+},{"./array-set":17,"./base64-vlq":18,"./mapping-list":21,"./util":25,"amdefine":26}],24:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9679,7 +10193,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":24,"./util":26,"amdefine":27}],26:[function(require,module,exports){
+},{"./source-map-generator":23,"./util":25,"amdefine":26}],25:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -10000,7 +10514,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":27}],27:[function(require,module,exports){
+},{"amdefine":26}],26:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
@@ -10304,8 +10818,8 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,require("1YiZ5S"),"/../node_modules/jison/node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"1YiZ5S":3,"path":2}],28:[function(require,module,exports){
+}).call(this,require('_process'),"/node_modules/jison/node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
+},{"_process":35,"path":34}],27:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
@@ -10385,7 +10899,7 @@ module.exports={
   "readme": "ERROR: No README data found!"
 }
 
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -14217,7 +14731,7 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],30:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports={
   "author": {
     "name": "Zach Carter",
@@ -14287,7 +14801,7 @@ module.exports={
   "readme": "ERROR: No README data found!"
 }
 
-},{}],31:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 // Basic Lexer implemented using JavaScript regular expressions
 // MIT Licensed
 
@@ -14892,7 +15406,7 @@ RegExpLexer.generate = generate;
 module.exports = RegExpLexer;
 
 
-},{"./package.json":30,"lex-parser":32}],32:[function(require,module,exports){
+},{"./package.json":29,"lex-parser":31}],31:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.6 */
 /*
@@ -15745,8 +16259,8 @@ if (typeof module !== 'undefined' && require.main === module) {
   exports.main(process.argv.slice(1));
 }
 }
-}).call(this,require("1YiZ5S"))
-},{"1YiZ5S":3,"fs":1,"path":2}],33:[function(require,module,exports){
+}).call(this,require('_process'))
+},{"_process":35,"fs":1,"path":34}],32:[function(require,module,exports){
 module.exports={
   "author": {
     "name": "Zach Carter",
@@ -15813,392 +16327,487 @@ module.exports={
   "_resolved": "git+https://github.com/zaach/jison.git#a9e58a6ddcfe5b83345507664cbe6e6179412751"
 }
 
+},{}],33:[function(require,module,exports){
+exports.endianness = function () { return 'LE' };
+
+exports.hostname = function () {
+    if (typeof location !== 'undefined') {
+        return location.hostname
+    }
+    else return '';
+};
+
+exports.loadavg = function () { return [] };
+
+exports.uptime = function () { return 0 };
+
+exports.freemem = function () {
+    return Number.MAX_VALUE;
+};
+
+exports.totalmem = function () {
+    return Number.MAX_VALUE;
+};
+
+exports.cpus = function () { return [] };
+
+exports.type = function () { return 'Browser' };
+
+exports.release = function () {
+    if (typeof navigator !== 'undefined') {
+        return navigator.appVersion;
+    }
+    return '';
+};
+
+exports.networkInterfaces
+= exports.getNetworkInterfaces
+= function () { return {} };
+
+exports.arch = function () { return 'javascript' };
+
+exports.platform = function () { return 'browser' };
+
+exports.tmpdir = exports.tmpDir = function () {
+    return '/tmp';
+};
+
+exports.EOL = '\n';
+
 },{}],34:[function(require,module,exports){
-var exports = module.exports = {};
+(function (process){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-exports.compile = compile;
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
 
-function compile(program, className) {
-  var compiled = _compile(program);
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
 
-  compiled.code = generateHeader(className);
-  compiled.code += generateMain(compiled);
-
-  return compiled;
+  return parts;
 }
 
+// Split a filename into [root, dir, basename, ext], unix version
+// 'root' is just a slash, or nothing.
+var splitPathRe =
+    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+var splitPath = function(filename) {
+  return splitPathRe.exec(filename).slice(1);
+};
 
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
 
-function _compile(program) {
-  var compiled = {
-    mainCode: [],
-    locals: program.locals,
-    stack: 0
-  }
-  var env = program.env;
-  var currentStack = 0;
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
 
-  for (var i = 0; i < program.lines.length; i++) {
-    var line = compileNode(program.lines[i]);
-
-    if(currentStack > 0) {
-      line.push('getstatic java/lang/System/out Ljava/io/PrintStream;');
-      currentStack++;
-      compiled.stack = currentStack > compiled.stack ? currentStack : compiled.stack;
-      line.push('swap');
-      line.push('invokevirtual java/io/PrintStream/print(I)V');
-      currentStack -= 2;
-      line.push('getstatic java/lang/System/out Ljava/io/PrintStream;');
-      line.push('ldc "\\n"');
-      line.push('invokevirtual java/io/PrintStream/print(Ljava/lang/String;)V');
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
     }
 
-    compiled.mainCode.push('.line ' + (i+1));
-    compiled.mainCode.push(line);
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
   }
 
-  compiled.mainCode.push('return');
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
 
-  return compiled;
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
 
-  function compileNode(node) {
-    var code = [];
-    var right;
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
 
-    if (node.nodeType === 'stmt') {
-      right = compileNode(node.right);
-      code = code.concat(right);
-      code.push('istore ' + env[node.left.value].index);
-      currentStack--;
-    } else if (node.nodeType === 'exp') {
-      if (node.left.height >= node.right.height) {
-        code = code.concat(compileNode(node.left));
-        code = code.concat(compileNode(node.right));
-      } else {
-        code = code.concat(compileNode(node.right));
-        code = code.concat(compileNode(node.left));
-        if (node.value === '-' || node.value === '/') {
-          code.push('swap');
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function(path) {
+  var result = splitPath(path),
+      root = result[0],
+      dir = result[1];
+
+  if (!root && !dir) {
+    // No dirname whatsoever
+    return '.';
+  }
+
+  if (dir) {
+    // It has a dirname, strip trailing slash
+    dir = dir.substr(0, dir.length - 1);
+  }
+
+  return root + dir;
+};
+
+
+exports.basename = function(path, ext) {
+  var f = splitPath(path)[2];
+  // TODO: make this comparison case-insensitive on windows?
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+
+exports.extname = function(path) {
+  return splitPath(path)[3];
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+}).call(this,require('_process'))
+},{"_process":35}],35:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
         }
-      }
-
-      if (node.value === '-') {
-        code.push('isub');
-      } else if (node.value === '/') {
-        code.push('idiv');
-      } else if (node.value === '*') {
-        code.push('imul');
-      } else if (node.value === '+') {
-        code.push('iadd');
-      }
-
-      currentStack--;
-    } else if (node.nodeType === 'string') {
-      code.push('iload ' + env[node.value].index);
-      currentStack++;
-    } else if (node.nodeType === 'number') {
-      code.push('sipush ' + node.value);
-      currentStack++;
+        queueIndex = -1;
+        len = queue.length;
     }
-
-    compiled.stack = currentStack > compiled.stack ? currentStack : compiled.stack;
-    return code;
-  }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
 }
 
-function generateHeader(className) {
-  var header = '';
-
-  header += '; Generated by visual-compiler ®Jakub Rohleder\n';
-  header += '; https://github.com/jakubrohleder/visual-compiler\n';
-  header += '; (Jasmin syntax 2, http://jasmin.sourceforge.net)\n\n';
-
-  header += '.bytecode 52.0\n'
-  header += '.class public ' + className + '\n';
-  header += '.super java/lang/Object\n\n';
-
-  header += '.method public <init>()V\n';
-  header += '  .limit stack 1\n';
-  header += '  .limit locals 1\n';
-  header += '  .line 1\n';
-  header += '  0: aload_0\n';
-  header += '  1: invokespecial java/lang/Object/<init>()V\n';
-  header += '  4: return\n';
-  header += '.end method\n\n';
-
-  return header;
-}
-
-function generateMain(compiled) {
-  var main = '';
-
-  main += '.method public static main([Ljava/lang/String;)V\n';
-  main += '  .limit stack ' + compiled.stack + '\n';
-  main += '  .limit locals ' + compiled.locals + '\n';
-
-  main += indentLines(compiled.mainCode, 1).join('\n');
-
-  main += '\n.end method\n';
-
-  return main;
-}
-
-function indentLines(array, indentation) {
-  indentation = indentation === undefined ? 0 : indentation;
-  return array.reduce(reduce, []);
-
-  function reduce(accumulator, element) {
-    if (element instanceof Array) {
-      var tmp = indentLines(element, indentation + 1);
-      return accumulator.concat(tmp);
-    } else {
-      var indent = new Array(indentation + 1).join('  ');
-      accumulator.push(indent + element);
-      return accumulator;
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
     }
-  }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
 }
-},{}],35:[function(require,module,exports){
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],36:[function(require,module,exports){
+var Element = require('./element.js').Element;
 var exports = module.exports = {};
 
-exports.compile = compile;
+exports.create = create;
 
-function compile(program, className) {
-  var compiled = _compile(program);
+function Block(opts) {
+  var _this = this;
 
-  compiled.code = generateHeader(className);
-  compiled.code += generateMain(compiled);
-
-  return compiled;
+  Element.call(_this, opts);
 }
 
+Block.prototype = Object.create(Element.prototype);
+Block.prototype.constructor = Element;
 
-
-function _compile(program) {
-  var compiled = {
-    mainCode: [],
-    locals: program.locals,
-    stack: 0
-  }
-  var env = program.env;
-  var labelsCount = 0;
-  var key;
-
-  for (key in env) {
-    compiled.mainCode.push('%' + key + ' = alloca i32');
-  }
-
-  for (var i = 0; i < program.lines.length; i++) {
-    var line = compileNode(program.lines[i]);
-
-    compiled.mainCode.push('; line ' + (i+1));
-    compiled.mainCode.push(line.code);
-
-    if(program.lines[i].nodeType === 'exp' || program.lines[i].nodeType === 'string' || program.lines[i].nodeType === 'number') {
-      var tl = '%t' + labelsCount++;
-      compiled.mainCode.push('  ' + tl + ' = bitcast [4 x i8]* @dnl to i8*')
-      compiled.mainCode.push('  call i32 @printf(i8* ' + tl +', i32 ' + line.label + ')');
-    }
-  }
-
-  compiled.mainCode.push('ret i32 0');
-
-  return compiled;
-
-  function compileNode(node) {
-    var code = [];
-    var tmpCode = '';
-    var left;
-    var right;
-    var label;
-
-    if (node.nodeType === 'stmt') {
-      tmpCode += 'store i32 ';
-      if (node.right.nodeType === 'number') {
-        tmpCode += node.right.value + ', ';
-      } else {
-        right = compileNode(node.right);
-        code = code.concat(right.code);
-        tmpCode += right.label + ', ';
-      }
-
-      tmpCode += 'i32* %' + node.left.value;
-      code.push(tmpCode);
-    } else if (node.nodeType === 'exp') {
-      if (node.value === '-') {
-        tmpCode += 'sub i32 ';
-      } else if (node.value === '/') {
-        tmpCode += 'sdiv i32 ';
-      } else if (node.value === '*') {
-        tmpCode += 'mul i32 ';
-      } else if (node.value === '+') {
-        tmpCode += 'add i32 ';
-      }
-
-      if (node.left.nodeType === 'number') {
-        tmpCode += node.left.value + ', ';
-      } else {
-        left = compileNode(node.left);
-        code = code.concat(left.code);
-        tmpCode += left.label + ', ';
-      }
-
-      if (node.right.nodeType === 'number') {
-        tmpCode += node.right.value;
-      } else {
-        right = compileNode(node.right);
-        code = code.concat(right.code);
-        tmpCode += right.label;
-      }
-
-      label = '%t' + labelsCount++;
-      tmpCode = label + ' = ' + tmpCode;
-
-      code.push(tmpCode);
-    } else if (node.nodeType === 'string') {
-      label = '%t' + labelsCount++;
-      code.push(label + ' = load i32* %' + node.value);
-    } else if (node.nodeType === 'number') {
-      label = '%t' + labelsCount++;
-      code.push(label + ' = add i32 0, ' + node.value);
-    }
-
-    return {
-      code: code,
-      label: label
-    }
-  }
+function create(opts) {
+  return new Block(opts);
 }
 
-function generateHeader() {
-  var header = '';
+},{"./element.js":37}],37:[function(require,module,exports){
+var exports = module.exports = {};
 
-  header += '; Generated by visual-compiler ®Jakub Rohleder\n';
-  header += '; https://github.com/jakubrohleder/visual-compiler\n';
-  header += '; (LLVM syntax, http://llvm.org/docs/LangRef.html)\n\n';
+exports.Element = Element;
 
-  header += '@dnl = internal constant [4 x i8] c"%d\\0A\\00"\n';
-  header += 'declare i32 @printf(i8*, i32)\n\n';
+function Element(opts) {
+  var _this = this;
 
-  return header;
+  _this.location = opts.location;
 }
 
-function generateMain(compiled) {
-  var main = '';
+},{}],38:[function(require,module,exports){
+var Element = require('./element.js').Element;
+var exports = module.exports = {};
 
-  main += 'define i32 @main() {\n';
+exports.create = create;
 
-  main += indentLines(compiled.mainCode, 1).join('\n');
+function Expression(opts) {
+  var _this = this;
 
-  main += '\n}\n';
-
-  return main;
+  Element.call(_this, opts);
 }
 
-function indentLines(array, indentation) {
-  indentation = indentation === undefined ? 0 : indentation;
-  return array.reduce(reduce, []);
+Expression.prototype = Object.create(Element.prototype);
+Expression.prototype.constructor = Element;
 
-  function reduce(accumulator, element) {
-    if (element instanceof Array) {
-      var tmp = indentLines(element, indentation + 1);
-      return accumulator.concat(tmp);
-    } else {
-      var indent = new Array(indentation + 1).join('  ');
-      accumulator.push(indent + element);
-      return accumulator;
-    }
-  }
+function create(opts) {
+  return new Expression(opts);
 }
-},{}],"instant":[function(require,module,exports){
-module.exports=require('epB21t');
-},{}],"epB21t":[function(require,module,exports){
-var grammar = require('./syntax.json');
+
+},{"./element.js":37}],39:[function(require,module,exports){
+var Element = require('./element.js').Element;
+var exports = module.exports = {};
+
+exports.create = create;
+
+function Function(opts) {
+  var _this = this;
+
+  Element.call(_this, opts);
+}
+
+Function.prototype = Object.create(Element.prototype);
+Function.prototype.constructor = Element;
+
+function create(opts) {
+  return new Function(opts);
+}
+
+},{"./element.js":37}],40:[function(require,module,exports){
+var Element = require('./element.js').Element;
+var exports = module.exports = {};
+
+exports.create = create;
+
+function Statement(opts) {
+  var _this = this;
+
+  Element.call(_this, opts);
+}
+
+Statement.prototype = Object.create(Element.prototype);
+Statement.prototype.constructor = Element;
+
+function create(opts) {
+  return new Statement(opts);
+}
+
+},{"./element.js":37}],"latte":[function(require,module,exports){
+
 var Parser = require('jison').Parser;
-var JVM = require('./jvm.js');
-var LLVM = require('./llvm.js');
+var Hjson = require('hjson');
+var grammar = Hjson.parse("{\n   \"comment\": \"Latte language parser\",\n   \"lex\": {\n      \"rules\": [\n         [\"\\\\s+\",                    \"/* skip whitespace */\"],\n         [\"true\",                    \"return 'TRUE'\"],\n         [\"false\",                   \"return 'FALSE'\"],\n         [\"if\",                      \"return 'IF'\"],\n         [\"else\",                    \"return 'ELSE'\"],\n         [\"while\",                   \"return 'WHILE'\"],\n         [\"int\",                     \"return 'INTEGER'\"],\n         [\"string\",                  \"return 'STRING'\"],\n         [\"boolean\",                 \"return 'BOOLEAN'\"],\n         [\"void\",                    \"return 'VOID'\"],\n         [\"return\",                  \"return 'RETURN'\"],\n         [\"[0-9]+\",                  \"return 'NUMBER'\"],\n         [\"[a-zA-Z_][0-9a-zA-Z_]*\",  \"return 'LITERAL'\"],\n         [\"\\\\+\\\\+\",                  \"return 'INCR'\"],\n         [\"--\",                      \"return 'DECR'\"],\n         [\"\\\\*\",                     \"return '*'\"],\n         [\"\\\\/\",                     \"return '/'\"],\n         [\"-\",                       \"return '-'\"],\n         [\"\\\\+\",                     \"return '+'\"],\n         [\"=\",                       \"return '='\"],\n         [\"<\",                       \"return '<'\"],\n         [\"<=\",                      \"return '<='\"],\n         [\">\",                       \"return '>'\"],\n         [\">=\",                      \"return '>='\"],\n         [\"==\",                      \"return '=='\"],\n         [\"!=\",                      \"return '!='\"],\n         [\";\",                       \"return ';'\"],\n         [\",\",                       \"return ','\"],\n         [\"$\",                       \"return 'EOF'\"],\n         [\"!\",                       \"return '!'\"],\n         [\"%\",                       \"return '%'\"],\n         [\"&&\",                      \"return '&&'\"],\n         [\"\\\\|\\\\|\",                  \"return '||'\"],\n         [\"\\\\(\",                     \"return '('\"],\n         [\"\\\\)\",                     \"return ')'\"],\n         [\"\\\\]\",                     \"return ']'\"],\n         [\"\\\\[\",                     \"return '['\"],\n         [\"\\\\{\",                     \"return '{'\"],\n         [\"\\\\}\",                     \"return '}'\"]\n      ]\n   },\n\n   \"operators\": [\n      [\"left\", \"&&\", \"||\"],\n      [\"left\", \"<\", \"<=\", \">\", \">=\", \"==\", \"!=\", \"RELOP\"],\n      [\"left\", \"-\", \"+\", \"ADDOP\"],\n      [\"left\", \"*\", \"/\", \"%\", \"MULOP\"],\n      [\"nonassoc\", \"INCR\", \"DECR\"],\n      [\"nonassoc\", \"UMINUS\", \"NEGATION\"],\n      [\"nonassoc\", \"IF_WITHOUT_ELSE\"],\n      [\"nonassoc\", \"ELSE\"]\n   ],\n\n   \"bnf\": {\n      \"Program\": [\n         [\"TopDefs EOF\",   \"return yy.data;\"]\n      ],\n\n      \"TopDefs\": [\n         [\"TopDef\", \"\"],\n         [\"TopDefs TopDef\", \"\"]\n      ],\n\n      \"TopDef\": [\n         [\"Type Ident ( Args ) Block\", \"\"]\n      ],\n\n      \"Args\": [\n         [\"\", \"\"],\n         [\"Arg\", \"\"],\n         [\"Args , Arg\", \"\"]\n      ],\n\n      \"Arg\": [\n         [\"Type Ident\", \"\"]\n      ],\n\n      \"Block\": [\n         [\"{ Stmts }\", \"\"]\n      ],\n\n      \"Stmts\": [\n         [\"Stmt\", \"\"],\n         [\"Stmts Stmt\", \"\"]\n      ],\n\n      \"Stmt\": [\n         [\"Block\", \"\"],\n         [\"Type Items ;\", \"\"],\n         [\"Ident = Expr ;\", \"\"],\n         [\"Ident INCR ;\", \"\"],\n         [\"Ident DECR ;\", \"\"],\n         [\"RETURN Expr ;\", \"\"],\n         [\"RETURN ;\", \"\"],\n         [\"IF ( Expr ) Stmt\", \"\", {\"prec\": \"IF_WITHOUT_ELSE\"}],\n         [\"IF ( Expr ) Stmt ELSE Stmt\", \"\", {\"prec\": \"IF_WITH_ELSE\"}],\n         [\"WHILE ( Expr ) Stmt\", \"\"],\n         [\"Expr ;\", \"\"],\n         [\";\", \"\"]\n      ],\n\n      \"Items\": [\n         [\"Item\", \"\"],\n         [\"Items , Item\", \"\"]\n      ],\n\n      \"Item\": [\n         [\"Ident\", \"\"],\n         [\"Ident = Expr\", \"\"]\n      ],\n\n      \"Type\": [\n         [\"INTEGER\", \"\"],\n         [\"STRING\", \"\"],\n         [\"BOOLEAN\", \"\"],\n         [\"VOID\", \"\"]\n      ],\n\n      \"Ident\": [\n         [\"LITERAL\", \"\"]\n      ],\n\n      \"Exprs\": [\n         [\"Expr\", \"\"],\n         [\"Exprs , Expr\", \"\"]\n      ],\n\n      \"Expr\": [\n         [\"Ident\", \"\"],\n         [\"NUMBER\", \"\"],\n         [\"TRUE\", \"\"],\n         [\"FALSE\", \"\"],\n         [\"Ident ( Exprs )\", \"\"],\n         [\"- Expr\", \"\", {\"prec\": \"UMINUS\"}],\n         [\"! Expr\", \"\", {\"prec\": \"NEGATION\"}],\n         [\"Expr MulOp Expr\", \"\", {\"prec\": \"MULOP\"}],\n         [\"Expr AddOp Expr\", \"\", {\"prec\": \"ADDOP\"}],\n         [\"Expr RelOp Expr\", \"\", {\"prec\": \"RELOP\"}],\n         [\"Expr && Expr\", \"\"],\n         [\"Expr || Expr\", \"\"],\n         [\"( Expr )\", \"$$ = $2\"]\n      ],\n\n      \"AddOp\": [\n         [\"+\", \"\"],\n         [\"-\", \"\"]\n      ],\n\n      \"MulOp\": [\n         [\"*\", \"\"],\n         [\"/\", \"\"],\n         [\"%\", \"\"]\n      ],\n\n      \"RelOp\": [\n         [\"<\", \"\"],\n         [\"<=\", \"\"],\n         [\">\", \"\"],\n         [\">=\", \"\"],\n         [\"==\", \"\"],\n         [\"!=\", \"\"]\n      ]\n   }\n}\n");
+
+var expressions = require('./core/expression.js');
+var statements = require('./core/statement.js');
+var block = require('./core/block.js');
+var fun = require('./core/function.js');
 
 var exports = module.exports = {};
 
 exports.parse = parse;
-exports.compileJVM = compileJVM;
-exports.compileLLVM = compileLLVM;
 
 function parse(code) {
   var parser = new Parser(grammar);
   parser.yy.data = {
     env: {},
-    lines: [],
-    locals: 1
+    lines: []
   }
+
+  parser.yy.expressions = expressions;
+  parser.yy.statements = statements;
 
   return parser.parse(code);
 }
 
-function compileJVM(tree, className) {
-  var compiledCode = JVM.compile(tree, className);
-  return compiledCode;
-}
-
-function compileLLVM(tree, className) {
-  var compiledCode = LLVM.compile(tree, className);
-  return compiledCode;
-}
-},{"./jvm.js":34,"./llvm.js":35,"./syntax.json":38,"jison":4}],38:[function(require,module,exports){
-module.exports={
-   "comment": "Instant parser",
-   "lex": {
-      "rules": [
-         ["\\s+",                    "/* skip whitespace */"],
-         ["[0-9]+",                  "return 'NUMBER'"],
-         ["[a-zA-Z_][0-9a-zA-Z_]*",  "return 'STRING'"],
-         ["\\*",                     "return '*'"],
-         ["\\/",                     "return '/'"],
-         ["-",                       "return '-'"],
-         ["\\+",                     "return '+'"],
-         ["=",                       "return '='"],
-         [";",                       "return ';'"],
-         ["$",                       "return 'EOF'"],
-         ["\\(",                     "return '('"],
-         ["\\)",                     "return ')'"]
-      ]
-   },
-
-   "operators": [
-      ["right", "+" ],
-      ["left", "-"],
-      ["left", "*", "/"]
-   ],
-
-   "bnf": {
-      "expressions": [
-         ["p EOF",   "return yy.data;"]
-      ],
-
-      "p": [
-         ["stmt", "yy.data.lines.push($1);"],
-         ["p ; stmt", "yy.data.lines.push($3);"]
-      ],
-
-      "stmt": [
-         ["id = e", "yy.data.env[$1.value] = {type: $3.type, index: yy.data.locals++}; $$ = {nodeType: 'stmt', value: '=', left:$1, right: $3, height: $3.height + 1, type: $3.type}"],
-         ["e", "$$ = $1"]
-      ],
-
-      "id": [
-         ["STRING", "$$ = {nodeType: 'string', type: 'string', value: String(yytext), height: 0}"]
-      ],
-
-      "e" :[
-         ["e + e",  "$$ = {nodeType: 'exp', value: '+', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["e - e",  "$$ = {nodeType: 'exp', value: '-', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["e * e",  "$$ = {nodeType: 'exp', value: '*', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["e / e",  "$$ = {nodeType: 'exp', value: '/', left:$1, right: $3, height: $1.height > $3.height ? $1.height + 1 : $3.height + 1, type: $1.type}"],
-         ["id",     "if(yy.data.env[$1.value] === undefined) {parseError('Undeclared variable \"' + $1.value + '\" at line ' + yylineno + ':' + this._$.first_column, {token: $1, line: yylineno, loc: this._$, parse: true})} $$ = $1"],
-         ["NUMBER", "$$ = {nodeType: 'number', type: 'number', value: Number(yytext), height: 0}"],
-         ["( e )",  "$$ = $2"]
-      ]
-   }
-}
-
-},{}]},{},["epB21t"])
+},{"./core/block.js":36,"./core/expression.js":38,"./core/function.js":39,"./core/statement.js":40,"hjson":2,"jison":3}]},{},["latte"]);
