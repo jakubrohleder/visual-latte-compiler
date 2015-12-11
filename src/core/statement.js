@@ -13,13 +13,15 @@ module.exports = new function() {
   _this.init = init.bind(_this);
 };
 
-function create(opts) {
+function create(type, opts) {
   var stmt;
   var _this = this
 
-  opts.currentScope = _this.state.currentScope;
+  opts = opts || {};
 
-  switch (opts.type) {
+  opts.scope = _this.state.currentScope;
+
+  switch (type) {
     case 'VARIABLE_ASSIGNMENT':
       stmt = new StatementAssignment(opts);
       break;

@@ -1,20 +1,21 @@
 var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionNegation;
+
+module.exports = ExpressionNegation;
+
+ExpressionNegation.prototype = Object.create(Expression.prototype);
+ExpressionNegation.prototype.constructor = ExpressionNegation;
+ExpressionNegation.prototype.staticCheck = staticCheck;
 
 function ExpressionNegation(opts) {
   var _this = this;
 
   Expression.call(_this, opts);
-
-  _this.value = opts.value;
-
-  if (_this.value.type !== 'boolean') {
-    console.error(
-      'Can\'t negate var that is not a boolean',
-      _this.value
-    )
-  }
 }
 
-ExpressionNegation.prototype = Object.create(Expression.prototype);
-ExpressionNegation.prototype.constructor = ExpressionNegation;
+function staticCheck() {
+  var _this = this;
+
+  _this.expr.staticCheck();
+
+  _this.type = _this.expr.type;
+}

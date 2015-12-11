@@ -65,7 +65,7 @@
 
             var doc = codeMirror.getDoc();
 
-            errorMessage = codeMirror.addLineWidget(error.hash.line, makeMarker(error.message));
+            errorMessage = codeMirror.addLineWidget(error.hash.loc.last_line-1, makeMarker(error.message));
             errorMarker = doc.markText(from, to, {className: 'error-text'});
           }
         });

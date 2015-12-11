@@ -1,6 +1,496 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
+/*!
+ * cr <https://github.com/jonschlinkert/cr>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+module.exports = function(str) {
+  if (typeof str !== 'string') {
+    throw new TypeError('expected a string');
+  }
+  return str.replace(/\r\n|\r/g, '\n');
+};
+
+module.exports.strip = function(str) {
+  if (typeof str !== 'string') {
+    throw new TypeError('expected a string');
+  }
+  return str.split('\r').join('');
+};
+
+},{}],3:[function(require,module,exports){
+'use strict';
+
+var isObject = require('is-extendable');
+
+module.exports = function extend(o/*, objects*/) {
+  if (!isObject(o)) { o = {}; }
+
+  var len = arguments.length;
+  for (var i = 1; i < len; i++) {
+    var obj = arguments[i];
+
+    if (isObject(obj)) {
+      assign(o, obj);
+    }
+  }
+  return o;
+};
+
+function assign(a, b) {
+  for (var key in b) {
+    if (hasOwn(b, key)) {
+      a[key] = b[key];
+    }
+  }
+}
+
+/**
+ * Returns true if the given `key` is an own property of `obj`.
+ */
+
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+},{"is-extendable":9}],4:[function(require,module,exports){
+'use strict';
+
+var extend = require('extend-shallow');
+var Block = require('./lib/block');
+var Line = require('./lib/line');
+var utils = require('./lib/utils');
+
+/**
+ * Extract comments from the given `string`.
+ *
+ * ```js
+ * extract(str, options);
+ * ```
+ * @param {String} `string`
+ * @param {Object} `options` Pass `first: true` to return after the first comment is found.
+ * @return {String}
+ * @api public
+ */
+
+function comments(str, options, fn) {
+  if (typeof str !== 'string') {
+    throw new TypeError('expected a string');
+  }
+  return block(str, options, fn)
+    .concat(line(str, options, fn))
+    .sort(compare);
+}
+
+/**
+ * Extract block comments from the given `string`.
+ *
+ * ```js
+ * extract.block(str, options);
+ * ```
+ * @param {String} `string`
+ * @param {Object} `options` Pass `first: true` to return after the first comment is found.
+ * @return {String}
+ * @api public
+ */
+
+function block(str, options, fn) {
+  return factory('/*', '*/', Block)(str, options, fn);
+}
+
+/**
+ * Extract line comments from the given `string`.
+ *
+ * ```js
+ * extract.line(str, options);
+ * ```
+ * @param {String} `string`
+ * @param {Object} `options` Pass `first: true` to return after the first comment is found.
+ * @return {String}
+ * @api public
+ */
+
+function line(str, options, fn) {
+  return factory('//', '\n', Line)(str, options, fn);
+}
+
+/**
+ * Factory for extracting comments from a string.
+ *
+ * @param {String} `string`
+ * @return {String}
+ */
+
+function factory(open, close, Ctor) {
+  return function(str, options, fn) {
+    if (typeof str !== 'string') {
+      throw new TypeError('expected a string');
+    }
+
+    if (typeof options === 'function') {
+      fn = options;
+      options = {};
+    }
+
+    if (typeof fn !== 'function') {
+      fn = utils.identity;
+    }
+
+    var opts = extend({}, options);
+    str = utils.normalize(str);
+    str = utils.escapeQuoted(str);
+
+    var res = [];
+    var start = str.indexOf(open);
+    var end = str.indexOf(close, start);
+    var len = str.length;
+    if (end === -1) {
+      end = len;
+    }
+
+    while (start !== -1 && end <= len) {
+      var comment = fn(new Ctor(str, start, end, open, close));
+      res.push(comment);
+      if (opts.first && res.length === 1) {
+        return res;
+      }
+      start = str.indexOf(open, end + 1);
+      end = str.indexOf(close, start);
+      if (end === -1) {
+        end = len;
+      }
+    }
+    return res;
+  };
+}
+
+/**
+ * Extract the first comment from the given `string`.
+ *
+ * @param {String} `string`
+ * @param {Object} `options` Pass `first: true` to return after the first comment is found.
+ * @return {String}
+ * @api public
+ */
+
+function first(str) {
+  if (typeof str !== 'string') {
+    throw new TypeError('expected a string');
+  }
+
+  var arr = comments(str, {first: true});
+  if (arr && arr.length) {
+    return arr[0].raw;
+  } else {
+    return null;
+  }
+}
+
+/**
+ * Utility for sorting line and block comments into
+ * the correct order.
+ */
+
+function compare(a, b) {
+  return a.loc.start.pos - b.loc.start.pos;
+}
+
+/**
+ * Expose `extract` module
+ */
+
+module.exports = comments;
+
+/**
+ * Expose `extract.first` method
+ */
+
+module.exports.first = first;
+
+/**
+ * Expose `extract.block` method
+ */
+
+module.exports.block = block;
+
+/**
+ * Expose `extract.line` method
+ */
+
+module.exports.line = line;
+
+/**
+ * Expose `extract.factory` method
+ */
+
+module.exports.factory = factory;
+
+},{"./lib/block":5,"./lib/line":7,"./lib/utils":8,"extend-shallow":3}],5:[function(require,module,exports){
+'use strict';
+
+var utils = require('./utils');
+var Code = require('./code');
+
+/**
+ * Create a new BlockComment with:
+ *   - `str` the entire string
+ *   - `idx` the starting index of the comment
+ *   - `end` the ending index of the comment
+ *   - `open` the opening character(s) of the comment
+ *   - `close` the closing character(s) of the comment
+ */
+
+function BlockComment(str, idx, end, open, close) {
+  var ol = open.length;
+  var cl = close.length;
+
+  var lineno = utils.linesCount(str, idx);
+  var value = utils.restore(str.slice(idx, end + cl));
+  var inner = value.slice(ol, -cl);
+  var lines = utils.strip(inner.split('\n'));
+
+  this.type = 'block';
+  this.raw = value;
+  this.value = lines.join('\n');
+  this.lines = lines;
+
+  this.loc = {
+    start: {
+      line: lineno,
+      pos: idx
+    },
+    end: {
+      line: lineno + utils.linesCount(value) - 1,
+      pos: end + cl
+    }
+  };
+
+  /**
+   * Add code context
+   */
+
+  this.code = new Code(str, this);
+}
+
+/**
+ * expose `BlockComment`
+ */
+
+module.exports = BlockComment;
+
+},{"./code":6,"./utils":8}],6:[function(require,module,exports){
+'use strict';
+
+var codeContext = require('parse-code-context');
+var utils = require('./utils');
+
+function Code(str, comment) {
+  str = utils.restore(str);
+  var start = comment.loc.end.pos;
+  var lineno = comment.loc.end.line;
+  var ctx = {};
+
+  var lines = str.split('\n').slice(lineno);
+  for (var i = 0; i < lines.length; i++) {
+    var res = codeContext(lines[i], lineno + i);
+    if (res) {
+      ctx = res;
+      lineno += i;
+      break;
+    }
+  }
+
+  var val = ctx.original || '';
+  var pos = str.slice(start).indexOf(val) + start;
+
+  return {
+    context: ctx,
+    line: lineno,
+    loc: {
+      start: { line: lineno, pos: pos },
+      end: { line: lineno, pos: pos + val.length }
+    },
+    value: val.trim()
+  };
+}
+
+/**
+ * Expose `Code`
+ */
+
+module.exports = Code;
+
+},{"./utils":8,"parse-code-context":42}],7:[function(require,module,exports){
+'use strict';
+
+var utils = require('./utils');
+
+/**
+ * Create a new LineComment with:
+ *   - `str` the entire string
+ *   - `idx` the starting index of the comment
+ *   - `end` the ending index of the comment
+ *   - `open` the opening character(s) of the comment (e.g. '//')
+ *   - `close` the closing character(s) of the comment (e.g. '\n')
+ */
+
+function LineComment(str, idx, end, open, close) {
+  var lineno = utils.linesCount(str, idx);
+  var value = utils.restore(str.slice(idx, end));
+
+  this.type = 'line';
+  this.raw = value;
+  this.value = this.raw.replace(/^\s*[\/\s]+/, '');
+
+  this.loc = {
+    start: {
+      line: lineno,
+      pos: idx
+    },
+    end: {
+      line: lineno + utils.linesCount(value) - 1,
+      pos: end
+    }
+  };
+}
+
+/**
+ * expose `LineComment`
+ */
+
+module.exports = LineComment;
+
+},{"./utils":8}],8:[function(require,module,exports){
+'use strict';
+
+var cr = require('cr');
+var bom = require('strip-bom-string');
+var quotesRegex = require('quoted-string-regex');
+var nonchar = require('noncharacters');
+
+/**
+ * Expose `utils`
+ */
+
+var utils = module.exports;
+
+/**
+ * Normalize newlines, strip carriage returns and
+ * byte order marks from `str`
+ */
+
+utils.normalize = function(str) {
+  return cr(bom(str));
+};
+
+/**
+ * Return the given value unchanged
+ */
+
+utils.identity = function(val) {
+  return val;
+};
+
+/**
+ * Get the total number of lines from the start
+ * of a string to the given index.
+ */
+
+utils.linesCount = function(str, i) {
+  if (typeof i === 'number') {
+    return str.slice(0, i).split('\n').length;
+  }
+  return str.split('\n').length;
+};
+
+/**
+ * Utility for getting a sequence of non-characters. The
+ * goal is to return a non-character string that is the
+ * same length as the characters we're replacing.
+ *
+ * http://www.unicode.org/faq/private_use.html#noncharacters
+ */
+
+function ch(num) {
+  return nonchar[num] + nonchar[num];
+}
+
+/**
+ * Escaped comment characters in quoted strings
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+utils.escapeQuoted = function(str) {
+  return str.replace(quotesRegex(), function(val) {
+    val = val.split('//').join(ch(0));
+    val = val.split('/*').join(ch(1));
+    val = val.split('*/').join(ch(2));
+    return val;
+  });
+};
+
+/**
+ * Restore comment characters in quoted strings
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+utils.restore = function(str) {
+  return str.replace(quotesRegex(), function(val) {
+    val = val.split(ch(0)).join('//');
+    val = val.split(ch(1)).join('/*');
+    val = val.split(ch(2)).join('*/');
+    return val;
+  });
+};
+
+/**
+ * Strip stars from the beginning of each comment line,
+ * and strip whitespace from the end of each line. We
+ * can't strip whitespace from the beginning since comments
+ * use markdown or other whitespace-sensitive formatting.
+ *
+ * @param {Array} `lines`
+ * @return {Array}
+ */
+
+utils.strip = function(lines) {
+  var len = lines.length, i = -1;
+  var res = [];
+
+  while (++i < len) {
+    var line = lines[i].replace(/^\s*[*\/]+\s?|\s+$/g, '');
+    if (!line) continue;
+    res.push(line);
+  }
+  return res;
+};
+
+},{"cr":2,"noncharacters":41,"quoted-string-regex":45,"strip-bom-string":46}],9:[function(require,module,exports){
+/*!
+ * is-extendable <https://github.com/jonschlinkert/is-extendable>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+module.exports = function isExtendable(val) {
+  return typeof val !== 'undefined' && val !== null
+    && (typeof val === 'object' || typeof val === 'function');
+};
+
+},{}],10:[function(require,module,exports){
 (function (process){
 // Jison, an LR(0), SLR(1), LARL(1), LR(1) Parser Generator
 // Zachary Carter <zach@carter.name>
@@ -1923,7 +2413,7 @@ return function Parser (g, options) {
 })();
 
 }).call(this,require('_process'))
-},{"../package.json":31,"./util/set":3,"./util/typal":4,"JSONSelect":5,"_process":34,"ebnf-parser":6,"escodegen":10,"esprima":27,"fs":1,"jison-lex":29,"path":33}],3:[function(require,module,exports){
+},{"../package.json":39,"./util/set":11,"./util/typal":12,"JSONSelect":13,"_process":44,"ebnf-parser":14,"escodegen":18,"esprima":35,"fs":1,"jison-lex":37,"path":43}],11:[function(require,module,exports){
 // Set class to wrap arrays
 
 var typal = require("./typal").typal;
@@ -2018,7 +2508,7 @@ if (typeof exports !== 'undefined')
     exports.Set = Set;
 
 
-},{"./typal":4}],4:[function(require,module,exports){
+},{"./typal":12}],12:[function(require,module,exports){
 /*
  * Introduces a typal object to make classical/prototypal patterns easier
  * Plus some AOP sugar
@@ -2110,7 +2600,7 @@ return {
 if (typeof exports !== 'undefined')
     exports.typal = typal;
 
-},{}],5:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*! Copyright (c) 2011, Lloyd Hilaiel, ISC License */
 /*
  * This is the JSONSelect reference implementation, in javascript.  This
@@ -2684,7 +3174,7 @@ if (typeof exports !== 'undefined')
     exports.compile = compile;
 })(typeof exports === "undefined" ? (window.JSONSelect = {}) : exports);
 
-},{}],6:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var bnf = require("./parser").parser,
     ebnf = require("./ebnf-transform"),
     jisonlex = require("lex-parser");
@@ -2727,7 +3217,7 @@ var parseLex = function (text) {
 };
 
 
-},{"./ebnf-transform":7,"./parser":8,"lex-parser":30}],7:[function(require,module,exports){
+},{"./ebnf-transform":15,"./parser":16,"lex-parser":38}],15:[function(require,module,exports){
 var EBNF = (function(){
     var parser = require('./transform-parser.js');
 
@@ -2864,7 +3354,7 @@ var EBNF = (function(){
 exports.transform = EBNF.transform;
 
 
-},{"./transform-parser.js":9}],8:[function(require,module,exports){
+},{"./transform-parser.js":17}],16:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.11 */
 /*
@@ -3669,7 +4159,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }
 }
 }).call(this,require('_process'))
-},{"./ebnf-transform":7,"_process":34,"fs":1,"path":33}],9:[function(require,module,exports){
+},{"./ebnf-transform":15,"_process":44,"fs":1,"path":43}],17:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.11 */
 /*
@@ -4301,7 +4791,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }
 }
 }).call(this,require('_process'))
-},{"_process":34,"fs":1,"path":33}],10:[function(require,module,exports){
+},{"_process":44,"fs":1,"path":43}],18:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -6588,7 +7078,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./package.json":26,"estraverse":11,"esutils":14,"source-map":15}],11:[function(require,module,exports){
+},{"./package.json":34,"estraverse":19,"esutils":22,"source-map":23}],19:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -7279,7 +7769,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],12:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7371,7 +7861,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],13:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7490,7 +7980,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":12}],14:[function(require,module,exports){
+},{"./code":20}],22:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7524,7 +8014,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":12,"./keyword":13}],15:[function(require,module,exports){
+},{"./code":20,"./keyword":21}],23:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -7534,7 +8024,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":21,"./source-map/source-map-generator":22,"./source-map/source-node":23}],16:[function(require,module,exports){
+},{"./source-map/source-map-consumer":29,"./source-map/source-map-generator":30,"./source-map/source-node":31}],24:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7633,7 +8123,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":24,"amdefine":25}],17:[function(require,module,exports){
+},{"./util":32,"amdefine":33}],25:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7777,7 +8267,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":18,"amdefine":25}],18:[function(require,module,exports){
+},{"./base64":26,"amdefine":33}],26:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7821,7 +8311,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":25}],19:[function(require,module,exports){
+},{"amdefine":33}],27:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -7903,7 +8393,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":25}],20:[function(require,module,exports){
+},{"amdefine":33}],28:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -7991,7 +8481,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":24,"amdefine":25}],21:[function(require,module,exports){
+},{"./util":32,"amdefine":33}],29:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8568,7 +9058,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":16,"./base64-vlq":17,"./binary-search":19,"./util":24,"amdefine":25}],22:[function(require,module,exports){
+},{"./array-set":24,"./base64-vlq":25,"./binary-search":27,"./util":32,"amdefine":33}],30:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8970,7 +9460,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":16,"./base64-vlq":17,"./mapping-list":20,"./util":24,"amdefine":25}],23:[function(require,module,exports){
+},{"./array-set":24,"./base64-vlq":25,"./mapping-list":28,"./util":32,"amdefine":33}],31:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9386,7 +9876,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":22,"./util":24,"amdefine":25}],24:[function(require,module,exports){
+},{"./source-map-generator":30,"./util":32,"amdefine":33}],32:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9707,7 +10197,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":25}],25:[function(require,module,exports){
+},{"amdefine":33}],33:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
@@ -10012,7 +10502,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/jison/node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"_process":34,"path":33}],26:[function(require,module,exports){
+},{"_process":44,"path":43}],34:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
@@ -10092,7 +10582,7 @@ module.exports={
   "readme": "ERROR: No README data found!"
 }
 
-},{}],27:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -13924,7 +14414,7 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],28:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports={
   "author": {
     "name": "Zach Carter",
@@ -13994,7 +14484,7 @@ module.exports={
   "readme": "ERROR: No README data found!"
 }
 
-},{}],29:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 // Basic Lexer implemented using JavaScript regular expressions
 // MIT Licensed
 
@@ -14599,7 +15089,7 @@ RegExpLexer.generate = generate;
 module.exports = RegExpLexer;
 
 
-},{"./package.json":28,"lex-parser":30}],30:[function(require,module,exports){
+},{"./package.json":36,"lex-parser":38}],38:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.6 */
 /*
@@ -15453,7 +15943,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }
 }
 }).call(this,require('_process'))
-},{"_process":34,"fs":1,"path":33}],31:[function(require,module,exports){
+},{"_process":44,"fs":1,"path":43}],39:[function(require,module,exports){
 module.exports={
   "author": {
     "name": "Zach Carter",
@@ -15520,7 +16010,7 @@ module.exports={
   "_resolved": "git+https://github.com/zaach/jison.git#a9e58a6ddcfe5b83345507664cbe6e6179412751"
 }
 
-},{}],32:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -27875,7 +28365,168 @@ module.exports={
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],33:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
+/*!
+ * noncharacters <https://github.com/jonschlinkert/noncharacters>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+module.exports = [
+  '\uFFFF',
+  '\uFFFE',
+
+  '\uFDD1',
+  '\uFDD2',
+  '\uFDD3',
+  '\uFDD4',
+  '\uFDD5',
+  '\uFDD6',
+  '\uFDD7',
+  '\uFDD8',
+  '\uFDD9',
+  '\uFDDA',
+  '\uFDDB',
+  '\uFDDC',
+  '\uFDDD',
+  '\uFDDE',
+  '\uFDDF',
+  '\uFDE0',
+  '\uFDE1',
+  '\uFDE2',
+  '\uFDE3',
+  '\uFDE4',
+  '\uFDE5',
+  '\uFDE6',
+  '\uFDE7',
+  '\uFDE8',
+  '\uFDE9',
+  '\uFDEA',
+  '\uFDEB',
+  '\uFDEC',
+  '\uFDED',
+  '\uFDEE',
+  '\uFDEF'
+];
+
+},{}],42:[function(require,module,exports){
+/*!
+ * parse-code-context <https://github.com/jonschlinkert/parse-code-context>
+ * Regex originally sourced and modified from <https://github.com/visionmedia/dox>.
+ *
+ * Copyright (c) 2015 Jon Schlinkert.
+ * Licensed under the MIT license.
+ */
+
+'use strict';
+
+module.exports = function (str, i) {
+  var match = null;
+
+  // function statement
+  if (match = /^function[ \t]([\w$]+)[ \t]*([\w\W]+)?/.exec(str)) {
+    return {
+      begin: i,
+      type: 'function statement',
+      name: match[1],
+      params: (match[2]).split(/\W/g).filter(Boolean),
+      string: match[1] + '()',
+      original: str
+    };
+    // function expression
+  } else if (match = /^var[ \t]*([\w$]+)[ \t]*=[ \t]*function([\w\W]+)?/.exec(str)) {
+    return {
+      begin: i,
+      type: 'function expression',
+      name: match[1],
+      params: (match[2]).split(/\W/g).filter(Boolean),
+      string: match[1] + '()',
+      original: str
+    };
+    // module.exports expression
+  } else if (match = /^(module\.exports)[ \t]*=[ \t]*function[ \t]([\w$]+)[ \t]*([\w\W]+)?/.exec(str)) {
+    return {
+      begin: i,
+      type: 'function expression',
+      receiver: match[1],
+      name: match[2],
+      params: (match[3]).split(/\W/g).filter(Boolean),
+      string: match[1] + '()',
+      original: str
+    };
+    // module.exports method
+  } else if (match = /^(module\.exports)[ \t]*=[ \t]*function([\w\W]+)?/.exec(str)) {
+    return {
+      begin: i,
+      type: 'method',
+      receiver: match[1],
+      name: '',
+      params: (match[2]).split(/\W/g).filter(Boolean),
+      string: match[1] + '.' + match[2] + '()',
+      original: str
+    };
+    // prototype method
+  } else if (match = /^([\w$]+)\.prototype\.([\w$]+)[ \t]*=[ \t]*function([\w\W]+)?/.exec(str)) {
+    return {
+      begin: i,
+      type: 'prototype method',
+      class: match[1],
+      name: match[2],
+      params: (match[3]).split(/\W/g).filter(Boolean),
+      string: match[1] + '.prototype.' + match[2] + '()',
+      original: str
+    };
+    // prototype property
+  } else if (match = /^([\w$]+)\.prototype\.([\w$]+)[ \t]*=[ \t]*([^\n;]+)/.exec(str)) {
+    return {
+      begin: i,
+      type: 'prototype property',
+      class: match[1],
+      name: match[2],
+      value: match[3],
+      string: match[1] + '.prototype.' + match[2],
+      original: str
+    };
+    // method
+  } else if (match = /^([\w$.]+)\.([\w$]+)[ \t]*=[ \t]*function([\w\W]+)?/.exec(str)) {
+    return {
+      begin: i,
+      type: 'method',
+      receiver: match[1],
+      name: match[2],
+      params: (match[3]).split(/\W/g).filter(Boolean),
+      string: match[1] + '.' + match[2] + '()',
+      original: str
+    };
+    // property
+  } else if (match = /^([\w$]+)\.([\w$]+)[ \t]*=[ \t]*([^\n;]+)/.exec(str)) {
+    return {
+      begin: i,
+      type: 'property',
+      receiver: match[1],
+      name: match[2],
+      value: match[3],
+      string: match[1] + '.' + match[2],
+      original: str
+    };
+    // declaration
+  } else if (match = /^var[ \t]+([\w$]+)[ \t]*=[ \t]*([^\n;]+)/.exec(str)) {
+    return {
+      begin: i,
+      type: 'declaration',
+      name: match[1],
+      value: match[2],
+      string: match[1],
+      original: str
+    };
+  }
+  return null;
+};
+
+},{}],43:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -28103,7 +28754,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":34}],34:[function(require,module,exports){
+},{"_process":44}],44:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -28196,17 +28847,191 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],35:[function(require,module,exports){
-var exports = module.exports = Element;
+},{}],45:[function(require,module,exports){
+/*!
+ * quoted-string-regex <https://github.com/jonschlinkert/quoted-string-regex>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+module.exports = function() {
+  return /'([^'\\]*\\.)*[^']*'|"([^"\\]*\\.)*[^"]*"/g;
+};
+
+},{}],46:[function(require,module,exports){
+/*!
+ * strip-bom-string <https://github.com/jonschlinkert/strip-bom-string>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+'use strict';
+
+module.exports = function(str) {
+  if (typeof str === 'string' && str.charAt(0) === '\ufeff') {
+    return str.slice(1);
+  }
+  return str;
+};
+
+},{}],47:[function(require,module,exports){
+'use strict';
+
+var extract = require('extract-comments');
+
+/**
+ * Strip comments from the given `string`.
+ *
+ * @param {String} `string`
+ * @param {Object} `options` Pass `safe: true` to keep comments with `!`
+ * @return {String}
+ * @api public
+ */
+
+function strip(str, options) {
+  options = options || {};
+  if (options.line) {
+    return line(str, options);
+  }
+  if (options.block) {
+    return block(str, options);
+  }
+  if (options.first) {
+    return first(str, options);
+  }
+  str = block(str, options);
+  return line(str, options);
+}
+
+/**
+ * Strip block comments from the given `string`.
+ *
+ * @param {String} `string`
+ * @param {Object} `options` Pass `safe: true` to keep comments with `!`
+ * @return {String}
+ * @api public
+ */
+
+function block(str, options) {
+  return stripEach(str, extract.block(str, options), options);
+}
+
+/**
+ * Strip line comments from the given `string`.
+ *
+ * @param {String} `string`
+ * @param {Object} `options` Pass `safe: true` to keep comments with `!`
+ * @return {String}
+ * @api public
+ */
+
+function line(str, options) {
+  return stripEach(str, extract.line(str, options), options);
+}
+
+/**
+ * Strip the first comment from the given `string`.
+ *
+ * @param {String} `string`
+ * @param {Object} `options` Pass `safe: true` to keep comments with `!`
+ * @return {String}
+ * @api public
+ */
+
+function first(str, options) {
+  return stripEach(str, extract.first(str), options);
+}
+
+/**
+ * Private function for stripping comments.
+ *
+ * @param {String} `string`
+ * @param {Object} `options` Pass `safe: true` to keep comments with `!`
+ * @return {String}
+ */
+
+function stripEach(str, comments, options) {
+  comments.forEach(function(comment) {
+    str = discard(str, comment, options);
+  });
+  return str;
+}
+
+/**
+ * Remove a comment from the given string.
+ *
+ * @param {String} `string`
+ * @param {Object} `options` Pass `safe: true` to keep comments with `!`
+ * @return {String}
+ */
+
+function discard(str, comment, opts) {
+  var ch = comment.value.charAt(0);
+  if (opts && opts.safe === true && ch === '!') {
+    return str;
+  }
+  return str.split(comment.raw).join('');
+}
+
+/**
+ * Expose `strip`
+ */
+
+module.exports = strip;
+
+/**
+ * Expose methods
+ */
+
+module.exports.block = block;
+module.exports.first = first;
+module.exports.line = line;
+
+},{"extract-comments":4}],48:[function(require,module,exports){
+module.exports = Element;
+
+Element.prototype.staticCheck = staticCheck;
 
 function Element(opts) {
   var _this = this;
 
-  _this.location = opts.location;
+  for (var key in opts) {
+    _this[key] = opts[key];
+  }
 }
 
-},{}],36:[function(require,module,exports){
-var ExpressionAdd = require('./expressions/expression-add');
+function staticCheck() {
+  var _this = this;
+
+  _this.checked = true;
+}
+
+},{}],49:[function(require,module,exports){
+var exports = module.exports = {};
+
+exports.parseError = parseError;
+
+_parseError.prototype = new Error();
+
+function _parseError (msg, hash) {
+  this.message = msg;
+  this.hash = hash;
+}
+
+
+function parseError(str, hash) {
+  if (hash.recoverable) {
+    this.trace(str);
+  } else {
+    hash.parse = true;
+    throw new _parseError(str, hash);
+  }
+}
+},{}],50:[function(require,module,exports){
 var ExpressionComparison = require('./expressions/expression-comparison');
 var ExpressionLogical = require('./expressions/expression-logical');
 var ExpressionNegation = require('./expressions/expression-negation');
@@ -28214,6 +29039,7 @@ var ExpressionUminus = require('./expressions/expression-uminus');
 var ExpressionOperation = require('./expressions/expression-operation');
 var ExpressionFuncall = require('./expressions/expression-funcall');
 var ExpressionObject = require('./expressions/expression-object');
+var ExpressionVariable = require('./expressions/expression-variable');
 
 module.exports = new function() {
   var _this = this
@@ -28223,13 +29049,13 @@ module.exports = new function() {
 };
 
 
-function create(opts) {
+function create(type, opts) {
   var expr;
   var _this = this
 
-  opts.currentScope = _this.state.currentScope;
+  opts.scope = _this.state.currentScope;
 
-  switch (opts.type) {
+  switch (type) {
     case 'UMINUS':
       expr = new ExpressionUminus(opts);
       break;
@@ -28243,11 +29069,7 @@ function create(opts) {
       break;
 
     case 'ADDOP':
-      if (opts.operator === '+') {
-        expr = new ExpressionAdd(opts);
-      } else {
-        expr = new ExpressionOperation(opts);
-      }
+      expr = new ExpressionOperation(opts);
       break;
 
     case 'RELOP':
@@ -28267,8 +29089,11 @@ function create(opts) {
       break;
 
     case 'OBJECT':
-      console.log('aaa');
       expr = new ExpressionObject(opts);
+      break;
+
+    case 'VARIABLE':
+      expr = new ExpressionVariable(opts);
       break;
 
     default:
@@ -28284,162 +29109,164 @@ function init(state) {
 
   return _this;
 }
-},{"./expressions/expression-add":37,"./expressions/expression-comparison":38,"./expressions/expression-funcall":39,"./expressions/expression-logical":40,"./expressions/expression-negation":41,"./expressions/expression-object":42,"./expressions/expression-operation":43,"./expressions/expression-uminus":45}],37:[function(require,module,exports){
+},{"./expressions/expression-comparison":51,"./expressions/expression-funcall":52,"./expressions/expression-logical":53,"./expressions/expression-negation":54,"./expressions/expression-object":55,"./expressions/expression-operation":56,"./expressions/expression-uminus":58,"./expressions/expression-variable":59}],51:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionAdd;
+var parseError = require('../error').parseError;
 
-function ExpressionAdd(opts) {
-  var _this = this;
+module.exports = ExpressionComparison;
 
-  Expression.call(_this, opts);
-
-  _this.left = opts.left;
-  _this.right = opts.right;
-
-  if (_this.left.type !== _this.right.type) {
-    console.error(
-      'Can\'t add two vars with different type',
-      _this.left.type,
-      _this.right.type
-    )
-  }
-
-  _this.type = _this.left.type;
-}
-
-ExpressionAdd.prototype = Object.create(Expression.prototype);
-ExpressionAdd.prototype.constructor = ExpressionAdd;
-
-},{"./expression-prototype.js":44}],38:[function(require,module,exports){
-var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionComparison;
+ExpressionComparison.prototype = Object.create(Expression.prototype);
+ExpressionComparison.prototype.constructor = ExpressionComparison;
+ExpressionComparison.prototype.staticCheck = staticCheck;
 
 function ExpressionComparison(opts) {
   var _this = this;
 
   Expression.call(_this, opts);
+}
 
-  _this.left = opts.left;
-  _this.right = opts.right;
-  _this.operator = opts.operator;
+function staticCheck() {
+  var _this = this;
+
+  _this.left.staticCheck();
+  _this.right.staticCheck();
 
   if (_this.left.type !== _this.right.type) {
-    console.error(
-      'Can\'t compare two vars with diferent type',
-      _this.left.type,
-      _this.right.type
-    )
-  }
-}
-
-ExpressionComparison.prototype = Object.create(Expression.prototype);
-ExpressionComparison.prototype.constructor = ExpressionComparison;
-
-},{"./expression-prototype.js":44}],39:[function(require,module,exports){
-var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionFuncall;
-
-function ExpressionFuncall(opts) {
-  var _this = this;
-
-  Expression.call(_this, opts);
-
-  _this.ident = opts.ident;
-  _this.args = opts.args;
-
-  // check if args are defined
-}
-
-ExpressionFuncall.prototype = Object.create(Expression.prototype);
-ExpressionFuncall.prototype.constructor = ExpressionFuncall;
-
-},{"./expression-prototype.js":44}],40:[function(require,module,exports){
-var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionLogical;
-
-function ExpressionLogical(opts) {
-  var _this = this;
-
-  Expression.call(_this, opts);
-
-  _this.left = opts.left;
-  _this.right = opts.right;
-  _this.operator = opts.operator;
-}
-
-ExpressionLogical.prototype = Object.create(Expression.prototype);
-ExpressionLogical.prototype.constructor = ExpressionLogical;
-
-},{"./expression-prototype.js":44}],41:[function(require,module,exports){
-var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionNegation;
-
-function ExpressionNegation(opts) {
-  var _this = this;
-
-  Expression.call(_this, opts);
-
-  _this.value = opts.value;
-
-  if (_this.value.type !== 'boolean') {
-    console.error(
-      'Can\'t negate var that is not a boolean',
-      _this.value
-    )
-  }
-}
-
-ExpressionNegation.prototype = Object.create(Expression.prototype);
-ExpressionNegation.prototype.constructor = ExpressionNegation;
-
-},{"./expression-prototype.js":44}],42:[function(require,module,exports){
-var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionObject;
-
-function ExpressionObject(opts) {
-  var _this = this;
-
-  Expression.call(_this, opts);
-
-  _this.value = opts.value;
-  _this.type = opts.type;
-}
-
-ExpressionObject.prototype = Object.create(Expression.prototype);
-ExpressionObject.prototype.constructor = ExpressionObject;
-
-},{"./expression-prototype.js":44}],43:[function(require,module,exports){
-var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionOperation;
-
-function ExpressionOperation(opts) {
-  var _this = this;
-
-  Expression.call(_this, opts);
-
-  _this.left = opts.left;
-  _this.right = opts.right;
-  _this.operator = opts.operator;
-
-  if (_this.left.type !== _this.right.type) {
-    console.error(
-      'Can\'t process two vars with different type',
-      _this.left.type,
-      _this.right.type
-    )
+    parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
   }
 
   _this.type = _this.left.type;
 }
 
+},{"../error":49,"./expression-prototype.js":57}],52:[function(require,module,exports){
+var Expression = require('./expression-prototype.js');
+var parseError = require('../error').parseError;
+
+module.exports = ExpressionFuncall;
+
+ExpressionFuncall.prototype = Object.create(Expression.prototype);
+ExpressionFuncall.prototype.constructor = ExpressionFuncall;
+ExpressionFuncall.prototype.staticCheck = staticCheck;
+
+function ExpressionFuncall(opts) {
+  var _this = this;
+
+  Expression.call(_this, opts);
+}
+
+function staticCheck() {
+  var _this = this;
+
+  if(_this.scope.getFunction(_this.ident) === false) {
+    parseError('Undeclared variable in expression: ' + _this.ident, _this);
+  }
+
+  _this.type = _this.scope.getFunction(_this.ident).type;
+}
+
+},{"../error":49,"./expression-prototype.js":57}],53:[function(require,module,exports){
+var Expression = require('./expression-prototype.js');
+var parseError = require('../error').parseError;
+
+module.exports = ExpressionLogical;
+
+ExpressionLogical.prototype = Object.create(Expression.prototype);
+ExpressionLogical.prototype.constructor = ExpressionLogical;
+ExpressionLogical.prototype.staticCheck = staticCheck;
+
+function ExpressionLogical(opts) {
+  var _this = this;
+
+  Expression.call(_this, opts);
+}
+
+function staticCheck() {
+  var _this = this;
+
+  _this.left.staticCheck();
+  _this.right.staticCheck();
+
+  if (_this.left.type !== _this.right.type) {
+    parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
+  }
+
+  _this.type = _this.left.type;
+}
+
+},{"../error":49,"./expression-prototype.js":57}],54:[function(require,module,exports){
+var Expression = require('./expression-prototype.js');
+
+module.exports = ExpressionNegation;
+
+ExpressionNegation.prototype = Object.create(Expression.prototype);
+ExpressionNegation.prototype.constructor = ExpressionNegation;
+ExpressionNegation.prototype.staticCheck = staticCheck;
+
+function ExpressionNegation(opts) {
+  var _this = this;
+
+  Expression.call(_this, opts);
+}
+
+function staticCheck() {
+  var _this = this;
+
+  _this.expr.staticCheck();
+
+  _this.type = _this.expr.type;
+}
+
+},{"./expression-prototype.js":57}],55:[function(require,module,exports){
+var Expression = require('./expression-prototype.js');
+
+module.exports = ExpressionObject;
+
+ExpressionObject.prototype = Object.create(Expression.prototype);
+ExpressionObject.prototype.constructor = ExpressionObject;
+
+function ExpressionObject(opts) {
+  var _this = this;
+
+  Expression.call(_this, opts);
+}
+
+},{"./expression-prototype.js":57}],56:[function(require,module,exports){
+var Expression = require('./expression-prototype.js');
+var parseError = require('../error').parseError;
+
+module.exports = ExpressionOperation;
+
 ExpressionOperation.prototype = Object.create(Expression.prototype);
 ExpressionOperation.prototype.constructor = ExpressionOperation;
+ExpressionOperation.prototype.staticCheck = staticCheck;
 
-},{"./expression-prototype.js":44}],44:[function(require,module,exports){
+function ExpressionOperation(opts) {
+  var _this = this;
+
+  Expression.call(_this, opts);
+}
+
+function staticCheck() {
+  var _this = this;
+
+  _this.left.staticCheck();
+  _this.right.staticCheck();
+
+  if (_this.left.type !== _this.right.type) {
+    parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
+  }
+
+  _this.type = _this.left.type;
+}
+
+},{"../error":49,"./expression-prototype.js":57}],57:[function(require,module,exports){
 var Element = require('../element.js');
 var exports = module.exports = Expression;
 
 exports.Expression = Expression;
+
+Expression.prototype = Object.create(Element.prototype);
+Expression.prototype.constructor = Element;
 
 function Expression(opts) {
   var _this = this;
@@ -28447,63 +29274,101 @@ function Expression(opts) {
   Element.call(_this, opts);
 }
 
-Expression.prototype = Object.create(Element.prototype);
-Expression.prototype.constructor = Element;
-
-},{"../element.js":35}],45:[function(require,module,exports){
+},{"../element.js":48}],58:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
-var exports = module.exports = ExpressionUminus;
+
+module.exports = ExpressionUminus;
+
+ExpressionUminus.prototype = Object.create(Expression.prototype);
+ExpressionUminus.prototype.constructor = ExpressionUminus;
+ExpressionUminus.prototype.staticCheck = staticCheck;
 
 function ExpressionUminus(opts) {
   var _this = this;
 
   Expression.call(_this, opts);
-
-  _this.value = opts.value;
-
-  if (_this.value.type !== 'boolean') {
-    console.error(
-      'Can\'t uminus var that is no an integer',
-      _this.value
-    )
-  }
 }
 
-ExpressionUminus.prototype = Object.create(Expression.prototype);
-ExpressionUminus.prototype.constructor = ExpressionUminus;
+function staticCheck() {
+  var _this = this;
 
-},{"./expression-prototype.js":44}],46:[function(require,module,exports){
+  _this.expr.staticCheck();
+
+  _this.type = _this.expr.type;
+}
+
+},{"./expression-prototype.js":57}],59:[function(require,module,exports){
+var Expression = require('./expression-prototype');
+var parseError = require('../error').parseError;
+
+module.exports = ExpressionVariable;
+
+ExpressionVariable.prototype = Object.create(Expression.prototype);
+ExpressionVariable.prototype.constructor = ExpressionVariable;
+ExpressionVariable.prototype.staticCheck = staticCheck;
+
+function ExpressionVariable(opts) {
+  var _this = this;
+
+  Expression.call(_this, opts);
+}
+
+function staticCheck() {
+  var _this = this;
+
+  if(_this.scope.getVariable(_this.ident) === false) {
+    parseError('Undeclared variable in expression: ' + _this.ident, _this);
+  }
+
+  _this.type = _this.scope.getVariable(_this.ident).type;
+}
+
+},{"../error":49,"./expression-prototype":57}],60:[function(require,module,exports){
 var Element = require('./element.js');
 var exports = module.exports = {};
 
 exports.create = create;
 exports.constructor = Function;
 
+Function.prototype = Object.create(Element.prototype);
+Function.prototype.constructor = Function;
+Function.prototype.staticCheck = staticCheck;
+
 function Function(opts) {
   var _this = this;
 
-  _this.ident = opts.ident;
-  _this.type = opts.type;
-  _this.args = opts.args;
-  _this.scope = opts.scope;
-
   Element.call(_this, opts);
-}
 
-Function.prototype = Object.create(Element.prototype);
-Function.prototype.constructor = Function;
+  _this.parent.addFunction(_this);
+}
 
 function create(opts) {
   return new Function(opts);
 }
 
-},{"./element.js":35}],47:[function(require,module,exports){
+function staticCheck() {
+  var _this = this;
+
+  _this.checked = true;
+
+  _this.scope.staticCheck();
+}
+
+},{"./element.js":48}],61:[function(require,module,exports){
 var _ = require('lodash');
 var Variable = require('./variable');
 
 var exports = module.exports = {};
 
 exports.create = create;
+
+Scope.prototype.addFunction = addFunction;
+Scope.prototype.addVariable = addVariable;
+Scope.prototype.addVariables = addVariables;
+Scope.prototype.addElement = addElement;
+Scope.prototype.getVariable = getVariable;
+Scope.prototype.getFunction = getFunction;
+Scope.prototype.staticCheck = staticCheck;
 
 function Scope(opts) {
   var _this = this;
@@ -28522,11 +29387,6 @@ function Scope(opts) {
 function create(opts) {
   return new Scope(opts);
 }
-
-Scope.prototype.addFunction = addFunction;
-Scope.prototype.addVariable = addVariable;
-Scope.prototype.addVariables = addVariables;
-Scope.prototype.addElement = addElement;
 
 function addFunction(fun) {
   var _this = this;
@@ -28560,16 +29420,54 @@ function addVariables(type, idents) {
 function addElement(element) {
   var _this = this;
 
-  _this.elements.push(element);
+  if(_.isArray(element)) {
+    _this.elements = _this.elements.concat(_.flattenDeep(element));
+  } else {
+    _this.elements.push(element);
+  }
 }
-},{"./variable":58,"lodash":32}],48:[function(require,module,exports){
-/**
- * Holds current state for parser
- */
 
+function getVariable(ident) {
+  var _this = this;
+  if (_this.vars[ident] !== undefined) {
+    return _this.vars[ident];
+  } else if (_this.parent === undefined) {
+    return false;
+  } else {
+    return _this.parent.getVariable(ident);
+  }
+}
+
+function getFunction(ident) {
+  var _this = this;
+  if (_this.functions[ident] !== undefined) {
+    return _this.functions[ident];
+  } else if (_this.parent === undefined) {
+    return false;
+  } else {
+    return _this.parent.getFunction(ident);
+  }
+}
+
+function staticCheck() {
+  var _this = this;
+
+  _this.checked = true;
+
+  _.forEach(_this.elements, function (element) {
+    element.staticCheck();
+  });
+}
+
+},{"./variable":72,"lodash":40}],62:[function(require,module,exports){
 var exports = module.exports = {};
 
 exports.create = create;
+
+State.prototype.pushFunction = pushFunction;
+State.prototype.popFunction = popFunction;
+State.prototype.pushScope = pushScope;
+State.prototype.popScope = popScope;
 
 function State(opts) {
   var _this = this;
@@ -28580,12 +29478,6 @@ function State(opts) {
   _this.scopes = [];
   _this.mainScope = opts.mainScope;
 }
-
-State.prototype.pushFunction = pushFunction;
-State.prototype.popFunction = popFunction;
-State.prototype.pushScope = pushScope;
-State.prototype.popScope = popScope;
-
 
 function create(opts) {
   return new State(opts);
@@ -28618,7 +29510,7 @@ function popScope() {
   _this.scopes.splice(-1, 1);
   _this.currentScope = _this.scopes.length > 0 ? _this.scopes[_this.scopes.length -1] : undefined;
 }
-},{}],49:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 var StatementIf = require('./statements/statement-if');
 var StatementIncr = require('./statements/statement-incr');
 var StatementDecr = require('./statements/statement-decr');
@@ -28634,13 +29526,15 @@ module.exports = new function() {
   _this.init = init.bind(_this);
 };
 
-function create(opts) {
+function create(type, opts) {
   var stmt;
   var _this = this
 
-  opts.currentScope = _this.state.currentScope;
+  opts = opts || {};
 
-  switch (opts.type) {
+  opts.scope = _this.state.currentScope;
+
+  switch (type) {
     case 'VARIABLE_ASSIGNMENT':
       stmt = new StatementAssignment(opts);
       break;
@@ -28680,77 +29574,111 @@ function init(state) {
 
   return _this;
 }
-},{"./statements/statement-assignment":50,"./statements/statement-declaration":51,"./statements/statement-decr":52,"./statements/statement-if":53,"./statements/statement-incr":54,"./statements/statement-return":56,"./statements/statement-while":57}],50:[function(require,module,exports){
+},{"./statements/statement-assignment":64,"./statements/statement-declaration":65,"./statements/statement-decr":66,"./statements/statement-if":67,"./statements/statement-incr":68,"./statements/statement-return":70,"./statements/statement-while":71}],64:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
-var exports = module.exports = StatementAssignment;
+var parseError = require('../error').parseError;
+
+module.exports = StatementAssignment;
+
+StatementAssignment.prototype = Object.create(Statement.prototype);
+StatementAssignment.prototype.constructor = StatementAssignment;
+StatementAssignment.prototype.staticCheck = staticCheck;
 
 function StatementAssignment(opts) {
   var _this = this;
 
   Statement.call(_this, opts);
-
-  _this.ident = opts.ident;
-  _this.value = opts.value;
-
-  // TODO check if exists
 }
 
-StatementAssignment.prototype = Object.create(Statement.prototype);
-StatementAssignment.prototype.constructor = StatementAssignment;
+function staticCheck() {
+  var _this = this;
 
-},{"./statement-prototype.js":55}],51:[function(require,module,exports){
+  _this.expr.staticCheck();
+
+  if(_this.scope.getVariable(_this.ident) === false) {
+    parseError('Undeclared variable ' + _this.ident, _this);
+  }
+
+  _this.type = _this.scope.getVariable(_this.value).type;
+}
+
+},{"../error":49,"./statement-prototype.js":69}],65:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
-var exports = module.exports = StatementDeclaration;
+
+module.exports = StatementDeclaration;
+
+StatementDeclaration.prototype = Object.create(Statement.prototype);
+StatementDeclaration.prototype.constructor = StatementDeclaration;
+StatementDeclaration.prototype.staticCheck = staticCheck;
 
 function StatementDeclaration(opts) {
   var _this = this;
 
   Statement.call(_this, opts);
-
-  _this.ident = opts.ident;
-  _this.type = opts.varType;
-
-  // TODO add to scope
 }
 
-StatementDeclaration.prototype = Object.create(Statement.prototype);
-StatementDeclaration.prototype.constructor = StatementDeclaration;
+function staticCheck() {
+  var _this = this;
 
-},{"./statement-prototype.js":55}],52:[function(require,module,exports){
+  _this.scope.addVariable(_this);
+}
+},{"./statement-prototype.js":69}],66:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
-var exports = module.exports = StatementDecr;
+var parseError = require('../error').parseError;
+
+module.exports = StatementDecr;
+
+StatementDecr.prototype = Object.create(Statement.prototype);
+StatementDecr.prototype.constructor = StatementDecr;
+StatementDecr.prototype.staticCheck = staticCheck;
 
 function StatementDecr(opts) {
   var _this = this;
 
   Statement.call(_this, opts);
-
-  _this.ident = opts.ident;
 }
 
-StatementDecr.prototype = Object.create(Statement.prototype);
-StatementDecr.prototype.constructor = StatementDecr;
+function staticCheck() {
+  var _this = this;
 
-},{"./statement-prototype.js":55}],53:[function(require,module,exports){
+  if(_this.scope.getVariable(_this.ident) === false) {
+    parseError('Undeclared variable in expression: ' + _this.ident, _this);
+  }
+
+  _this.type = _this.scope.getVariable(_this.ident).type;
+}
+
+},{"../error":49,"./statement-prototype.js":69}],67:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
-var exports = module.exports = StatementIf;
+
+module.exports = StatementIf;
+
+StatementIf.prototype = Object.create(Statement.prototype);
+StatementIf.prototype.constructor = StatementIf;
+StatementIf.prototype.staticCheck = staticCheck;
 
 function StatementIf(opts) {
   var _this = this;
 
   Statement.call(_this, opts);
-
-  _this.expr = opts.expr;
-  _this.right = opts.right;
-  _this.wrong = opts.wrong;
 }
 
-StatementIf.prototype = Object.create(Statement.prototype);
-StatementIf.prototype.constructor = StatementIf;
+function staticCheck() {
+  var _this = this;
 
-},{"./statement-prototype.js":55}],54:[function(require,module,exports){
+  _this.expr.staticCheck();
+  _this.right.staticCheck();
+  _this.wrong.staticCheck();
+}
+},{"./statement-prototype.js":69}],68:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
-var exports = module.exports = StatementIncr;
+var parseError = require('../error').parseError;
+
+module.exports = StatementIncr;
+
+StatementIncr.prototype = Object.create(Statement.prototype);
+StatementIncr.prototype.constructor = StatementIncr;
+StatementIncr.prototype.staticCheck = staticCheck;
 
 function StatementIncr(opts) {
   var _this = this;
@@ -28760,14 +29688,23 @@ function StatementIncr(opts) {
   _this.ident = opts.ident;
 }
 
-StatementIncr.prototype = Object.create(Statement.prototype);
-StatementIncr.prototype.constructor = StatementIncr;
+function staticCheck() {
+  var _this = this;
 
-},{"./statement-prototype.js":55}],55:[function(require,module,exports){
+  if(_this.scope.getVariable(_this.ident) === false) {
+    parseError('Undeclared variable in expression: ' + _this.ident, _this);
+  }
+
+  _this.type = _this.scope.getVariable(_this.ident).type;
+}
+
+},{"../error":49,"./statement-prototype.js":69}],69:[function(require,module,exports){
 var Element = require('../element.js');
-var exports = module.exports = Statement;
 
-exports.Statement = Statement;
+module.exports = Statement;
+
+Statement.prototype = Object.create(Element.prototype);
+Statement.prototype.constructor = Element;
 
 function Statement(opts) {
   var _this = this;
@@ -28775,45 +29712,59 @@ function Statement(opts) {
   Element.call(_this, opts);
 }
 
-Statement.prototype = Object.create(Element.prototype);
-Statement.prototype.constructor = Element;
-
-},{"../element.js":35}],56:[function(require,module,exports){
+},{"../element.js":48}],70:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
-var exports = module.exports = StatementReturn;
+
+module.exports = StatementReturn;
+
+StatementReturn.prototype = Object.create(Statement.prototype);
+StatementReturn.prototype.constructor = StatementReturn;
+StatementReturn.prototype.staticCheck = staticCheck;
 
 function StatementReturn(opts) {
   var _this = this;
 
   Statement.call(_this, opts);
-
-  _this.value = opts.value;
 }
 
-StatementReturn.prototype = Object.create(Statement.prototype);
-StatementReturn.prototype.constructor = StatementReturn;
+function staticCheck() {
+  var _this = this;
 
-},{"./statement-prototype.js":55}],57:[function(require,module,exports){
+  if (_this.expr !== undefined) {
+    _this.expr.staticCheck();
+  }
+}
+
+},{"./statement-prototype.js":69}],71:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
-var exports = module.exports = StatementWhile;
+
+module.exports = StatementWhile;
+
+StatementWhile.prototype = Object.create(Statement.prototype);
+StatementWhile.prototype.constructor = StatementWhile;
+StatementWhile.prototype.staticCheck = staticCheck;
 
 function StatementWhile(opts) {
   var _this = this;
 
   Statement.call(_this, opts);
-
-  _this.expr = opts.expr;
-  _this.stmt = opts.stmt;
 }
 
-StatementWhile.prototype = Object.create(Statement.prototype);
-StatementWhile.prototype.constructor = StatementWhile;
+function staticCheck() {
+  var _this = this;
 
-},{"./statement-prototype.js":55}],58:[function(require,module,exports){
+  _this.expr.staticCheck();
+  _this.stmt.staticCheck();
+}
+
+},{"./statement-prototype.js":69}],72:[function(require,module,exports){
 var Element = require('./element.js');
 var exports = module.exports = {};
 
 exports.create = create;
+
+Variable.prototype = Object.create(Element.prototype);
+Variable.prototype.constructor = Element;
 
 function Variable(opts) {
   var _this = this;
@@ -28824,23 +29775,22 @@ function Variable(opts) {
   _this.ident = opts.ident;
 }
 
-Variable.prototype = Object.create(Element.prototype);
-Variable.prototype.constructor = Element;
-
 function create(opts) {
   return new Variable(opts);
 }
 
-},{"./element.js":35}],"latte":[function(require,module,exports){
+},{"./element.js":48}],"latte":[function(require,module,exports){
 
 var Parser = require('jison').Parser;
+var strip = require('strip-comments');
+
 // var grammar = Hjson.parse(fs.readFileSync(__dirname + '/syntax.json', 'utf8'));
-var grammar = "\n/* description: Latte language parser */\n\n%lex\n\n%%\n\\s+                       /* skip whitespace */\ntrue                      return 'TRUE'\nfalse                     return 'FALSE'\nif                        return 'IF'\nelse                      return 'ELSE'\nwhile                     return 'WHILE'\nint                       return 'INTEGER'\nstring                    return 'STRING'\nboolean                   return 'BOOLEAN'\nvoid                      return 'VOID'\nreturn                    return 'RETURN'\n[0-9]+                    return 'NUMBER'\n[a-zA-Z_][0-9a-zA-Z_]*    return 'LITERAL'\nL?\\\"(\\\\.|[^\\\\\"])*\\\"       return 'STRING_LITERAL'\n\"++\"                      return 'INCR'\n\"--\"                      return 'DECR'\n\"*\"                       return '*'\n\"/\"                       return '/'\n\"-\"                       return '-'\n\"+\"                       return '+'\n\"=\"                       return '='\n\"<\"                       return '<'\n\"<=\"                      return '<='\n\">\"                       return '>'\n\">=\"                      return '>='\n\"==\"                      return '=='\n\"!=\"                      return '!='\n\";\"                       return ';'\n\",\"                       return ','\n<<EOF>>                   return 'EOF'\n\"!\"                       return '!'\n\"%\"                       return '%'\n\"&&\"                      return '&&'\n\"||\"                      return '||'\n\"(\"                       return '('\n\")\"                       return ')'\n\"]\"                       return ']'\n\"[\"                       return '['\n\"{\"                       return '{'\n\"}\"                       return '}'\n\n/lex\n\n%left '&&' '||'\n%left '<' '<=' '>' '>=' '==' '!=' RELOP\n%left '-' '+' ADDOP\n%left '*' '/' '%' MULOP\n%nonassoc INCR DECR\n%nonassoc UMINUS NEGATION\n%nonassoc IF_WITHOUT_ELSE\n%nonassoc ELSE\n\n%%\n\nProgram\n  : TopDefs EOF\n    {return yy.state.mainScope;}\n  ;\n\nTopDefs\n  : TopDef\n    {}\n  | TopDefs TopDef\n    {}\n  ;\n\nTopDef\n  : FunctionSignature Block\n    {\n      yy.state.currentFunction.location = _$;\n      yy.state.popFunction(fun);\n      yy.state.popScope(scope);\n    }\n  ;\n\nFunctionSignature\n  : Type Ident '(' Args ')'\n    {\n      var scope = yy.Scope.create({\n        vars: $Args,\n        parent: yy.state.currentScope\n      });\n      var fun = yy.Function.create({\n        type: $Type,\n        ident: $Ident,\n        args: $Args,\n        scope: scope\n      });\n      yy.state.currentScope.addFunction(fun);\n      yy.state.pushFunction(fun);\n      yy.state.pushScope(scope);\n    }\n  ;\n\nArgs\n  :\n    {$$ = []}\n  | Arg\n    {$$ = [$Arg]}\n  | Args ',' Arg\n    {$Args.push($Arg); $$ = $Args;}\n  ;\n\nArg\n  : Type Ident\n    {$$ = yy.Variable.create({\n      type: $Type,\n      ident: $Ident\n    });}\n  ;\n\nBlock\n  : '{' Stmts '}'\n    {}\n  ;\n\nBlockInit\n  :\n    {\n      var scope = yy.Scope.create({\n        parent: yy.state.currentScope\n      });\n\n      yy.state.pushScope(scope);\n\n      $$ = scope;\n    }\n  ;\n\nStmts\n  : Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  | Stmts Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  ;\n\nStmt\n  : BlockInit Block\n    {\n      $$ = $BlockInit;\n      yy.state.popScope(scope);\n    }\n  | Type Items ';'\n    {\n      $$ = $Items;\n    }\n  | Ident '=' Expr ';'\n    {\n      $$ = yy.Statement.create({\n        type: 'VARIABLE_ASSIGNMENT',\n        ident: $Ident,\n        value: $Expr\n      });\n    }\n  | Ident INCR ';'\n    {\n      $$ = yy.Statement.create({\n        type: 'VARIABLE_INCR',\n        ident: $Ident\n      });\n    }\n  | Ident DECR ';'\n    {\n      $$ = yy.Statement.create({\n        type: 'VARIABLE_DECR',\n        ident: $Ident\n      });\n    }\n  | RETURN Expr ';'\n    {\n      {\n        $$ = yy.Statement.create({\n          type: 'RETURN',\n          value: $Expr\n        });\n      }\n    }\n  | RETURN ';'\n    {\n      $$ = yy.Statement.create({\n        type: 'RETURN'\n      });\n    }\n  | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE\n    {\n      $$ = yy.Statement.create({\n        type: 'IF',\n        expr: $Expr,\n        right: $Stmt\n      });\n    }\n  | IF '(' Expr ')' Stmt ELSE Stmt\n    {\n      $$ = yy.Statement.create({\n        type: 'IF',\n        expr: $Expr,\n        right: $Stmt1,\n        wrong: $Stmt2\n      });\n    }\n  | WHILE '(' Expr ')' Stmt\n    {\n      $$ = yy.Statement.create({\n        type: 'WHILE',\n        expr: $Expr,\n        stmt: $Stmt\n      });\n    }\n  | Expr ';'\n    { $$ = $Expr; }\n  | ';'\n    {}\n  ;\n\nItems\n  : Item\n    {$$ = [$Item]}\n  | Items ',' Item\n    {\n      $Items.push($Item);\n      $$ = $Items;\n    }\n  ;\n\nItem\n  : Ident\n    {\n      $$ = yy.Statement.create({\n        type: 'VARIABLE_DECLARATION',\n        varType: yy.state.declarationType,\n        ident: $Ident\n      })\n    }\n  | Ident '=' Expr\n    {\n      var decl = yy.Statement.create({\n        type: 'VARIABLE_DECLARATION',\n        varType: yy.state.declarationType,\n        ident: $Ident\n      });\n      var ass = yy.Statement.create({\n        type: 'VARIABLE_ASSIGNMENT',\n        ident: $Ident,\n        value: $Expr\n      });\n      $$ = [decl, ass];\n    }\n  ;\n\nType\n  : INTEGER\n    {\n      yy.state.declarationType = $1;\n    }\n  | STRING\n    {\n      yy.state.declarationType = $1;\n    }\n  | BOOLEAN\n    {\n      yy.state.declarationType = $1;\n    }\n  | VOID\n    {\n      yy.state.declarationType = $1;\n    }\n  ;\n\nIdent\n  : LITERAL\n    { $$ = String(yytext); }\n  ;\n\nExprs\n  : Expr\n    { $$ = [$Expr]; }\n  | Exprs ',' Expr\n    {\n      $Exprs.push($Expr);\n      $$ = $Exprs;\n    }\n  ;\n\nExpr\n  : Ident\n    { $$ = $Ident; }\n  | Number\n    { $$ = $Number; }\n  | String\n    { $$ = $String; }\n  | Logical\n    { $$ = $Logical }\n  | Ident '(' Exprs ')'\n    {\n      $$ = yy.Expression.create({\n        type: 'FUNCALL',\n        args: $Exprs,\n        ident: $Ident\n      });\n    }\n  | '-' Expr %prec UMINUS\n    {\n      $$ = yy.Expression.create({\n        type: 'UMINUS',\n        value: $Expr\n      });\n    }\n  | '!' Expr %prec NEGATION\n    {\n      $$ = yy.Expression.create({\n        type: 'NEGATION',\n        value: $Expr\n      });\n    }\n  | Expr MulOp Expr %prec MULOP\n    {\n      $$ = yy.Expression.create({\n        type: 'MULOP',\n        operator: $MulOp,\n        left: $Expr1,\n        right: $Expr2\n      });\n    }\n  | Expr AddOp Expr %prec ADDOP\n    {\n      $$ = yy.Expression.create({\n        type: 'ADDOP',\n        operator: $AddOp,\n        left: $Expr1,\n        right: $Expr2\n      });\n    }\n  | Expr RelOp Expr %prec RELOP\n    {\n      $$ = yy.Expression.create({\n        type: 'RELOP',\n        operator: $RelOp,\n        left: $Expr1,\n        right: $Expr2\n      });\n    }\n  | Expr '&&' Expr\n    {\n      $$ = yy.Expression.create({\n        type: 'LOGAND',\n        operator: '&&',\n        left: $Expr1,\n        right: $Expr2\n      });\n    }\n  | Expr '||' Expr\n    {\n      $$ = yy.Expression.create({\n        type: 'LOGOR',\n        operator: '||',\n        left: $Expr1,\n        right: $Expr2\n      });\n    }\n  | '(' Expr ')'\n    {$$ = $2}\n  ;\n\nNumber\n  : NUMBER\n    {\n      console.log('number');\n      $$ = yy.Expression.create({\n        type: 'OBJECT',\n        varType: 'int',\n        value: Number(yytext)\n      });\n    }\n  ;\n\nString\n  : STRING_LITERAL\n    {\n      console.log('str');\n      $$ = yy.Expression.create({\n        type: 'OBJECT',\n        varType: 'string',\n        value: String(yytext)\n      });\n    }\n  ;\n\nLogical\n  : TRUE\n    {\n      $$ = yy.Expression.create({\n        type: 'OBJECT',\n        varType: 'boolean',\n        value: JSON.parse(yytext)\n      });\n    }\n  | FALSE\n    {\n      $$ = yy.Expression.create({\n        type: 'OBJECT',\n        varType: 'boolean',\n        value: JSON.parse(yytext)\n      });\n    }\n  ;\n\nAddOp\n  : '+'\n    {}\n  | '-'\n    {}\n  ;\n\nMulOp\n  : '*'\n    {}\n  | '/'\n    {}\n  | '%'\n    {}\n  ;\n\nRelOp\n  : '<'\n    {}\n  | '<='\n    {}\n  | '>'\n    {}\n  | '>='\n    {}\n  | '=='\n    {}\n  | '!='\n    {}\n  ;\n";
+var grammar = "\n/* description: Latte language parser */\n\n%lex\n\n%%\n\\s+                       /* skip whitespace */\ntrue                      return 'TRUE'\nfalse                     return 'FALSE'\nif                        return 'IF'\nelse                      return 'ELSE'\nwhile                     return 'WHILE'\nint                       return 'INTEGER'\nstring                    return 'STRING'\nboolean                   return 'BOOLEAN'\nvoid                      return 'VOID'\nreturn                    return 'RETURN'\n[0-9]+                    return 'NUMBER'\n[a-zA-Z_][0-9a-zA-Z_]*    return 'LITERAL'\nL?\\\"(\\\\.|[^\\\\\"])*\\\"       return 'STRING_LITERAL'\n\"++\"                      return 'INCR'\n\"--\"                      return 'DECR'\n\"*\"                       return '*'\n\"/\"                       return '/'\n\"-\"                       return '-'\n\"+\"                       return '+'\n\"=\"                       return '='\n\"<\"                       return '<'\n\"<=\"                      return '<='\n\">\"                       return '>'\n\">=\"                      return '>='\n\"==\"                      return '=='\n\"!=\"                      return '!='\n\";\"                       return ';'\n\",\"                       return ','\n<<EOF>>                   return 'EOF'\n\"!\"                       return '!'\n\"%\"                       return '%'\n\"&&\"                      return '&&'\n\"||\"                      return '||'\n\"(\"                       return '('\n\")\"                       return ')'\n\"]\"                       return ']'\n\"[\"                       return '['\n\"{\"                       return '{'\n\"}\"                       return '}'\n\n/lex\n\n%left '&&' '||'\n%left '<' '<=' '>' '>=' '==' '!=' RELOP\n%left '-' '+' ADDOP\n%left '*' '/' '%' MULOP\n%nonassoc INCR DECR\n%nonassoc UMINUS NEGATION\n%nonassoc IF_WITHOUT_ELSE\n%nonassoc ELSE\n\n%%\n\nProgram\n  : TopDefs EOF\n    {return yy.state.mainScope;}\n  ;\n\nTopDefs\n  : TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  | TopDefs TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  ;\n\nTopDef\n  : FunctionSignature Block\n    {\n      yy.state.currentFunction.location = _$[_$.length-1];\n      yy.state.popFunction();\n      yy.state.popScope(scope);\n\n      $$ = $FunctionSignature;\n    }\n  ;\n\nFunctionSignature\n  : Type Ident '(' Args ')'\n    {\n      var scope = yy.Scope.create({\n        vars: $Args,\n        parent: yy.state.currentScope\n      });\n      var fun = yy.Function.create({\n        type: $Type,\n        ident: $Ident,\n        args: $Args,\n        scope: scope,\n        parent: yy.state.currentScope\n      });\n      yy.state.pushFunction(fun);\n      yy.state.pushScope(scope);\n\n      $$ = fun;\n    }\n  ;\n\nArgs\n  :\n    {$$ = []}\n  | Arg\n    {$$ = [$Arg]}\n  | Args ',' Arg\n    {$Args.push($Arg); $$ = $Args;}\n  ;\n\nArg\n  : Type Ident\n    {$$ = yy.Variable.create({\n      type: $Type,\n      ident: $Ident,\n      loc: _$[_$.length-1]\n    });}\n  ;\n\nBlock\n  : '{' Stmts '}'\n    {}\n  ;\n\nBlockInit\n  :\n    {\n      var scope = yy.Scope.create({\n        parent: yy.state.currentScope\n      });\n\n      yy.state.pushScope(scope);\n\n      $$ = scope;\n    }\n  ;\n\nStmts\n  : Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  | Stmts Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  ;\n\nStmt\n  : BlockInit Block\n    {\n      $$ = $BlockInit;\n      yy.state.currentScope.location = _$[_$.length-1];\n      yy.state.popScope(scope);\n    }\n  | Type Items ';'\n    {\n      $$ = $Items;\n    }\n  | Ident '=' Expr ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Ident INCR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_INCR', {\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Ident DECR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_DECR', {\n        ident: $Ident,\n      loc: _$[_$.length-1]\n      });\n    }\n  | RETURN Expr ';'\n    {\n      {\n        $$ = yy.Statement.create('RETURN', {\n          value: $Expr,\n      loc: _$[_$.length-1]\n        });\n      }\n    }\n  | RETURN ';'\n    {\n      $$ = yy.Statement.create('RETURN', {\n        loc: _$[_$.length-1]\n      });\n    }\n  | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt,\n        loc: _$[_$.length-1]\n      });\n    }\n  | IF '(' Expr ')' Stmt ELSE Stmt\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt1,\n        wrong: $Stmt2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | WHILE '(' Expr ')' Stmt\n    {\n      $$ = yy.Statement.create('WHILE', {\n        expr: $Expr,\n        stmt: $Stmt,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr ';'\n    { $$ = $Expr; }\n  | ';'\n    {}\n  ;\n\nItems\n  : Item\n    {$$ = [$Item]}\n  | Items ',' Item\n    {\n      $Items.push($Item);\n      $$ = $Items;\n    }\n  ;\n\nItem\n  : Ident\n    {\n      $$ = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      })\n    }\n  | Ident '=' Expr\n    {\n      var decl = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n      var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n      $$ = [decl, ass];\n    }\n  ;\n\nType\n  : INTEGER\n    {\n      yy.state.declarationType = $1;\n    }\n  | STRING\n    {\n      yy.state.declarationType = $1;\n    }\n  | BOOLEAN\n    {\n      yy.state.declarationType = $1;\n    }\n  | VOID\n    {\n      yy.state.declarationType = $1;\n    }\n  ;\n\nIdent\n  : LITERAL\n    { $$ = String(yytext); }\n  ;\n\nExprs\n  : Expr\n    { $$ = [$Expr]; }\n  | Exprs ',' Expr\n    {\n      $Exprs.push($Expr);\n      $$ = $Exprs;\n    }\n  ;\n\nExpr\n  : Number\n    { $$ = $Number; }\n  | String\n    { $$ = $String; }\n  | Logical\n    { $$ = $Logical }\n  | Ident\n    {\n      $$ = yy.Expression.create('VARIABLE', {\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Ident '(' Exprs ')'\n    {\n      $$ = yy.Expression.create('FUNCALL', {\n        args: $Exprs,\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n    }\n  | '-' Expr %prec UMINUS\n    {\n      $$ = yy.Expression.create('UMINUS', {\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n    }\n  | '!' Expr %prec NEGATION\n    {\n      $$ = yy.Expression.create('NEGATION', {\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr MulOp Expr %prec MULOP\n    {\n      $$ = yy.Expression.create('MULOP', {\n        operator: $MulOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr AddOp Expr %prec ADDOP\n    {\n      $$ = yy.Expression.create('ADDOP', {\n        operator: $AddOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr RelOp Expr %prec RELOP\n    {\n      $$ = yy.Expression.create('RELOP', {\n        operator: $RelOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr '&&' Expr\n    {\n      $$ = yy.Expression.create('LOGAND', {\n        operator: '&&',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr '||' Expr\n    {\n      $$ = yy.Expression.create('LOGOR', {\n        operator: '||',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | '(' Expr ')'\n    {$$ = $2}\n  ;\n\nNumber\n  : NUMBER\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'int',\n        value: Number(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nString\n  : STRING_LITERAL\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'string',\n        value: String(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nLogical\n  : TRUE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  | FALSE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nAddOp\n  : '+'\n    {}\n  | '-'\n    {}\n  ;\n\nMulOp\n  : '*'\n    {}\n  | '/'\n    {}\n  | '%'\n    {}\n  ;\n\nRelOp\n  : '<'\n    {}\n  | '<='\n    {}\n  | '>'\n    {}\n  | '>='\n    {}\n  | '=='\n    {}\n  | '!='\n    {}\n  ;\n";
 
 var Expression = require('./core/expression.js');
 var Statement = require('./core/statement.js');
 var Scope = require('./core/scope.js');
-var Functions = require('./core/function.js');
+var Function = require('./core/function.js');
 var State = require('./core/state.js');
 var Variable = require('./core/variable.js');
 
@@ -28850,11 +29800,18 @@ exports.parse = parse;
 
 function parse(code) {
   var parser = new Parser(grammar);
+  var tree;
   var scope = Scope.create();
   var state = State.create({
     mainScope: scope
   });
 
+  Function.create({
+    type: 'void',
+    ident: 'printInt',
+    args: [],
+    parent: scope
+  });
 
   state.pushScope(scope);
 
@@ -28863,10 +29820,13 @@ function parse(code) {
   parser.yy.Expression = Expression.init(state);
   parser.yy.Statement = Statement.init(state);
   parser.yy.Scope = Scope;
-  parser.yy.Function = Functions;
+  parser.yy.Function = Function;
   parser.yy.Variable = Variable;
 
-  return parser.parse(code);
+  tree = parser.parse(code);
+  tree.staticCheck();
+
+  return tree;
 }
 
-},{"./core/expression.js":36,"./core/function.js":46,"./core/scope.js":47,"./core/state.js":48,"./core/statement.js":49,"./core/variable.js":58,"jison":2}]},{},["latte"]);
+},{"./core/expression.js":50,"./core/function.js":60,"./core/scope.js":61,"./core/state.js":62,"./core/statement.js":63,"./core/variable.js":72,"jison":10,"strip-comments":47}]},{},["latte"]);

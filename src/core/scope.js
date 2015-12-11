@@ -5,6 +5,14 @@ var exports = module.exports = {};
 
 exports.create = create;
 
+Scope.prototype.addFunction = addFunction;
+Scope.prototype.addVariable = addVariable;
+Scope.prototype.addVariables = addVariables;
+Scope.prototype.addElement = addElement;
+Scope.prototype.getVariable = getVariable;
+Scope.prototype.getFunction = getFunction;
+Scope.prototype.staticCheck = staticCheck;
+
 function Scope(opts) {
   var _this = this;
 
@@ -22,11 +30,6 @@ function Scope(opts) {
 function create(opts) {
   return new Scope(opts);
 }
-
-Scope.prototype.addFunction = addFunction;
-Scope.prototype.addVariable = addVariable;
-Scope.prototype.addVariables = addVariables;
-Scope.prototype.addElement = addElement;
 
 function addFunction(fun) {
   var _this = this;
@@ -60,5 +63,41 @@ function addVariables(type, idents) {
 function addElement(element) {
   var _this = this;
 
-  _this.elements.push(element);
+  if(_.isArray(element)) {
+    _this.elements = _this.elements.concat(_.flattenDeep(element));
+  } else {
+    _this.elements.push(element);
+  }
+}
+
+function getVariable(ident) {
+  var _this = this;
+  if (_this.vars[ident] !== undefined) {
+    return _this.vars[ident];
+  } else if (_this.parent === undefined) {
+    return false;
+  } else {
+    return _this.parent.getVariable(ident);
+  }
+}
+
+function getFunction(ident) {
+  var _this = this;
+  if (_this.functions[ident] !== undefined) {
+    return _this.functions[ident];
+  } else if (_this.parent === undefined) {
+    return false;
+  } else {
+    return _this.parent.getFunction(ident);
+  }
+}
+
+function staticCheck() {
+  var _this = this;
+
+  _this.checked = true;
+
+  _.forEach(_this.elements, function (element) {
+    element.staticCheck();
+  });
 }

@@ -1,15 +1,21 @@
 var Statement = require('./statement-prototype.js');
-var exports = module.exports = StatementIf;
+
+module.exports = StatementIf;
+
+StatementIf.prototype = Object.create(Statement.prototype);
+StatementIf.prototype.constructor = StatementIf;
+StatementIf.prototype.staticCheck = staticCheck;
 
 function StatementIf(opts) {
   var _this = this;
 
   Statement.call(_this, opts);
-
-  _this.expr = opts.expr;
-  _this.right = opts.right;
-  _this.wrong = opts.wrong;
 }
 
-StatementIf.prototype = Object.create(Statement.prototype);
-StatementIf.prototype.constructor = StatementIf;
+function staticCheck() {
+  var _this = this;
+
+  _this.expr.staticCheck();
+  _this.right.staticCheck();
+  _this.wrong.staticCheck();
+}

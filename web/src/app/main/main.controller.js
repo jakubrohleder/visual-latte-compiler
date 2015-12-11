@@ -28,9 +28,9 @@
         data.tree = undefined;
         data.llvm = undefined;
         data.jvm = undefined;
-        if(error.hash === undefined) {
+        // if(error.hash === undefined) {
           console.error(error);
-        }
+        // }
       } finally {
         data.code = code;
       }

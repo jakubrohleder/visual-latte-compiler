@@ -65,17 +65,19 @@ Program
 
 TopDefs
   : TopDef
-    {}
+    { yy.state.currentScope.addElement($TopDef) }
   | TopDefs TopDef
-    {}
+    { yy.state.currentScope.addElement($TopDef) }
   ;
 
 TopDef
   : FunctionSignature Block
     {
-      yy.state.currentFunction.location = _$;
-      yy.state.popFunction(fun);
+      yy.state.currentFunction.location = _$[_$.length-1];
+      yy.state.popFunction();
       yy.state.popScope(scope);
+
+      $$ = $FunctionSignature;
     }
   ;
 
@@ -90,11 +92,13 @@ FunctionSignature
         type: $Type,
         ident: $Ident,
         args: $Args,
-        scope: scope
+        scope: scope,
+        parent: yy.state.currentScope
       });
-      yy.state.currentScope.addFunction(fun);
       yy.state.pushFunction(fun);
       yy.state.pushScope(scope);
+
+      $$ = fun;
     }
   ;
 
@@ -111,7 +115,8 @@ Arg
   : Type Ident
     {$$ = yy.Variable.create({
       type: $Type,
-      ident: $Ident
+      ident: $Ident,
+      loc: _$[_$.length-1]
     });}
   ;
 
@@ -148,6 +153,7 @@ Stmt
   : BlockInit Block
     {
       $$ = $BlockInit;
+      yy.state.currentScope.location = _$[_$.length-1];
       yy.state.popScope(scope);
     }
   | Type Items ';'
@@ -156,64 +162,64 @@ Stmt
     }
   | Ident '=' Expr ';'
     {
-      $$ = yy.Statement.create({
-        type: 'VARIABLE_ASSIGNMENT',
+      $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {
         ident: $Ident,
-        value: $Expr
+        expr: $Expr,
+        loc: _$[_$.length-1]
       });
     }
   | Ident INCR ';'
     {
-      $$ = yy.Statement.create({
-        type: 'VARIABLE_INCR',
-        ident: $Ident
+      $$ = yy.Statement.create('VARIABLE_INCR', {
+        ident: $Ident,
+        loc: _$[_$.length-1]
       });
     }
   | Ident DECR ';'
     {
-      $$ = yy.Statement.create({
-        type: 'VARIABLE_DECR',
-        ident: $Ident
+      $$ = yy.Statement.create('VARIABLE_DECR', {
+        ident: $Ident,
+      loc: _$[_$.length-1]
       });
     }
   | RETURN Expr ';'
     {
       {
-        $$ = yy.Statement.create({
-          type: 'RETURN',
-          value: $Expr
+        $$ = yy.Statement.create('RETURN', {
+          value: $Expr,
+      loc: _$[_$.length-1]
         });
       }
     }
   | RETURN ';'
     {
-      $$ = yy.Statement.create({
-        type: 'RETURN'
+      $$ = yy.Statement.create('RETURN', {
+        loc: _$[_$.length-1]
       });
     }
   | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE
     {
-      $$ = yy.Statement.create({
-        type: 'IF',
+      $$ = yy.Statement.create('IF', {
         expr: $Expr,
-        right: $Stmt
+        right: $Stmt,
+        loc: _$[_$.length-1]
       });
     }
   | IF '(' Expr ')' Stmt ELSE Stmt
     {
-      $$ = yy.Statement.create({
-        type: 'IF',
+      $$ = yy.Statement.create('IF', {
         expr: $Expr,
         right: $Stmt1,
-        wrong: $Stmt2
+        wrong: $Stmt2,
+        loc: _$[_$.length-1]
       });
     }
   | WHILE '(' Expr ')' Stmt
     {
-      $$ = yy.Statement.create({
-        type: 'WHILE',
+      $$ = yy.Statement.create('WHILE', {
         expr: $Expr,
-        stmt: $Stmt
+        stmt: $Stmt,
+        loc: _$[_$.length-1]
       });
     }
   | Expr ';'
@@ -235,23 +241,23 @@ Items
 Item
   : Ident
     {
-      $$ = yy.Statement.create({
-        type: 'VARIABLE_DECLARATION',
-        varType: yy.state.declarationType,
-        ident: $Ident
+      $$ = yy.Statement.create('VARIABLE_DECLARATION', {
+        type: yy.state.declarationType,
+        ident: $Ident,
+        loc: _$[_$.length-1]
       })
     }
   | Ident '=' Expr
     {
-      var decl = yy.Statement.create({
-        type: 'VARIABLE_DECLARATION',
-        varType: yy.state.declarationType,
-        ident: $Ident
-      });
-      var ass = yy.Statement.create({
-        type: 'VARIABLE_ASSIGNMENT',
+      var decl = yy.Statement.create('VARIABLE_DECLARATION', {
+        type: yy.state.declarationType,
         ident: $Ident,
-        value: $Expr
+        loc: _$[_$.length-1]
+      });
+      var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {
+        ident: $Ident,
+        expr: $Expr,
+        loc: _$[_$.length-1]
       });
       $$ = [decl, ass];
     }
@@ -292,79 +298,84 @@ Exprs
   ;
 
 Expr
-  : Ident
-    { $$ = $Ident; }
-  | Number
+  : Number
     { $$ = $Number; }
   | String
     { $$ = $String; }
   | Logical
     { $$ = $Logical }
+  | Ident
+    {
+      $$ = yy.Expression.create('VARIABLE', {
+        ident: $Ident,
+        loc: _$[_$.length-1]
+      });
+    }
   | Ident '(' Exprs ')'
     {
-      $$ = yy.Expression.create({
-        type: 'FUNCALL',
+      $$ = yy.Expression.create('FUNCALL', {
         args: $Exprs,
-        ident: $Ident
+        ident: $Ident,
+        loc: _$[_$.length-1]
       });
     }
   | '-' Expr %prec UMINUS
     {
-      $$ = yy.Expression.create({
-        type: 'UMINUS',
-        value: $Expr
+      $$ = yy.Expression.create('UMINUS', {
+        expr: $Expr,
+        loc: _$[_$.length-1]
       });
     }
   | '!' Expr %prec NEGATION
     {
-      $$ = yy.Expression.create({
-        type: 'NEGATION',
-        value: $Expr
+      $$ = yy.Expression.create('NEGATION', {
+        expr: $Expr,
+        loc: _$[_$.length-1]
       });
     }
   | Expr MulOp Expr %prec MULOP
     {
-      $$ = yy.Expression.create({
-        type: 'MULOP',
+      $$ = yy.Expression.create('MULOP', {
         operator: $MulOp,
         left: $Expr1,
-        right: $Expr2
+        right: $Expr2,
+        loc: _$[_$.length-1]
       });
     }
   | Expr AddOp Expr %prec ADDOP
     {
-      $$ = yy.Expression.create({
-        type: 'ADDOP',
+      $$ = yy.Expression.create('ADDOP', {
         operator: $AddOp,
         left: $Expr1,
-        right: $Expr2
+        right: $Expr2,
+        loc: _$[_$.length-1]
       });
     }
   | Expr RelOp Expr %prec RELOP
     {
-      $$ = yy.Expression.create({
-        type: 'RELOP',
+      $$ = yy.Expression.create('RELOP', {
         operator: $RelOp,
         left: $Expr1,
-        right: $Expr2
+        right: $Expr2,
+        loc: _$[_$.length-1]
       });
     }
   | Expr '&&' Expr
     {
-      $$ = yy.Expression.create({
-        type: 'LOGAND',
+      $$ = yy.Expression.create('LOGAND', {
         operator: '&&',
         left: $Expr1,
-        right: $Expr2
+        right: $Expr2,
+        loc: _$[_$.length-1]
       });
     }
   | Expr '||' Expr
     {
-      $$ = yy.Expression.create({
-        type: 'LOGOR',
+      $$ = yy.Expression.create('LOGOR', {
         operator: '||',
         left: $Expr1,
-        right: $Expr2
+        right: $Expr2,
+        loc: _$[_$.length-1]
       });
     }
   | '(' Expr ')'
@@ -374,11 +385,10 @@ Expr
 Number
   : NUMBER
     {
-      console.log('number');
-      $$ = yy.Expression.create({
-        type: 'OBJECT',
-        varType: 'int',
-        value: Number(yytext)
+      $$ = yy.Expression.create('OBJECT', {
+        type: 'int',
+        value: Number(yytext),
+        loc: _$[_$.length-1]
       });
     }
   ;
@@ -386,11 +396,10 @@ Number
 String
   : STRING_LITERAL
     {
-      console.log('str');
-      $$ = yy.Expression.create({
-        type: 'OBJECT',
-        varType: 'string',
-        value: String(yytext)
+      $$ = yy.Expression.create('OBJECT', {
+        type: 'string',
+        value: String(yytext),
+        loc: _$[_$.length-1]
       });
     }
   ;
@@ -398,18 +407,18 @@ String
 Logical
   : TRUE
     {
-      $$ = yy.Expression.create({
-        type: 'OBJECT',
-        varType: 'boolean',
-        value: JSON.parse(yytext)
+      $$ = yy.Expression.create('OBJECT', {
+        type: 'boolean',
+        value: JSON.parse(yytext),
+        loc: _$[_$.length-1]
       });
     }
   | FALSE
     {
-      $$ = yy.Expression.create({
-        type: 'OBJECT',
-        varType: 'boolean',
-        value: JSON.parse(yytext)
+      $$ = yy.Expression.create('OBJECT', {
+        type: 'boolean',
+        value: JSON.parse(yytext),
+        loc: _$[_$.length-1]
       });
     }
   ;

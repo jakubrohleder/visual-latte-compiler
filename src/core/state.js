@@ -1,10 +1,11 @@
-/**
- * Holds current state for parser
- */
-
 var exports = module.exports = {};
 
 exports.create = create;
+
+State.prototype.pushFunction = pushFunction;
+State.prototype.popFunction = popFunction;
+State.prototype.pushScope = pushScope;
+State.prototype.popScope = popScope;
 
 function State(opts) {
   var _this = this;
@@ -15,12 +16,6 @@ function State(opts) {
   _this.scopes = [];
   _this.mainScope = opts.mainScope;
 }
-
-State.prototype.pushFunction = pushFunction;
-State.prototype.popFunction = popFunction;
-State.prototype.pushScope = pushScope;
-State.prototype.popScope = popScope;
-
 
 function create(opts) {
   return new State(opts);
