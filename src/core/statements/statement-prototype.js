@@ -1,7 +1,7 @@
-var Element = require('./element.js').Element;
-var exports = module.exports = {};
+var Element = require('../element.js');
+var exports = module.exports = Statement;
 
-exports.create = create;
+exports.Statement = Statement;
 
 function Statement(opts) {
   var _this = this;
@@ -11,7 +11,3 @@ function Statement(opts) {
 
 Statement.prototype = Object.create(Element.prototype);
 Statement.prototype.constructor = Element;
-
-function create(opts) {
-  return new Statement(opts);
-}

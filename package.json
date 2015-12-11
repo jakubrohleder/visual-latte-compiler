@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "dependencies": {
     "exec": "^0.2.1",
-    "jison": "git+https://github.com/zaach/jison.git"
+    "jison": "git+https://github.com/zaach/jison.git",
+    "lodash": "^3.10.1"
   },
   "scripts": {
     "test": "gulp test"

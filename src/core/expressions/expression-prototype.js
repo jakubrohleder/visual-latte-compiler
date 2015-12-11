@@ -1,7 +1,7 @@
-var Element = require('./element.js').Element;
-var exports = module.exports = {};
+var Element = require('../element.js');
+var exports = module.exports = Expression;
 
-exports.create = create;
+exports.Expression = Expression;
 
 function Expression(opts) {
   var _this = this;
@@ -11,7 +11,3 @@ function Expression(opts) {
 
 Expression.prototype = Object.create(Element.prototype);
 Expression.prototype.constructor = Element;
-
-function create(opts) {
-  return new Expression(opts);
-}

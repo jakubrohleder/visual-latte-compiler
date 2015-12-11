@@ -1,6 +1,4 @@
-var exports = module.exports = {};
-
-exports.Element = Element;
+var exports = module.exports = Element;
 
 function Element(opts) {
   var _this = this;

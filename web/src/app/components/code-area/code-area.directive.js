@@ -19,12 +19,15 @@
       var codeMirror;
       var errorMarker;
       var errorMessage;
+      // var theme = localStorage.getItem('nightMode') === true ? 'ambiance' : 'default';
 
       $scope.bindCodeMirror = bindCodeMirror;
       $scope.editorOptions = {
         lineWrapping : true,
         lineNumbers: true,
-        gutters: ['error']
+        gutters: ['error'],
+        mode: 'text/x-c++src',
+        theme: 'ambiance'
       };
 
       $scope.$watch('error', markError);

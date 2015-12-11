@@ -57,30 +57,39 @@
 
    "bnf": {
       "Program": [
-         ["TopDefs EOF",   "return yy.data;"]
+         ["TopDefs EOF",   "return yy;"]
       ],
 
       "TopDefs": [
-         ["TopDef", ""],
-         ["TopDefs TopDef", ""]
+         ["TopDef", "yy.environment.add($1);"],
+         ["TopDefs TopDef", "yy.environment.add($2);"]
       ],
 
       "TopDef": [
-         ["Type Ident ( Args ) Block", ""]
+         ["Type Ident ( Args ) Block", "$$ = yy.Functions.create({
+            type: $1,
+            name: $2,
+            args: $4,
+            block: $6,
+            location: this._$
+         });"]
       ],
 
       "Args": [
-         ["", ""],
-         ["Arg", ""],
-         ["Args , Arg", ""]
+         ["", "$$ = []"],
+         ["Arg", "$$ = [$1]"],
+         ["Args , Arg", "$1.push($3); $$ = $1;"]
       ],
 
       "Arg": [
-         ["Type Ident", ""]
+         ["Type Ident", "$$ = yy.Variables.create({
+            type: $1,
+            ident: $2
+         })"]
       ],
 
       "Block": [
-         ["{ Stmts }", ""]
+         ["{ Stmts }", "$$ = $2"]
       ],
 
       "Stmts": [
