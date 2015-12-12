@@ -19,7 +19,7 @@ function staticCheck() {
   _this.expr.staticCheck();
 
   if(_this.scope.getVariable(_this.ident) === false) {
-    parseError('Undeclared variable ' + _this.ident, _this);
+    parseError('Undeclared variable in assigment: ' + _this.ident, _this);
   }
 
   _this.type = _this.scope.getVariable(_this.value).type;

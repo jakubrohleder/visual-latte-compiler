@@ -5,6 +5,9 @@
 
 %%
 \s+                       /* skip whitespace */
+"//".*                    /* skip line comments */
+"/*"((\*+[^/*])|([^*]))*\**"*/" /* skip block comments */
+
 true                      return 'TRUE'
 false                     return 'FALSE'
 if                        return 'IF'
@@ -165,7 +168,7 @@ Stmt
       $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {
         ident: $Ident,
         expr: $Expr,
-        loc: _$[_$.length-1]
+        loc: _$[_$.length-4]
       });
     }
   | Ident INCR ';'

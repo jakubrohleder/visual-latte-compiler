@@ -19,7 +19,7 @@ function staticCheck() {
   var _this = this;
 
   if(_this.scope.getVariable(_this.ident) === false) {
-    parseError('Undeclared variable in expression: ' + _this.ident, _this);
+    parseError('Undeclared variable to increment: ' + _this.ident, _this);
   }
 
   _this.type = _this.scope.getVariable(_this.ident).type;
