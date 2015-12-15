@@ -29,7 +29,7 @@ function Scope(opts) {
   _this.state = {
     checked: false,
     optimized: false
-  }
+  };
 
   _this.parent = opts.parent;
 }
@@ -42,7 +42,7 @@ function addFunction(fun) {
   var _this = this;
 
   if (_this.functions[fun.ident] !== undefined) {
-    if(_this.functions[fun.ident].scope === _this) {
+    if (_this.functions[fun.ident].scope === _this) {
       parseError('Function ' + fun.ident + ' already defined', {loc: fun.loc});
     } else {
       console.log('Redefining function', fun.ident);
@@ -55,7 +55,7 @@ function addVariable(variable) {
   var _this = this;
 
   if (_this.variables[variable.ident] !== undefined) {
-    if(_this.variables[variable.ident].scope === _this) {
+    if (_this.variables[variable.ident].scope === _this) {
       parseError(
         'Variable ' + variable.ident + ' already defined',
         variable.loc,
@@ -71,9 +71,9 @@ function addVariable(variable) {
 function addElement(element) {
   var _this = this;
 
-  if (element === undefined){
+  if (element === undefined) {
     return;
-  } else if(_.isArray(element)) {
+  } else if (_.isArray(element)) {
     _this.elements = _this.elements.concat(_.flattenDeep(element));
   } else {
     _this.elements.push(element);
@@ -86,9 +86,9 @@ function getVariable(ident) {
     return _this.variables[ident];
   } else if (_this.parent === undefined) {
     return false;
-  } else {
-    return _this.parent.getVariable(ident);
   }
+
+  return _this.parent.getVariable(ident);
 }
 
 function getFunction(ident) {
@@ -97,9 +97,9 @@ function getFunction(ident) {
     return _this.functions[ident];
   } else if (_this.parent === undefined) {
     return false;
-  } else {
-    return _this.parent.getFunction(ident);
   }
+
+  return _this.parent.getFunction(ident);
 }
 
 function semanticCheck() {
@@ -110,7 +110,7 @@ function semanticCheck() {
     _this.addVariable(variable);
   });
 
-  _.forEach(_this.elements, function (element) {
+  _.forEach(_this.elements, function(element) {
     element.semanticCheck();
   });
 

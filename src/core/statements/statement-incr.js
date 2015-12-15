@@ -18,7 +18,7 @@ function StatementIncr(opts) {
 function semanticCheck() {
   var _this = this;
 
-  if(_this.scope.getVariable(_this.ident) === false) {
+  if (_this.scope.getVariable(_this.ident) === false) {
     parseError(
       'Undeclared variable to increment: ' + _this.ident,
       _this.loc,

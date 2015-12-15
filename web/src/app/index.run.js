@@ -21,8 +21,6 @@
 
     $interval(changeIcon, 10);
 
-    $log.debug('runBlock end');
-
     function changeIcon() {
       isDown = !isDown;
       if (isDown) {

@@ -7,7 +7,7 @@ var StatementDeclaration = require('./statements/statement-declaration');
 var StatementWhile = require('./statements/statement-while');
 
 module.exports = new function() {
-  var _this = this
+  var _this = this;
 
   _this.create = create.bind(_this);
   _this.init = init.bind(_this);
@@ -15,7 +15,7 @@ module.exports = new function() {
 
 function create(type, opts) {
   var stmt;
-  var _this = this
+  var _this = this;
 
   opts = opts || {};
 
@@ -23,33 +23,36 @@ function create(type, opts) {
   opts.function = _this.state.currentFunction;
 
   switch (type) {
-    case 'VARIABLE_ASSIGNMENT':
-      stmt = new StatementAssignment(opts);
-      break;
+  case 'VARIABLE_ASSIGNMENT':
+    stmt = new StatementAssignment(opts);
+    break;
 
-    case 'VARIABLE_INCR':
-      stmt = new StatementIncr(opts);
-      break;
+  case 'VARIABLE_INCR':
+    stmt = new StatementIncr(opts);
+    break;
 
-    case 'VARIABLE_DECR':
-      stmt = new StatementDecr(opts);
-      break;
+  case 'VARIABLE_DECR':
+    stmt = new StatementDecr(opts);
+    break;
 
-    case 'RETURN':
-      stmt = new StatementReturn(opts);
-      break;
+  case 'RETURN':
+    stmt = new StatementReturn(opts);
+    break;
 
-    case 'IF':
-      stmt = new StatementIf(opts);
-      break;
+  case 'IF':
+    stmt = new StatementIf(opts);
+    break;
 
-    case 'WHILE':
-      stmt = new StatementWhile(opts);
-      break;
+  case 'WHILE':
+    stmt = new StatementWhile(opts);
+    break;
 
-    case 'VARIABLE_DECLARATION':
-      stmt = new StatementDeclaration(opts);
-      break;
+  case 'VARIABLE_DECLARATION':
+    stmt = new StatementDeclaration(opts);
+    break;
+
+  default:
+    console.error('Unmached statement', opts);
   }
 
   return stmt;

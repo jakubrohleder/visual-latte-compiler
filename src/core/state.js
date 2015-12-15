@@ -36,7 +36,7 @@ function popFunction() {
   var _this = this;
 
   _this.functions.splice(-1, 1);
-  _this.currentFunction = _this.functions.length > 0 ? _this.functions[_this.functions.length -1] : undefined;
+  _this.currentFunction = _this.functions.length > 0 ? _this.functions[_this.functions.length - 1] : undefined;
 }
 
 function pushScope(scope) {
@@ -50,5 +50,5 @@ function popScope() {
   var _this = this;
 
   _this.scopes.splice(-1, 1);
-  _this.currentScope = _this.scopes.length > 0 ? _this.scopes[_this.scopes.length -1] : undefined;
+  _this.currentScope = _this.scopes.length > 0 ? _this.scopes[_this.scopes.length - 1] : undefined;
 }

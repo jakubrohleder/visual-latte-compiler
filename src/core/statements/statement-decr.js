@@ -16,7 +16,7 @@ function StatementDecr(opts) {
 function semanticCheck() {
   var _this = this;
 
-  if(_this.scope.getVariable(_this.ident) === false) {
+  if (_this.scope.getVariable(_this.ident) === false) {
     parseError(
       'Undeclared variable to decrement: ' + _this.ident,
       _this.loc,

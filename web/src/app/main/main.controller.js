@@ -6,7 +6,7 @@
     .controller('MainController', MainController);
 
   /** @ngInject */
-  function MainController($scope, latte, $log) {
+  function MainController($scope, latte) {
     $scope.samples = latte.samples;
     $scope.code = localStorage.getItem('code');
 
@@ -72,7 +72,6 @@
         fun();
         $scope.data.error = undefined;
       } catch (error) {
-        $log.log(error);
         $scope.data.error = error;
         $scope.data.rootScope = undefined;
       }

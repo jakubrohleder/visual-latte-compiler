@@ -32,6 +32,4 @@ function semanticCheck() {
       _this
     );
   }
-
-
 }

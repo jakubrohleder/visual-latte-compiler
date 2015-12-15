@@ -1,9 +1,10 @@
 var fs = require('fs');
+var path = require('path');
 var Parser = require('jison').Parser;
 var samples = require('./samples.json');
 var parseError = require('./core/error').parseError;
 
-var grammar = fs.readFileSync(__dirname + '/syntax.jison', 'utf8');
+var grammar = fs.readFileSync(path.join(__dirname, '/syntax.jison'), 'utf8');
 
 var Expression = require('./core/expression');
 var Statement = require('./core/statement');
@@ -21,7 +22,6 @@ exports.samples = samples;
 
 function parse(code) {
   var parser = new Parser(grammar);
-  var tree;
   var state = State.create();
 
   parser.yy.state = state;
@@ -35,9 +35,8 @@ function parse(code) {
   parser.yy.VariableReference = VariableReference;
 
   try {
-    tree = parser.parse(code);
+    parser.parse(code);
   } catch (error) {
-    console.log(error);
     error.hash.loc.first_line ++;
     error.hash.loc.last_line ++;
     parseError(
@@ -47,7 +46,5 @@ function parse(code) {
     );
   }
 
-  // tree.semanticCheck();
-
-  return tree;
+  return parser.yy.state.rootScope;
 }

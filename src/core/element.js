@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 module.exports = Element;
 
 Element.prototype.semanticCheck = semanticCheck;
@@ -5,9 +7,9 @@ Element.prototype.semanticCheck = semanticCheck;
 function Element(opts) {
   var _this = this;
 
-  for (var key in opts) {
-    _this[key] = opts[key];
-  }
+  _.forEach(opts, function(value, key) {
+    _this[key] = value;
+  });
 }
 
 function semanticCheck() {
