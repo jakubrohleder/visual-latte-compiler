@@ -14,14 +14,16 @@
 
     function controller($scope) {
       $scope.samples = latte.samples;
-      $scope.checked = JSON.parse(localStorage.getItem('checkedSamples')) || {};
+      $scope.checked = angular.fromJson(localStorage.getItem('checkedSamples')) || {};
 
       $scope.$watchCollection('checked', function(checked) {
-        if(checked !== undefined) {
-          localStorage.setItem('checkedSamples', JSON.stringify(checked));
+        if (checked !== undefined) {
+          localStorage.setItem(
+            'checkedSamples',
+            angular.toJson(checked)
+          );
         }
       });
     }
   }
-
 })();

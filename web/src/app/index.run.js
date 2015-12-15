@@ -8,8 +8,8 @@
   /** @ngInject */
   function runBlock($log, Favico, $interval) {
     var favicon = new Favico({
-      animation:'slide',
-      position : 'up'
+      animation: 'slide',
+      position: 'up'
     });
     var up = new Image();
     up.src = 'assets/images/mario-up.gif';
@@ -23,15 +23,13 @@
 
     $log.debug('runBlock end');
 
-    function changeIcon () {
+    function changeIcon() {
       isDown = !isDown;
-      if(isDown) {
+      if (isDown) {
         favicon.image(down);
       } else {
         favicon.image(up);
       }
     }
-
   }
-
 })();

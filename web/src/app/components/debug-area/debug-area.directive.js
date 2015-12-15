@@ -18,5 +18,4 @@
       $scope.showDebug = true;
     }
   }
-
 })();

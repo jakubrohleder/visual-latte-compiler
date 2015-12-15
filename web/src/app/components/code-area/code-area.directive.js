@@ -23,7 +23,7 @@
 
       $scope.bindCodeMirror = bindCodeMirror;
       $scope.editorOptions = {
-        lineWrapping : true,
+        lineWrapping: true,
         lineNumbers: true,
         gutters: ['error'],
         mode: 'text/x-c++src',
@@ -33,17 +33,17 @@
 
       $scope.$watch('error', markError);
 
-      function markError (error) {
+      function markError(error) {
         $timeout(function() {
-          if(errorMarker !== undefined) {
+          if (errorMarker !== undefined) {
             errorMarker.clear();
           }
 
-          if(errorMessage !== undefined) {
+          if (errorMessage !== undefined) {
             errorMessage.clear();
           }
 
-          if(
+          if (
             error !== undefined &&
             codeMirror !== undefined &&
             $scope.code !== undefined &&
@@ -61,15 +61,19 @@
 
             var doc = codeMirror.getDoc();
 
-            errorMessage = codeMirror.addLineWidget(error.hash.loc.last_line-1, makeMarker(error.message));
-            errorMarker = doc.markText(from, to, {className: 'error-text'});
+            errorMessage = codeMirror.addLineWidget(
+              error.hash.loc.last_line - 1,
+              makeMarker(error.message)
+            );
+            errorMarker = doc.markText(
+              from, to, {className: 'error-text'}
+            );
           }
         });
       }
 
       function bindCodeMirror(cm) {
         codeMirror = cm;
-
       }
 
       function makeMarker(message) {
@@ -78,8 +82,6 @@
         marker.addClass('error-marker');
         return marker[0];
       }
-
     }
   }
-
 })();

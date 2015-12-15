@@ -6,11 +6,11 @@
     .controller('MainController', MainController);
 
   /** @ngInject */
-  function MainController($scope, latte) {
+  function MainController($scope, latte, $log) {
     $scope.samples = latte.samples;
     $scope.code = localStorage.getItem('code');
 
-    $scope.options = JSON.parse(localStorage.getItem('options')) || {
+    $scope.options = angular.fromJson(localStorage.getItem('options')) || {
       debounce: 500,
       parse: true,
       semantic: true,
@@ -48,6 +48,10 @@
         parse();
       }
 
+      if ($scope.data.rootScope === undefined) {
+        return;
+      }
+
       if ($scope.options.semantic === true) {
         semantic();
       }
@@ -68,7 +72,7 @@
         fun();
         $scope.data.error = undefined;
       } catch (error) {
-        console.log(error);
+        $log.log(error);
         $scope.data.error = error;
         $scope.data.rootScope = undefined;
       }

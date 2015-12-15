@@ -7,5 +7,4 @@
       'ui.codemirror',
       'jsonFormatter'
     ]);
-
 })();

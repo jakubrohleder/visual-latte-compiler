@@ -4,9 +4,9 @@
   'use strict';
 
   angular.module('visualLatteCompiler')
-    .filter('bytes', bytes);
+    .filter('bytes', bytesFilter);
 
-  function bytes() {
+  function bytesFilter() {
     return function(bytes, precision) {
       if (isNaN(parseFloat(bytes)) || !isFinite(bytes)) {
         return '-';

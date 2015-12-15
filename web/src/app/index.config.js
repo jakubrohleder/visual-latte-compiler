@@ -10,5 +10,4 @@
     // Enable log
     $logProvider.debugEnabled(true);
   }
-
 })();

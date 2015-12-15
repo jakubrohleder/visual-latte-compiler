@@ -2,9 +2,9 @@
   'use strict';
 
   angular.module('visualLatteCompiler')
-    .directive('options', options);
+    .directive('options', optionsDirective);
 
-  function options() {
+  function optionsDirective() {
     return {
       restrict: 'E',
       templateUrl: 'app/components/options/options.html',
@@ -19,7 +19,7 @@
         options.compile = options.compile && options.semantic;
         options.compile = options.compile && options.semantic;
 
-        localStorage.setItem('options', JSON.stringify(options));
+        localStorage.setItem('options', angular.toJson(options));
 
         $scope.auto();
       }
