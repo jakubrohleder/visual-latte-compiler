@@ -25,7 +25,6 @@ gulp.task('browserify', function() {
     // .pipe($.uglify())
     .pipe($.rename('instant-bundle.js'))
     .pipe(gulp.dest(conf.paths.web.src))
-    .pipe(gulp.dest('dist'))
     .pipe(browserSync.reload({ stream: true }))
     .on('error', function(err) {
       console.log(err);
