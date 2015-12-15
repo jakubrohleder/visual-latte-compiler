@@ -1,3 +1,4 @@
+// return with no value for int function
 int main() {
         if (true)
                 return;

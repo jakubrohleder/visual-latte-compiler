@@ -1,0 +1,7 @@
+// Variable declaration as an only if instruction
+
+int main () {
+ if(true)
+    int x;
+ return 0 ;
+}

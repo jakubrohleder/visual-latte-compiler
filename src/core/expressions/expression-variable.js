@@ -17,7 +17,11 @@ function semanticCheck() {
   var _this = this;
 
   if(_this.scope.getVariable(_this.ident) === false) {
-    parseError('Undeclared variable in expression: ' + _this.ident, _this);
+    parseError(
+      'Undeclared variable in expression: ' + _this.ident,
+      _this.loc,
+      _this
+    );
   }
 
   _this.type = _this.scope.getVariable(_this.ident).type;

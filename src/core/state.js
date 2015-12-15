@@ -14,7 +14,7 @@ function State(opts) {
 
   _this.functions = [];
   _this.scopes = [];
-  _this.mainScope = opts.mainScope;
+  _this.rootScope = opts.rootScope;
 }
 
 function create(opts) {

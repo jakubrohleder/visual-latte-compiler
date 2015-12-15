@@ -21,9 +21,11 @@ exports.samples = samples;
 function parse(code) {
   var parser = new Parser(grammar);
   var tree;
-  var scope = Scope.create();
+  var scope = Scope.create({
+    root: true
+  });
   var state = State.create({
-    mainScope: scope
+    rootScope: scope
   });
 
   Function.create({

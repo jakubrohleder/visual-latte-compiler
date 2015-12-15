@@ -19,12 +19,20 @@ function semanticCheck() {
   _this.expr.semanticCheck();
 
   if(_this.scope.getVariable(_this.ident) === false) {
-    parseError('Undeclared variable in assigment: ' + _this.ident, _this);
+    parseError(
+      'Undeclared variable in assigment: ' + _this.ident,
+      _this.loc[_this.loc.length - 4],
+      _this
+    );
   }
 
   _this.type = _this.scope.getVariable(_this.ident).type;
 
   if(_this.expr.type !== _this.type) {
-    parseError('Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type, _this);
+    parseError(
+      'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type,
+      _this.loc[_this.loc.length - 2],
+      _this
+    );
   }
 }

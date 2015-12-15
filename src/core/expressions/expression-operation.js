@@ -20,7 +20,11 @@ function semanticCheck() {
   _this.right.semanticCheck();
 
   if (_this.left.type !== _this.right.type) {
-    parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
+    parseError(
+      'Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type,
+      _this.loc,
+      _this
+    );
   }
 
   _this.type = _this.left.type;

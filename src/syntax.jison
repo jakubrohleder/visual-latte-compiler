@@ -63,7 +63,7 @@ L?\"(\\.|[^\\"])*\"       return 'STRING_LITERAL'
 
 Program
   : TopDefs EOF
-    {return yy.state.mainScope;}
+    {return yy.state.rootScope;}
   ;
 
 TopDefs
@@ -76,7 +76,7 @@ TopDefs
 TopDef
   : FunctionSignature Block
     {
-      yy.state.currentFunction.location = _$[_$.length-1];
+      yy.state.currentFunction.loc = _$;
       yy.state.popFunction();
       yy.state.popScope(scope);
 
@@ -119,7 +119,7 @@ Arg
     {$$ = yy.Argument.create({
       type: $Type,
       ident: $Ident,
-      loc: _$[_$.length-1]
+      loc: _$
     });}
   ;
 
@@ -158,7 +158,7 @@ Stmt
   : BlockInit Block
     {
       $$ = $BlockInit;
-      yy.state.currentScope.location = _$[_$.length-1];
+      yy.state.currentScope.loc = _$;
       yy.state.popScope(scope);
     }
   | Type Items ';'
@@ -170,21 +170,21 @@ Stmt
       $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {
         ident: $Ident,
         expr: $Expr,
-        loc: _$[_$.length-4]
+        loc: _$
       });
     }
   | Ident INCR ';'
     {
       $$ = yy.Statement.create('VARIABLE_INCR', {
         ident: $Ident,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | Ident DECR ';'
     {
       $$ = yy.Statement.create('VARIABLE_DECR', {
         ident: $Ident,
-      loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | RETURN Expr ';'
@@ -192,14 +192,14 @@ Stmt
       {
         $$ = yy.Statement.create('RETURN', {
           expr: $Expr,
-          loc: _$[_$.length-1]
+          loc: _$
         });
       }
     }
   | RETURN ';'
     {
       $$ = yy.Statement.create('RETURN', {
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE
@@ -207,7 +207,7 @@ Stmt
       $$ = yy.Statement.create('IF', {
         expr: $Expr,
         right: $Stmt,
-        loc: _$[_$.length-3]
+        loc: _$
       });
     }
   | IF '(' Expr ')' Stmt ELSE Stmt
@@ -216,7 +216,7 @@ Stmt
         expr: $Expr,
         right: $Stmt1,
         wrong: $Stmt2,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | WHILE '(' Expr ')' Stmt
@@ -224,7 +224,7 @@ Stmt
       $$ = yy.Statement.create('WHILE', {
         expr: $Expr,
         stmt: $Stmt,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | Expr ';'
@@ -249,7 +249,7 @@ Item
       $$ = yy.Statement.create('VARIABLE_DECLARATION', {
         type: yy.state.declarationType,
         ident: $Ident,
-        loc: _$[_$.length-1]
+        loc: _$
       })
     }
   | Ident '=' Expr
@@ -257,12 +257,12 @@ Item
       var decl = yy.Statement.create('VARIABLE_DECLARATION', {
         type: yy.state.declarationType,
         ident: $Ident,
-        loc: _$[_$.length-1]
+        loc: _$
       });
       var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {
         ident: $Ident,
         expr: $Expr,
-        loc: _$[_$.length-1]
+        loc: _$
       });
       $$ = [decl, ass];
     }
@@ -315,7 +315,7 @@ Expr
     {
       $$ = yy.Expression.create('VARIABLE', {
         ident: $Ident,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | Ident '(' Exprs ')'
@@ -323,21 +323,21 @@ Expr
       $$ = yy.Expression.create('FUNCALL', {
         args: $Exprs,
         ident: $Ident,
-        loc: _$[_$.length-4]
+        loc: _$
       });
     }
   | '-' Expr %prec UMINUS
     {
       $$ = yy.Expression.create('UMINUS', {
         expr: $Expr,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | '!' Expr %prec NEGATION
     {
       $$ = yy.Expression.create('NEGATION', {
         expr: $Expr,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | Expr MulOp Expr %prec MULOP
@@ -346,7 +346,7 @@ Expr
         operator: $MulOp,
         left: $Expr1,
         right: $Expr2,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | Expr AddOp Expr %prec ADDOP
@@ -355,7 +355,7 @@ Expr
         operator: $AddOp,
         left: $Expr1,
         right: $Expr2,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | Expr RelOp Expr %prec RELOP
@@ -364,7 +364,7 @@ Expr
         operator: $RelOp,
         left: $Expr1,
         right: $Expr2,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | Expr '&&' Expr
@@ -373,7 +373,7 @@ Expr
         operator: '&&',
         left: $Expr1,
         right: $Expr2,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | Expr '||' Expr
@@ -382,7 +382,7 @@ Expr
         operator: '||',
         left: $Expr1,
         right: $Expr2,
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | '(' Expr ')'
@@ -395,7 +395,7 @@ Number
       $$ = yy.Expression.create('OBJECT', {
         type: 'int',
         value: Number(yytext),
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   ;
@@ -406,7 +406,7 @@ String
       $$ = yy.Expression.create('OBJECT', {
         type: 'string',
         value: String(yytext),
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   ;
@@ -417,7 +417,7 @@ Logical
       $$ = yy.Expression.create('OBJECT', {
         type: 'boolean',
         value: JSON.parse(yytext),
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   | FALSE
@@ -425,7 +425,7 @@ Logical
       $$ = yy.Expression.create('OBJECT', {
         type: 'boolean',
         value: JSON.parse(yytext),
-        loc: _$[_$.length-1]
+        loc: _$
       });
     }
   ;

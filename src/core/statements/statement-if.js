@@ -20,12 +20,22 @@ function semanticCheck() {
   _this.expr.semanticCheck();
 
   if (_this.expr.type !== 'boolean') {
-    parseError('Wrong type of if condition: ' + _this.expr.type + ' instead of boolean', _this);
+    parseError(
+      'Wrong type of if condition: ' + _this.expr.type + ' instead of boolean',
+      _this.loc,
+      _this
+    );
   }
 
   // Array only if it's declaration - can be ommited
   if (!_.isArray(_this.right)) {
     _this.right.semanticCheck();
+  } else {
+    parseError(
+      'Declaration as only instruction in if',
+      _this.right[0].loc,
+      _this
+    );
   }
 
   if (_this.wrong !== undefined) {

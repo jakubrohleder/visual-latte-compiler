@@ -26,7 +26,7 @@
     if($scope.folder) {
       $scope.size = Object.keys($scope.content).length;
     } else {
-      $scope.size = $scope.content.split("\n").length;
+      $scope.firstLine = $scope.content.split("\n")[0];
     }
 
     $scope.show = show;

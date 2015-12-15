@@ -19,6 +19,7 @@ function Scope(opts) {
 
   opts = opts || {};
 
+  _this.root = opts.root || false;
   _this.functions = {};
   _this.variables = {};
   _this.elements = [];
@@ -53,7 +54,11 @@ function addVariable(variable) {
 
   if (_this.variables[variable.ident] !== undefined) {
     if(_this.variables[variable.ident].scope === _this) {
-      parseError('Variable ' + variable.ident + ' already defined', {loc: variable.loc});
+      parseError(
+        'Variable ' + variable.ident + ' already defined',
+        variable.loc,
+        _this
+      );
     } else {
       console.log('Redefining variable', variable.ident);
     }
@@ -112,4 +117,8 @@ function semanticCheck() {
   _.forEach(_this.elements, function (element) {
     element.semanticCheck();
   });
+
+  if (_this.root === true && _this.functions.main === undefined) {
+    parseError('Main function not declared', _this);
+  }
 }

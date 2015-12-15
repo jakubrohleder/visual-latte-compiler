@@ -1,5 +1,6 @@
 var Statement = require('./statement-prototype.js');
 var parseError = require('../error').parseError;
+var _ = require('lodash');
 
 module.exports = StatementWhile;
 
@@ -19,8 +20,16 @@ function semanticCheck() {
   _this.expr.semanticCheck();
 
   if (_this.expr.type !== 'boolean') {
-    parseError('Wrong type of if condition: ' + _this.expr.type + ' instead of boolean', _this);
+    parseError(
+      'Wrong type of if condition: ' + _this.expr.type + ' instead of boolean',
+      _this.loc,
+      _this
+    );
   }
 
-  _this.stmt.semanticCheck();
+  if (!_.isArray(_this.stmt)) {
+    _this.stmt.semanticCheck();
+  } else {
+    parseError('Declaration as only instruction in while', {loc: _this.stmt[0].loc});
+  }
 }

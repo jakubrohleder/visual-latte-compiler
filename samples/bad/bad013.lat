@@ -1,3 +1,4 @@
+// Adding int to string
 int main() {
       string x ;
       x = "pi" + 1 ;
