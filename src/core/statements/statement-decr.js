@@ -5,7 +5,7 @@ module.exports = StatementDecr;
 
 StatementDecr.prototype = Object.create(Statement.prototype);
 StatementDecr.prototype.constructor = StatementDecr;
-StatementDecr.prototype.staticCheck = staticCheck;
+StatementDecr.prototype.semanticCheck = semanticCheck;
 
 function StatementDecr(opts) {
   var _this = this;
@@ -13,7 +13,7 @@ function StatementDecr(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   if(_this.scope.getVariable(_this.ident) === false) {

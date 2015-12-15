@@ -5,7 +5,7 @@ module.exports = StatementWhile;
 
 StatementWhile.prototype = Object.create(Statement.prototype);
 StatementWhile.prototype.constructor = StatementWhile;
-StatementWhile.prototype.staticCheck = staticCheck;
+StatementWhile.prototype.semanticCheck = semanticCheck;
 
 function StatementWhile(opts) {
   var _this = this;
@@ -13,14 +13,14 @@ function StatementWhile(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   if (_this.expr.type !== 'boolean') {
     parseError('Wrong type of if condition: ' + _this.expr.type + ' instead of boolean', _this);
   }
 
-  _this.stmt.staticCheck();
+  _this.stmt.semanticCheck();
 }

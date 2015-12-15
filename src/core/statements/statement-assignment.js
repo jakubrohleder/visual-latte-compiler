@@ -5,7 +5,7 @@ module.exports = StatementAssignment;
 
 StatementAssignment.prototype = Object.create(Statement.prototype);
 StatementAssignment.prototype.constructor = StatementAssignment;
-StatementAssignment.prototype.staticCheck = staticCheck;
+StatementAssignment.prototype.semanticCheck = semanticCheck;
 
 function StatementAssignment(opts) {
   var _this = this;
@@ -13,10 +13,10 @@ function StatementAssignment(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   if(_this.scope.getVariable(_this.ident) === false) {
     parseError('Undeclared variable in assigment: ' + _this.ident, _this);

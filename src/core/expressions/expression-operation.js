@@ -5,7 +5,7 @@ module.exports = ExpressionOperation;
 
 ExpressionOperation.prototype = Object.create(Expression.prototype);
 ExpressionOperation.prototype.constructor = ExpressionOperation;
-ExpressionOperation.prototype.staticCheck = staticCheck;
+ExpressionOperation.prototype.semanticCheck = semanticCheck;
 
 function ExpressionOperation(opts) {
   var _this = this;
@@ -13,11 +13,11 @@ function ExpressionOperation(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.left.staticCheck();
-  _this.right.staticCheck();
+  _this.left.semanticCheck();
+  _this.right.semanticCheck();
 
   if (_this.left.type !== _this.right.type) {
     parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);

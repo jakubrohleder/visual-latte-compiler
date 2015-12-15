@@ -1,6 +1,6 @@
 module.exports = Element;
 
-Element.prototype.staticCheck = staticCheck;
+Element.prototype.semanticCheck = semanticCheck;
 
 function Element(opts) {
   var _this = this;
@@ -10,8 +10,7 @@ function Element(opts) {
   }
 }
 
-function staticCheck() {
-  var _this = this;
+function semanticCheck() {
+  // var _this = this;
 
-  _this.checked = true;
 }

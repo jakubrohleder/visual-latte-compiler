@@ -28199,7 +28199,7 @@ process.umask = function() { return 0; };
 },{}],35:[function(require,module,exports){
 module.exports = Element;
 
-Element.prototype.staticCheck = staticCheck;
+Element.prototype.semanticCheck = semanticCheck;
 
 function Element(opts) {
   var _this = this;
@@ -28209,10 +28209,9 @@ function Element(opts) {
   }
 }
 
-function staticCheck() {
-  var _this = this;
+function semanticCheck() {
+  // var _this = this;
 
-  _this.checked = true;
 }
 
 },{}],36:[function(require,module,exports){
@@ -28323,7 +28322,7 @@ module.exports = ExpressionComparison;
 
 ExpressionComparison.prototype = Object.create(Expression.prototype);
 ExpressionComparison.prototype.constructor = ExpressionComparison;
-ExpressionComparison.prototype.staticCheck = staticCheck;
+ExpressionComparison.prototype.semanticCheck = semanticCheck;
 
 function ExpressionComparison(opts) {
   var _this = this;
@@ -28331,11 +28330,11 @@ function ExpressionComparison(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.left.staticCheck();
-  _this.right.staticCheck();
+  _this.left.semanticCheck();
+  _this.right.semanticCheck();
 
   if (_this.left.type !== _this.right.type) {
     parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
@@ -28353,7 +28352,7 @@ module.exports = ExpressionFuncall;
 
 ExpressionFuncall.prototype = Object.create(Expression.prototype);
 ExpressionFuncall.prototype.constructor = ExpressionFuncall;
-ExpressionFuncall.prototype.staticCheck = staticCheck;
+ExpressionFuncall.prototype.semanticCheck = semanticCheck;
 
 function ExpressionFuncall(opts) {
   var _this = this;
@@ -28361,7 +28360,7 @@ function ExpressionFuncall(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
   var fun = _this.scope.getFunction(_this.ident);
 
@@ -28375,7 +28374,7 @@ function staticCheck() {
 
 
   _.forEach(_this.args, function(arg) {
-    arg.staticCheck();
+    arg.semanticCheck();
   });
 }
 
@@ -28387,7 +28386,7 @@ module.exports = ExpressionLogical;
 
 ExpressionLogical.prototype = Object.create(Expression.prototype);
 ExpressionLogical.prototype.constructor = ExpressionLogical;
-ExpressionLogical.prototype.staticCheck = staticCheck;
+ExpressionLogical.prototype.semanticCheck = semanticCheck;
 
 function ExpressionLogical(opts) {
   var _this = this;
@@ -28395,11 +28394,11 @@ function ExpressionLogical(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.left.staticCheck();
-  _this.right.staticCheck();
+  _this.left.semanticCheck();
+  _this.right.semanticCheck();
 
   if (_this.left.type !== _this.right.type) {
     parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
@@ -28415,7 +28414,7 @@ module.exports = ExpressionNegation;
 
 ExpressionNegation.prototype = Object.create(Expression.prototype);
 ExpressionNegation.prototype.constructor = ExpressionNegation;
-ExpressionNegation.prototype.staticCheck = staticCheck;
+ExpressionNegation.prototype.semanticCheck = semanticCheck;
 
 function ExpressionNegation(opts) {
   var _this = this;
@@ -28423,10 +28422,10 @@ function ExpressionNegation(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   _this.type = _this.expr.type;
 }
@@ -28453,7 +28452,7 @@ module.exports = ExpressionOperation;
 
 ExpressionOperation.prototype = Object.create(Expression.prototype);
 ExpressionOperation.prototype.constructor = ExpressionOperation;
-ExpressionOperation.prototype.staticCheck = staticCheck;
+ExpressionOperation.prototype.semanticCheck = semanticCheck;
 
 function ExpressionOperation(opts) {
   var _this = this;
@@ -28461,11 +28460,11 @@ function ExpressionOperation(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.left.staticCheck();
-  _this.right.staticCheck();
+  _this.left.semanticCheck();
+  _this.right.semanticCheck();
 
   if (_this.left.type !== _this.right.type) {
     parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
@@ -28496,7 +28495,7 @@ module.exports = ExpressionUminus;
 
 ExpressionUminus.prototype = Object.create(Expression.prototype);
 ExpressionUminus.prototype.constructor = ExpressionUminus;
-ExpressionUminus.prototype.staticCheck = staticCheck;
+ExpressionUminus.prototype.semanticCheck = semanticCheck;
 
 function ExpressionUminus(opts) {
   var _this = this;
@@ -28504,10 +28503,10 @@ function ExpressionUminus(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   _this.type = _this.expr.type;
 }
@@ -28520,7 +28519,7 @@ module.exports = ExpressionVariable;
 
 ExpressionVariable.prototype = Object.create(Expression.prototype);
 ExpressionVariable.prototype.constructor = ExpressionVariable;
-ExpressionVariable.prototype.staticCheck = staticCheck;
+ExpressionVariable.prototype.semanticCheck = semanticCheck;
 
 function ExpressionVariable(opts) {
   var _this = this;
@@ -28528,7 +28527,7 @@ function ExpressionVariable(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   if(_this.scope.getVariable(_this.ident) === false) {
@@ -28548,7 +28547,7 @@ exports.constructor = Function;
 
 Function.prototype = Object.create(Element.prototype);
 Function.prototype.constructor = Function;
-Function.prototype.staticCheck = staticCheck;
+Function.prototype.semanticCheck = semanticCheck;
 
 function Function(opts) {
   var _this = this;
@@ -28562,10 +28561,10 @@ function create(opts) {
   return new Function(opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.scope.staticCheck();
+  _this.scope.semanticCheck();
 }
 
 },{"./element.js":35,"lodash":32}],48:[function(require,module,exports){
@@ -28583,7 +28582,7 @@ Scope.prototype.addVariables = addVariables;
 Scope.prototype.addElement = addElement;
 Scope.prototype.getVariable = getVariable;
 Scope.prototype.getFunction = getFunction;
-Scope.prototype.staticCheck = staticCheck;
+Scope.prototype.semanticCheck = semanticCheck;
 
 function Scope(opts) {
   var _this = this;
@@ -28677,13 +28676,11 @@ function getFunction(ident) {
   }
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.checked = true;
-
   _.forEach(_this.elements, function (element) {
-    element.staticCheck();
+    element.semanticCheck();
   });
 }
 
@@ -28811,7 +28808,7 @@ module.exports = StatementAssignment;
 
 StatementAssignment.prototype = Object.create(Statement.prototype);
 StatementAssignment.prototype.constructor = StatementAssignment;
-StatementAssignment.prototype.staticCheck = staticCheck;
+StatementAssignment.prototype.semanticCheck = semanticCheck;
 
 function StatementAssignment(opts) {
   var _this = this;
@@ -28819,10 +28816,10 @@ function StatementAssignment(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   if(_this.scope.getVariable(_this.ident) === false) {
     parseError('Undeclared variable in assigment: ' + _this.ident, _this);
@@ -28842,7 +28839,7 @@ module.exports = StatementDeclaration;
 
 StatementDeclaration.prototype = Object.create(Statement.prototype);
 StatementDeclaration.prototype.constructor = StatementDeclaration;
-StatementDeclaration.prototype.staticCheck = staticCheck;
+StatementDeclaration.prototype.semanticCheck = semanticCheck;
 
 function StatementDeclaration(opts) {
   var _this = this;
@@ -28850,7 +28847,7 @@ function StatementDeclaration(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   _this.scope.addVariable(_this);
@@ -28863,7 +28860,7 @@ module.exports = StatementDecr;
 
 StatementDecr.prototype = Object.create(Statement.prototype);
 StatementDecr.prototype.constructor = StatementDecr;
-StatementDecr.prototype.staticCheck = staticCheck;
+StatementDecr.prototype.semanticCheck = semanticCheck;
 
 function StatementDecr(opts) {
   var _this = this;
@@ -28871,7 +28868,7 @@ function StatementDecr(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   if(_this.scope.getVariable(_this.ident) === false) {
@@ -28884,12 +28881,13 @@ function staticCheck() {
 },{"../error":36,"./statement-prototype.js":56}],54:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
 var parseError = require('../error').parseError;
+var _ = require('lodash');
 
 module.exports = StatementIf;
 
 StatementIf.prototype = Object.create(Statement.prototype);
 StatementIf.prototype.constructor = StatementIf;
-StatementIf.prototype.staticCheck = staticCheck;
+StatementIf.prototype.semanticCheck = semanticCheck;
 
 function StatementIf(opts) {
   var _this = this;
@@ -28897,21 +28895,27 @@ function StatementIf(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   if (_this.expr.type !== 'boolean') {
     parseError('Wrong type of if condition: ' + _this.expr.type + ' instead of boolean', _this);
   }
 
-  _this.right.staticCheck();
+  // Array only if it's declaration - can be ommited
+  if (!_.isArray(_this.right)) {
+    _this.right.semanticCheck();
+  }
+
   if (_this.wrong !== undefined) {
-    _this.wrong.staticCheck();
+    _this.wrong.semanticCheck();
   }
 }
-},{"../error":36,"./statement-prototype.js":56}],55:[function(require,module,exports){
+
+
+},{"../error":36,"./statement-prototype.js":56,"lodash":32}],55:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
 var parseError = require('../error').parseError;
 
@@ -28919,7 +28923,7 @@ module.exports = StatementIncr;
 
 StatementIncr.prototype = Object.create(Statement.prototype);
 StatementIncr.prototype.constructor = StatementIncr;
-StatementIncr.prototype.staticCheck = staticCheck;
+StatementIncr.prototype.semanticCheck = semanticCheck;
 
 function StatementIncr(opts) {
   var _this = this;
@@ -28929,7 +28933,7 @@ function StatementIncr(opts) {
   _this.ident = opts.ident;
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   if(_this.scope.getVariable(_this.ident) === false) {
@@ -28961,7 +28965,7 @@ module.exports = StatementReturn;
 
 StatementReturn.prototype = Object.create(Statement.prototype);
 StatementReturn.prototype.constructor = StatementReturn;
-StatementReturn.prototype.staticCheck = staticCheck;
+StatementReturn.prototype.semanticCheck = semanticCheck;
 
 function StatementReturn(opts) {
   var _this = this;
@@ -28969,11 +28973,11 @@ function StatementReturn(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   if (_this.expr !== undefined) {
-    _this.expr.staticCheck();
+    _this.expr.semanticCheck();
     if (_this.function.type !== _this.expr.type) {
       parseError('Wrong type of return: ' + _this.expr.type + ' instead of ' + _this.function.type, _this);
     }
@@ -28992,7 +28996,7 @@ module.exports = StatementWhile;
 
 StatementWhile.prototype = Object.create(Statement.prototype);
 StatementWhile.prototype.constructor = StatementWhile;
-StatementWhile.prototype.staticCheck = staticCheck;
+StatementWhile.prototype.semanticCheck = semanticCheck;
 
 function StatementWhile(opts) {
   var _this = this;
@@ -29000,16 +29004,16 @@ function StatementWhile(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   if (_this.expr.type !== 'boolean') {
     parseError('Wrong type of if condition: ' + _this.expr.type + ' instead of boolean', _this);
   }
 
-  _this.stmt.staticCheck();
+  _this.stmt.semanticCheck();
 }
 
 },{"../error":36,"./statement-prototype.js":56}],59:[function(require,module,exports){
@@ -29097,10 +29101,7 @@ module.exports={
     "bad024.lat": "int main() {\n    if (false) \n       return 0;\n}\n",
     "bad025.lat": "int main() {\n   return f(3); \n}\n\nint f(int x) {\n    if (x<0) \n       return x;\n}\n",
     "bad026.lat": "// Assigning string to int variable.\n\nint main () {\n int x;\n  x = \"foo\"+\"bar\";\n return 0 ;\n}",
-    "bad027.lat": "// Assigning int to string variable.\n\nint main () {\n string x;\n x = 1;\n return 0 ;\n}",
-    "test": {
-      "test.lat": ""
-    }
+    "bad027.lat": "// Assigning int to string variable.\n\nint main () {\n string x;\n x = 1;\n return 0 ;\n}"
   },
   "good": {
     "core001.lat": "int main() {\n\tprintInt(fac(10));\n\tprintInt(rfac(10));\n\tprintInt(mfac(10));\n        printInt(ifac(10));\n        string r ; // just to test blocks \n\t{\n\t  int n = 10;\n\t  int r = 1;\n\t  while (n>0) {\n\t    r = r * n;\n\t    n--;\n\t  }\n\t  printInt(r);\n\t}\n\tprintString (repStr(\"=\",60));\n\tprintString (\"hello */\");\n        printString (\"/* world\") ;\n        return 0 ;\n}\n\nint fac(int a) {\n\tint r;\n\tint n;\n\n\tr = 1;\n\tn = a;\n\twhile (n > 0) {\n\t  r = r * n;\n\t  n = n - 1;\n\t}\n\treturn r;\n}\n\nint rfac(int n) {\n\tif (n == 0)\n\t  return 1;\n\telse\n\t  return n * rfac(n-1);\n}\n\nint mfac(int n) {\n\tif (n == 0)\n\t  return 1;\n\telse\n\t  return n * nfac(n-1);\n}\n\nint nfac(int n) {\n\tif (n != 0)\n\t  return mfac(n-1) * n;\n\telse\n\t  return 1;\n}\n\nint ifac(int n) { return ifac2f(1,n); }\n\nint ifac2f(int l, int h) {\n        if (l == h)\n          return l;\n        if (l > h)\n          return 1;\n        int m;\n        m = (l + h) / 2;\n        return ifac2f(l,m) * ifac2f(m+1,h);\n}\n\nstring repStr(string s, int n) {\n  string r = \"\";\n  int i = 0;\n  while(i<n) {\n    r = r + s;\n    i++;\n  }\n return r;\n}",
@@ -29156,6 +29157,10 @@ module.exports={
       "array002.lat": "int [] doubleArray (int [] a){\n  int [] res = new int [a . length];\n  int i = 0 ;\n  for (int n : a){\n    res [i] = 2 * n ;\n    i ++ ;\n  }\n  return res ;\n}\n\nvoid shiftLeft (int [] a){\n  int x = a [0];\n  int i = 0 ;\n  while (i < a.length - 1){\n    a [i] = a [i + 1];\n    i ++ ;\n  }\n  a[a.length - 1]= x ;\n  return;\n }\n\nint scalProd(int[] a, int[] b) {\n  int res = 0;\n  int i = 0;\n  while (i < a.length) {\n    res = res + a[i] * b[i];\n    i++;\n  }\n  return res;\n}\n\nint main () {\n  int [] a = new int [5];\n  int i = 0 ;\n  while (i < a.length){\n    a [i]= i ;\n    i ++ ;\n    }\n  shiftLeft (a);\n  int [] b = doubleArray (a);\n  for (int x : a)printInt (x);\n  for (int x : b)printInt (x);\n  printInt(scalProd(a,b));\n  return 0 ;\n}\n ",
       "array002.output": "1\n2\n3\n4\n0\n2\n4\n6\n8\n0\n60\n"
     },
+    "objects2": {
+      "shapes.lat": "class Node {\n  Shape elem;\n  Node next;\n\n  void setElem(Shape c) { elem = c; }\n\n  void setNext(Node n) { next = n; }\n\n  Shape getElem() { return elem; }\n\n  Node getNext() { return next; }\n}\n\nclass Stack {\n  Node head;\n\n  void push(Shape c) {\n    Node newHead = new Node;\n    newHead.setElem(c);\n    newHead.setNext(head);\n    head = newHead;\n  }\n\n  boolean isEmpty() {\n    return head==(Node)null;\n  }\n\n  Shape top() {\n    return head.getElem();\n  }\n\n  void pop() {\n    head = head.getNext();\n  }\n}\n\nclass Shape {\n  void tell () {\n    printString(\"I'm a shape\");\n  }\n\n  void tellAgain() {\n     printString(\"I'm just a shape\");\n  }\n}\n\nclass Rectangle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a rectangle\");\n  }\n}\n\nclass Circle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a circle\");\n  }\n}\n\nclass Square extends Rectangle {\n  void tellAgain() {\n    printString(\"I'm really a square\");\n  }\n}\n\nint main() {\n  Stack stk = new Stack;\n  Shape s = new Shape;\n  stk.push(s);\n  s = new Rectangle;\n  stk.push(s);\n  s = new Square;\n  stk.push(s);\n  s = new Circle;\n  stk.push(s);\n  while (!stk.isEmpty()) {\n    s = stk.top();\n    s.tell();\n    s.tellAgain();\n    stk.pop();\n  }\n  return 0;\n}\n",
+      "shapes.output": "I'm a shape\nI'm really a circle\nI'm a shape\nI'm really a square\nI'm a shape\nI'm really a rectangle\nI'm a shape\nI'm just a shape\n"
+    },
     "objects1": {
       "counter.lat": "int main () {\n  Counter c;\n  c = new Counter;\n  c.incr();\n  c.incr();\n  c.incr();\n  int x = c.value();\n  printInt(x);\n  return 0;\n}\n\nclass Counter {\n  int val;\n\n  void incr () {val++; return;}\n\n  int value () {return val;}\n\n}\n",
       "counter.output": "3\n",
@@ -29165,10 +29170,6 @@ module.exports={
       "points.output": "5\n9\n7\n2\n",
       "queue.lat": "class Node {\n  int elem;\n  Node next;\n\n  void setElem (int e)  { elem = e; }\n  void setNext (Node n) { next = n; }\n\n  int  getElem () { return elem; }\n  Node getNext () { return next; }\n\n}\n\nclass IntQueue {\n  Node front;\n  Node rear;\n\n  boolean isEmpty () { return front == (Node)null; }\n\n  void insert (int x) {\n    Node last = new Node;\n    last.setElem(x);\n    if (self.isEmpty())\n      front = last;\n    else \n      rear.setNext(last);\n    rear = last;\n  }\n\n  int first () { return front.getElem(); }\n\n  void rmFirst () {\n    front = front.getNext();\n  }\n\n  int size () {\n      Node n = front;\n      int res = 0;\n      while (n != (Node)null) {\n        n = n.getNext();\n        res++;\n      }\n     return res;\n  }\n}\n\nint f (int x) {\n  return x*x + 3;\n}\n\nint main () {\n  IntQueue q = new IntQueue;\n  q.insert(f(3));\n  q.insert(5);\n  q.insert(7);\n  printInt(q.first());\n  q.rmFirst();\n  printInt(q.size());\n  return 0;\n}\n\n     ",
       "queue.output": "12\n2\n"
-    },
-    "objects2": {
-      "shapes.lat": "class Node {\n  Shape elem;\n  Node next;\n\n  void setElem(Shape c) { elem = c; }\n\n  void setNext(Node n) { next = n; }\n\n  Shape getElem() { return elem; }\n\n  Node getNext() { return next; }\n}\n\nclass Stack {\n  Node head;\n\n  void push(Shape c) {\n    Node newHead = new Node;\n    newHead.setElem(c);\n    newHead.setNext(head);\n    head = newHead;\n  }\n\n  boolean isEmpty() {\n    return head==(Node)null;\n  }\n\n  Shape top() {\n    return head.getElem();\n  }\n\n  void pop() {\n    head = head.getNext();\n  }\n}\n\nclass Shape {\n  void tell () {\n    printString(\"I'm a shape\");\n  }\n\n  void tellAgain() {\n     printString(\"I'm just a shape\");\n  }\n}\n\nclass Rectangle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a rectangle\");\n  }\n}\n\nclass Circle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a circle\");\n  }\n}\n\nclass Square extends Rectangle {\n  void tellAgain() {\n    printString(\"I'm really a square\");\n  }\n}\n\nint main() {\n  Stack stk = new Stack;\n  Shape s = new Shape;\n  stk.push(s);\n  s = new Rectangle;\n  stk.push(s);\n  s = new Square;\n  stk.push(s);\n  s = new Circle;\n  stk.push(s);\n  while (!stk.isEmpty()) {\n    s = stk.top();\n    s.tell();\n    s.tellAgain();\n    stk.pop();\n  }\n  return 0;\n}\n",
-      "shapes.output": "I'm a shape\nI'm really a circle\nI'm a shape\nI'm really a square\nI'm a shape\nI'm really a rectangle\nI'm a shape\nI'm just a shape\n"
     },
     "struct": {
       "list.lat": "class list {\n  int elem;\n  list next;\n}\n\nint main() {\n  printInt(length(fromTo(1,50)));\n  printInt(length2(fromTo(1,100)));\n  return 0;\n}\n\nint head (list xs) {\n  return xs . elem;\n}\n \nlist cons (int x, list xs) {\n  list n;\n  n = new list;\n  n.elem = x;\n  n.next = xs;\n  return n;\n}\n\nint length (list xs) {\n  if (xs==(list)null)\n    return 0;\n  else\n    return 1 + length (xs.next);\n}\n\nlist fromTo (int m, int n) {\n  if (m>n)\n    return (list)null;\n  else \n    return cons (m,fromTo (m+1,n));\n}\n\nint length2 (list xs) {\n  int res = 0;\n  while (xs != (list)null) {\n    res++;\n    xs = xs.next;\n  }\n  return res;\n}\n",
@@ -29232,7 +29233,7 @@ function parse(code) {
   parser.yy.VariableReference = VariableReference;
 
   tree = parser.parse(code);
-  tree.staticCheck();
+  tree.semanticCheck();
 
   return tree;
 }

@@ -7,7 +7,7 @@ exports.constructor = Function;
 
 Function.prototype = Object.create(Element.prototype);
 Function.prototype.constructor = Function;
-Function.prototype.staticCheck = staticCheck;
+Function.prototype.semanticCheck = semanticCheck;
 
 function Function(opts) {
   var _this = this;
@@ -21,8 +21,8 @@ function create(opts) {
   return new Function(opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.scope.staticCheck();
+  _this.scope.semanticCheck();
 }

@@ -5,7 +5,7 @@ module.exports = ExpressionVariable;
 
 ExpressionVariable.prototype = Object.create(Expression.prototype);
 ExpressionVariable.prototype.constructor = ExpressionVariable;
-ExpressionVariable.prototype.staticCheck = staticCheck;
+ExpressionVariable.prototype.semanticCheck = semanticCheck;
 
 function ExpressionVariable(opts) {
   var _this = this;
@@ -13,7 +13,7 @@ function ExpressionVariable(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   if(_this.scope.getVariable(_this.ident) === false) {

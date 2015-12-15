@@ -5,7 +5,7 @@ module.exports = StatementIncr;
 
 StatementIncr.prototype = Object.create(Statement.prototype);
 StatementIncr.prototype.constructor = StatementIncr;
-StatementIncr.prototype.staticCheck = staticCheck;
+StatementIncr.prototype.semanticCheck = semanticCheck;
 
 function StatementIncr(opts) {
   var _this = this;
@@ -15,7 +15,7 @@ function StatementIncr(opts) {
   _this.ident = opts.ident;
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   if(_this.scope.getVariable(_this.ident) === false) {

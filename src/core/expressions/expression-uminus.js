@@ -4,7 +4,7 @@ module.exports = ExpressionUminus;
 
 ExpressionUminus.prototype = Object.create(Expression.prototype);
 ExpressionUminus.prototype.constructor = ExpressionUminus;
-ExpressionUminus.prototype.staticCheck = staticCheck;
+ExpressionUminus.prototype.semanticCheck = semanticCheck;
 
 function ExpressionUminus(opts) {
   var _this = this;
@@ -12,10 +12,10 @@ function ExpressionUminus(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   _this.type = _this.expr.type;
 }

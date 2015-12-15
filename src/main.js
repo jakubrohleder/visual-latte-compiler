@@ -53,7 +53,7 @@ function parse(code) {
   parser.yy.VariableReference = VariableReference;
 
   tree = parser.parse(code);
-  tree.staticCheck();
+  tree.semanticCheck();
 
   return tree;
 }

@@ -5,7 +5,7 @@ module.exports = StatementReturn;
 
 StatementReturn.prototype = Object.create(Statement.prototype);
 StatementReturn.prototype.constructor = StatementReturn;
-StatementReturn.prototype.staticCheck = staticCheck;
+StatementReturn.prototype.semanticCheck = semanticCheck;
 
 function StatementReturn(opts) {
   var _this = this;
@@ -13,11 +13,11 @@ function StatementReturn(opts) {
   Statement.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
   if (_this.expr !== undefined) {
-    _this.expr.staticCheck();
+    _this.expr.semanticCheck();
     if (_this.function.type !== _this.expr.type) {
       parseError('Wrong type of return: ' + _this.expr.type + ' instead of ' + _this.function.type, _this);
     }

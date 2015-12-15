@@ -6,7 +6,7 @@ module.exports = ExpressionFuncall;
 
 ExpressionFuncall.prototype = Object.create(Expression.prototype);
 ExpressionFuncall.prototype.constructor = ExpressionFuncall;
-ExpressionFuncall.prototype.staticCheck = staticCheck;
+ExpressionFuncall.prototype.semanticCheck = semanticCheck;
 
 function ExpressionFuncall(opts) {
   var _this = this;
@@ -14,7 +14,7 @@ function ExpressionFuncall(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
   var fun = _this.scope.getFunction(_this.ident);
 
@@ -28,6 +28,6 @@ function staticCheck() {
 
 
   _.forEach(_this.args, function(arg) {
-    arg.staticCheck();
+    arg.semanticCheck();
   });
 }

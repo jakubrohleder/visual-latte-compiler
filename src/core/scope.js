@@ -12,7 +12,7 @@ Scope.prototype.addVariables = addVariables;
 Scope.prototype.addElement = addElement;
 Scope.prototype.getVariable = getVariable;
 Scope.prototype.getFunction = getFunction;
-Scope.prototype.staticCheck = staticCheck;
+Scope.prototype.semanticCheck = semanticCheck;
 
 function Scope(opts) {
   var _this = this;
@@ -106,12 +106,10 @@ function getFunction(ident) {
   }
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.checked = true;
-
   _.forEach(_this.elements, function (element) {
-    element.staticCheck();
+    element.semanticCheck();
   });
 }

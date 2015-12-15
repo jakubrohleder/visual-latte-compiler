@@ -4,7 +4,7 @@ module.exports = ExpressionNegation;
 
 ExpressionNegation.prototype = Object.create(Expression.prototype);
 ExpressionNegation.prototype.constructor = ExpressionNegation;
-ExpressionNegation.prototype.staticCheck = staticCheck;
+ExpressionNegation.prototype.semanticCheck = semanticCheck;
 
 function ExpressionNegation(opts) {
   var _this = this;
@@ -12,10 +12,10 @@ function ExpressionNegation(opts) {
   Expression.call(_this, opts);
 }
 
-function staticCheck() {
+function semanticCheck() {
   var _this = this;
 
-  _this.expr.staticCheck();
+  _this.expr.semanticCheck();
 
   _this.type = _this.expr.type;
 }
