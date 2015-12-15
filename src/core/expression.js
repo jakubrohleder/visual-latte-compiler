@@ -20,6 +20,7 @@ function create(type, opts) {
   var _this = this
 
   opts.scope = _this.state.currentScope;
+  opts.function = _this.state.currentFunction;
 
   switch (type) {
     case 'UMINUS':

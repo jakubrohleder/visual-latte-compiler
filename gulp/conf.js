@@ -20,7 +20,8 @@ exports.paths = {
   },
   lib: {
     src: 'src',
-    e2e: 'e2e'
+    e2e: 'e2e',
+    samples: 'samples'
   }
 };
 

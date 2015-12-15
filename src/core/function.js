@@ -1,4 +1,5 @@
 var Element = require('./element.js');
+var _ = require('lodash');
 var exports = module.exports = {};
 
 exports.create = create;
@@ -22,8 +23,6 @@ function create(opts) {
 
 function staticCheck() {
   var _this = this;
-
-  _this.checked = true;
 
   _this.scope.staticCheck();
 }

@@ -3,7 +3,7 @@
   /* global $:false*/
 
   var app = angular.module('visualLatteCompiler');
-
+  // console.log($.site.settings.modules);
   $.each($.site.settings.modules, function(index, module) {
     var fn = $.fn[module];
     var name = 'ui' + module.charAt(0).toUpperCase() + module.substring(1);
@@ -28,11 +28,25 @@
 
           scope.options.directive = scope;
 
-          scope.options.onChange = function(value) {
-            $timeout(function() {
-              scope.ngModel = value;
-            });
-          };
+          if (name === 'uiCheckbox') {
+            scope.options.onChecked = function() {
+              $timeout(function() {
+                scope.ngModel = true;
+              });
+            };
+
+            scope.options.onUnchecked = function() {
+              $timeout(function() {
+                scope.ngModel = false;
+              });
+            };
+          } else {
+            scope.options.onChange = function(value) {
+              $timeout(function() {
+                scope.ngModel = value;
+              });
+            };
+          }
 
           $timeout(function() {
             var element = iElement[module](_.clone(scope.options));

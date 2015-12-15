@@ -27,13 +27,13 @@ L?\"(\\.|[^\\"])*\"       return 'STRING_LITERAL'
 "/"                       return '/'
 "-"                       return '-'
 "+"                       return '+'
-"="                       return '='
 "<"                       return '<'
 "<="                      return '<='
 ">"                       return '>'
 ">="                      return '>='
 "=="                      return '=='
 "!="                      return '!='
+"="                       return '='
 ";"                       return ';'
 ","                       return ','
 <<EOF>>                   return 'EOF'
@@ -88,7 +88,7 @@ FunctionSignature
   : Type Ident '(' Args ')'
     {
       var scope = yy.Scope.create({
-        vars: $Args,
+        variables: $Args,
         parent: yy.state.currentScope
       });
       var fun = yy.Function.create({
@@ -116,7 +116,7 @@ Args
 
 Arg
   : Type Ident
-    {$$ = yy.Variable.create({
+    {$$ = yy.Argument.create({
       type: $Type,
       ident: $Ident,
       loc: _$[_$.length-1]
@@ -125,6 +125,8 @@ Arg
 
 Block
   : '{' Stmts '}'
+    {}
+  | '{' '}'
     {}
   ;
 
@@ -189,8 +191,8 @@ Stmt
     {
       {
         $$ = yy.Statement.create('RETURN', {
-          value: $Expr,
-      loc: _$[_$.length-1]
+          expr: $Expr,
+          loc: _$[_$.length-1]
         });
       }
     }
@@ -205,7 +207,7 @@ Stmt
       $$ = yy.Statement.create('IF', {
         expr: $Expr,
         right: $Stmt,
-        loc: _$[_$.length-1]
+        loc: _$[_$.length-3]
       });
     }
   | IF '(' Expr ')' Stmt ELSE Stmt
@@ -228,7 +230,7 @@ Stmt
   | Expr ';'
     { $$ = $Expr; }
   | ';'
-    {}
+    {$$ = undefined;}
   ;
 
 Items
@@ -291,7 +293,9 @@ Ident
   ;
 
 Exprs
-  : Expr
+  :
+    { $$ = [] }
+  | Expr
     { $$ = [$Expr]; }
   | Exprs ',' Expr
     {
@@ -319,7 +323,7 @@ Expr
       $$ = yy.Expression.create('FUNCALL', {
         args: $Exprs,
         ident: $Ident,
-        loc: _$[_$.length-1]
+        loc: _$[_$.length-4]
       });
     }
   | '-' Expr %prec UMINUS

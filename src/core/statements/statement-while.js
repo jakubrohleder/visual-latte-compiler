@@ -1,4 +1,5 @@
 var Statement = require('./statement-prototype.js');
+var parseError = require('../error').parseError;
 
 module.exports = StatementWhile;
 
@@ -16,5 +17,10 @@ function staticCheck() {
   var _this = this;
 
   _this.expr.staticCheck();
+
+  if (_this.expr.type !== 'boolean') {
+    parseError('Wrong type of if condition: ' + _this.expr.type + ' instead of boolean', _this);
+  }
+
   _this.stmt.staticCheck();
 }

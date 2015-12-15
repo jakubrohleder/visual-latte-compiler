@@ -1,0 +1,61 @@
+<div
+  class="item"
+  style="position: relative"
+  ng-class="{
+    'checked': checked[path],
+    'folder': folder,
+    'file': !folder
+  }"
+>
+  <i
+    class="icon link"
+    ng-click="show()"
+    ng-class="{
+      folder: folder
+    }"
+  ></i>
+  <div class="content">
+    <a
+      class="header link"
+      ng-click="show()">
+      {{name}}
+    </a>
+    <div
+      ng-click="show()"
+      class="description"
+      ng-if="folder"
+    >
+      {{size}} files
+    </div>
+    <div
+      ng-click="show()"
+      class="description"
+      ng-if="!folder && !checked[path]"
+    >
+      {{size}} lines
+    </div>
+    <div class="list" ng-if="folder && checked[path]">
+      <sample
+        class="item"
+        ng-repeat="(key, value) in content | orderBy : checkSort"
+        content="value"
+        name="key"
+        path="getPath(key)"
+        code="code"
+        checked="checked"
+      >
+      </sample>
+    </div>
+  </div>
+  <div class="item-check">
+    <div
+      ui-checkbox
+      class="ui checkbox"
+      ng-if="!folder"
+      ng-model="checked[path]"
+    >
+      <input type="checkbox" ng-model="checked[path]">
+      <label></label>
+    </div>
+  </div>
+</div>

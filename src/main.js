@@ -1,8 +1,7 @@
 var fs = require('fs');
 var Parser = require('jison').Parser;
-var strip = require('strip-comments');
+var samples = require('./samples.json');
 
-// var grammar = Hjson.parse(fs.readFileSync(__dirname + '/syntax.json', 'utf8'));
 var grammar = fs.readFileSync(__dirname + '/syntax.jison', 'utf8');
 
 var Expression = require('./core/expression.js');
@@ -10,11 +9,14 @@ var Statement = require('./core/statement.js');
 var Scope = require('./core/scope.js');
 var Function = require('./core/function.js');
 var State = require('./core/state.js');
-var Variable = require('./core/variable.js');
+var Argument = require('./core/variables/argument.js');
+var Variable = require('./core/variables/variable.js');
+var VariableReference = require('./core/variables/variable-reference.js');
 
 var exports = module.exports = {};
 
 exports.parse = parse;
+exports.samples = samples;
 
 function parse(code) {
   var parser = new Parser(grammar);
@@ -31,6 +33,13 @@ function parse(code) {
     parent: scope
   });
 
+  Function.create({
+    type: 'void',
+    ident: 'printString',
+    args: [],
+    parent: scope
+  });
+
   state.pushScope(scope);
 
   parser.yy.state = state;
@@ -39,7 +48,9 @@ function parse(code) {
   parser.yy.Statement = Statement.init(state);
   parser.yy.Scope = Scope;
   parser.yy.Function = Function;
+  parser.yy.Argument = Argument;
   parser.yy.Variable = Variable;
+  parser.yy.VariableReference = VariableReference;
 
   tree = parser.parse(code);
   tree.staticCheck();

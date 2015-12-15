@@ -23,5 +23,5 @@ function staticCheck() {
     parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
   }
 
-  _this.type = _this.left.type;
+  _this.type = 'boolean';
 }

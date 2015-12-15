@@ -25,6 +25,7 @@
     "gulp-brfs": "^0.1.0",
     "gulp-browserify": "^0.5.1",
     "gulp-eslint": "~1.0.0",
+    "gulp-file-contents-to-json": "^0.1.2",
     "gulp-filter": "~3.0.1",
     "gulp-flatten": "~0.2.0",
     "gulp-inject": "~3.0.0",

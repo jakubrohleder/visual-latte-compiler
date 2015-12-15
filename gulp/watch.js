@@ -40,4 +40,8 @@ gulp.task('watch', ['inject'], function () {
   gulp.watch(path.join(conf.paths.lib.src, '/**/*.*'), function() {
     gulp.start('browserify');
   });
+
+  gulp.watch(path.join(conf.paths.lib.samples, '/**/*'), function() {
+    gulp.start('samples');
+  })
 });

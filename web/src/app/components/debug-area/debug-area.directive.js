@@ -15,12 +15,6 @@
     };
 
     function controller($scope) {
-      $scope.$watch('data.code', function (code) {
-        if(code !== undefined) {
-          $scope.code = code.match(/[^\r\n]+/g);
-        }
-      });
-
       $scope.showDebug = true;
     }
   }

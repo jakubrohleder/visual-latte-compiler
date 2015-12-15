@@ -1,5 +1,6 @@
 var Expression = require('./expression-prototype.js');
 var parseError = require('../error').parseError;
+var _ = require('lodash');
 
 module.exports = ExpressionFuncall;
 
@@ -15,10 +16,18 @@ function ExpressionFuncall(opts) {
 
 function staticCheck() {
   var _this = this;
+  var fun = _this.scope.getFunction(_this.ident);
 
-  if(_this.scope.getFunction(_this.ident) === false) {
-    parseError('Undeclared variable in expression: ' + _this.ident, _this);
+  if (fun === false) {
+    parseError('Undeclared function: ' + _this.ident, _this);
+  } else if (fun.args.length !== _this.args.length) {
+    parseError('Wrong number of arguments for function ' + _this.ident + ' call: ' + _this.args.length + ' instead of ' + fun.args.length, _this);
   }
 
   _this.type = _this.scope.getFunction(_this.ident).type;
+
+
+  _.forEach(_this.args, function(arg) {
+    arg.staticCheck();
+  });
 }

@@ -1,5 +1,6 @@
 var _ = require('lodash');
-var Variable = require('./variable');
+var Variable = require('./variables/variable');
+var parseError = require('./error').parseError;
 
 var exports = module.exports = {};
 
@@ -19,12 +20,15 @@ function Scope(opts) {
   opts = opts || {};
 
   _this.functions = {};
-  _this.vars = {};
+  _this.variables = {};
   _this.elements = [];
 
   _this.parent = opts.parent;
 
-  _.forEach(opts.vars, _this.addVariable.bind(_this));
+  _.forEach(opts.variables, function(variable) {
+    variable.scope = _this;
+    _this.addVariable(variable);
+  });
 }
 
 function create(opts) {
@@ -35,7 +39,11 @@ function addFunction(fun) {
   var _this = this;
 
   if (_this.functions[fun.ident] !== undefined) {
-    console.log('Redefining function', fun.ident);
+    if(_this.functions[fun.ident].scope === _this) {
+      parseError('Function ' + fun.ident + ' already defined', {loc: fun.loc});
+    } else {
+      console.log('Redefining function', fun.ident);
+    }
   }
   _this.functions[fun.ident] = fun;
 }
@@ -43,10 +51,14 @@ function addFunction(fun) {
 function addVariable(variable) {
   var _this = this;
 
-  if (_this.vars[variable.ident] !== undefined) {
-    console.log('Redefining variable', variable.ident);
+  if (_this.variables[variable.ident] !== undefined) {
+    if(_this.variables[variable.ident].scope === _this) {
+      parseError('Variable ' + variable.ident + ' already defined', {loc: variable.loc});
+    } else {
+      console.log('Redefining variable', variable.ident);
+    }
   }
-  _this.vars[variable.ident] = variable;
+  _this.variables[variable.ident] = variable;
 }
 
 function addVariables(type, idents) {
@@ -63,7 +75,9 @@ function addVariables(type, idents) {
 function addElement(element) {
   var _this = this;
 
-  if(_.isArray(element)) {
+  if (element === undefined){
+    return;
+  } else if(_.isArray(element)) {
     _this.elements = _this.elements.concat(_.flattenDeep(element));
   } else {
     _this.elements.push(element);
@@ -72,8 +86,8 @@ function addElement(element) {
 
 function getVariable(ident) {
   var _this = this;
-  if (_this.vars[ident] !== undefined) {
-    return _this.vars[ident];
+  if (_this.variables[ident] !== undefined) {
+    return _this.variables[ident];
   } else if (_this.parent === undefined) {
     return false;
   } else {

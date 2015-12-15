@@ -22,5 +22,9 @@ function staticCheck() {
     parseError('Undeclared variable in assigment: ' + _this.ident, _this);
   }
 
-  _this.type = _this.scope.getVariable(_this.value).type;
+  _this.type = _this.scope.getVariable(_this.ident).type;
+
+  if(_this.expr.type !== _this.type) {
+    parseError('Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type, _this);
+  }
 }

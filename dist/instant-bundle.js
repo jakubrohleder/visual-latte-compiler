@@ -1,496 +1,6 @@
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
-/*!
- * cr <https://github.com/jonschlinkert/cr>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-'use strict';
-
-module.exports = function(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-  return str.replace(/\r\n|\r/g, '\n');
-};
-
-module.exports.strip = function(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-  return str.split('\r').join('');
-};
-
-},{}],3:[function(require,module,exports){
-'use strict';
-
-var isObject = require('is-extendable');
-
-module.exports = function extend(o/*, objects*/) {
-  if (!isObject(o)) { o = {}; }
-
-  var len = arguments.length;
-  for (var i = 1; i < len; i++) {
-    var obj = arguments[i];
-
-    if (isObject(obj)) {
-      assign(o, obj);
-    }
-  }
-  return o;
-};
-
-function assign(a, b) {
-  for (var key in b) {
-    if (hasOwn(b, key)) {
-      a[key] = b[key];
-    }
-  }
-}
-
-/**
- * Returns true if the given `key` is an own property of `obj`.
- */
-
-function hasOwn(obj, key) {
-  return Object.prototype.hasOwnProperty.call(obj, key);
-}
-
-},{"is-extendable":9}],4:[function(require,module,exports){
-'use strict';
-
-var extend = require('extend-shallow');
-var Block = require('./lib/block');
-var Line = require('./lib/line');
-var utils = require('./lib/utils');
-
-/**
- * Extract comments from the given `string`.
- *
- * ```js
- * extract(str, options);
- * ```
- * @param {String} `string`
- * @param {Object} `options` Pass `first: true` to return after the first comment is found.
- * @return {String}
- * @api public
- */
-
-function comments(str, options, fn) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-  return block(str, options, fn)
-    .concat(line(str, options, fn))
-    .sort(compare);
-}
-
-/**
- * Extract block comments from the given `string`.
- *
- * ```js
- * extract.block(str, options);
- * ```
- * @param {String} `string`
- * @param {Object} `options` Pass `first: true` to return after the first comment is found.
- * @return {String}
- * @api public
- */
-
-function block(str, options, fn) {
-  return factory('/*', '*/', Block)(str, options, fn);
-}
-
-/**
- * Extract line comments from the given `string`.
- *
- * ```js
- * extract.line(str, options);
- * ```
- * @param {String} `string`
- * @param {Object} `options` Pass `first: true` to return after the first comment is found.
- * @return {String}
- * @api public
- */
-
-function line(str, options, fn) {
-  return factory('//', '\n', Line)(str, options, fn);
-}
-
-/**
- * Factory for extracting comments from a string.
- *
- * @param {String} `string`
- * @return {String}
- */
-
-function factory(open, close, Ctor) {
-  return function(str, options, fn) {
-    if (typeof str !== 'string') {
-      throw new TypeError('expected a string');
-    }
-
-    if (typeof options === 'function') {
-      fn = options;
-      options = {};
-    }
-
-    if (typeof fn !== 'function') {
-      fn = utils.identity;
-    }
-
-    var opts = extend({}, options);
-    str = utils.normalize(str);
-    str = utils.escapeQuoted(str);
-
-    var res = [];
-    var start = str.indexOf(open);
-    var end = str.indexOf(close, start);
-    var len = str.length;
-    if (end === -1) {
-      end = len;
-    }
-
-    while (start !== -1 && end <= len) {
-      var comment = fn(new Ctor(str, start, end, open, close));
-      res.push(comment);
-      if (opts.first && res.length === 1) {
-        return res;
-      }
-      start = str.indexOf(open, end + 1);
-      end = str.indexOf(close, start);
-      if (end === -1) {
-        end = len;
-      }
-    }
-    return res;
-  };
-}
-
-/**
- * Extract the first comment from the given `string`.
- *
- * @param {String} `string`
- * @param {Object} `options` Pass `first: true` to return after the first comment is found.
- * @return {String}
- * @api public
- */
-
-function first(str) {
-  if (typeof str !== 'string') {
-    throw new TypeError('expected a string');
-  }
-
-  var arr = comments(str, {first: true});
-  if (arr && arr.length) {
-    return arr[0].raw;
-  } else {
-    return null;
-  }
-}
-
-/**
- * Utility for sorting line and block comments into
- * the correct order.
- */
-
-function compare(a, b) {
-  return a.loc.start.pos - b.loc.start.pos;
-}
-
-/**
- * Expose `extract` module
- */
-
-module.exports = comments;
-
-/**
- * Expose `extract.first` method
- */
-
-module.exports.first = first;
-
-/**
- * Expose `extract.block` method
- */
-
-module.exports.block = block;
-
-/**
- * Expose `extract.line` method
- */
-
-module.exports.line = line;
-
-/**
- * Expose `extract.factory` method
- */
-
-module.exports.factory = factory;
-
-},{"./lib/block":5,"./lib/line":7,"./lib/utils":8,"extend-shallow":3}],5:[function(require,module,exports){
-'use strict';
-
-var utils = require('./utils');
-var Code = require('./code');
-
-/**
- * Create a new BlockComment with:
- *   - `str` the entire string
- *   - `idx` the starting index of the comment
- *   - `end` the ending index of the comment
- *   - `open` the opening character(s) of the comment
- *   - `close` the closing character(s) of the comment
- */
-
-function BlockComment(str, idx, end, open, close) {
-  var ol = open.length;
-  var cl = close.length;
-
-  var lineno = utils.linesCount(str, idx);
-  var value = utils.restore(str.slice(idx, end + cl));
-  var inner = value.slice(ol, -cl);
-  var lines = utils.strip(inner.split('\n'));
-
-  this.type = 'block';
-  this.raw = value;
-  this.value = lines.join('\n');
-  this.lines = lines;
-
-  this.loc = {
-    start: {
-      line: lineno,
-      pos: idx
-    },
-    end: {
-      line: lineno + utils.linesCount(value) - 1,
-      pos: end + cl
-    }
-  };
-
-  /**
-   * Add code context
-   */
-
-  this.code = new Code(str, this);
-}
-
-/**
- * expose `BlockComment`
- */
-
-module.exports = BlockComment;
-
-},{"./code":6,"./utils":8}],6:[function(require,module,exports){
-'use strict';
-
-var codeContext = require('parse-code-context');
-var utils = require('./utils');
-
-function Code(str, comment) {
-  str = utils.restore(str);
-  var start = comment.loc.end.pos;
-  var lineno = comment.loc.end.line;
-  var ctx = {};
-
-  var lines = str.split('\n').slice(lineno);
-  for (var i = 0; i < lines.length; i++) {
-    var res = codeContext(lines[i], lineno + i);
-    if (res) {
-      ctx = res;
-      lineno += i;
-      break;
-    }
-  }
-
-  var val = ctx.original || '';
-  var pos = str.slice(start).indexOf(val) + start;
-
-  return {
-    context: ctx,
-    line: lineno,
-    loc: {
-      start: { line: lineno, pos: pos },
-      end: { line: lineno, pos: pos + val.length }
-    },
-    value: val.trim()
-  };
-}
-
-/**
- * Expose `Code`
- */
-
-module.exports = Code;
-
-},{"./utils":8,"parse-code-context":42}],7:[function(require,module,exports){
-'use strict';
-
-var utils = require('./utils');
-
-/**
- * Create a new LineComment with:
- *   - `str` the entire string
- *   - `idx` the starting index of the comment
- *   - `end` the ending index of the comment
- *   - `open` the opening character(s) of the comment (e.g. '//')
- *   - `close` the closing character(s) of the comment (e.g. '\n')
- */
-
-function LineComment(str, idx, end, open, close) {
-  var lineno = utils.linesCount(str, idx);
-  var value = utils.restore(str.slice(idx, end));
-
-  this.type = 'line';
-  this.raw = value;
-  this.value = this.raw.replace(/^\s*[\/\s]+/, '');
-
-  this.loc = {
-    start: {
-      line: lineno,
-      pos: idx
-    },
-    end: {
-      line: lineno + utils.linesCount(value) - 1,
-      pos: end
-    }
-  };
-}
-
-/**
- * expose `LineComment`
- */
-
-module.exports = LineComment;
-
-},{"./utils":8}],8:[function(require,module,exports){
-'use strict';
-
-var cr = require('cr');
-var bom = require('strip-bom-string');
-var quotesRegex = require('quoted-string-regex');
-var nonchar = require('noncharacters');
-
-/**
- * Expose `utils`
- */
-
-var utils = module.exports;
-
-/**
- * Normalize newlines, strip carriage returns and
- * byte order marks from `str`
- */
-
-utils.normalize = function(str) {
-  return cr(bom(str));
-};
-
-/**
- * Return the given value unchanged
- */
-
-utils.identity = function(val) {
-  return val;
-};
-
-/**
- * Get the total number of lines from the start
- * of a string to the given index.
- */
-
-utils.linesCount = function(str, i) {
-  if (typeof i === 'number') {
-    return str.slice(0, i).split('\n').length;
-  }
-  return str.split('\n').length;
-};
-
-/**
- * Utility for getting a sequence of non-characters. The
- * goal is to return a non-character string that is the
- * same length as the characters we're replacing.
- *
- * http://www.unicode.org/faq/private_use.html#noncharacters
- */
-
-function ch(num) {
-  return nonchar[num] + nonchar[num];
-}
-
-/**
- * Escaped comment characters in quoted strings
- *
- * @param {String} str
- * @return {String}
- */
-
-utils.escapeQuoted = function(str) {
-  return str.replace(quotesRegex(), function(val) {
-    val = val.split('//').join(ch(0));
-    val = val.split('/*').join(ch(1));
-    val = val.split('*/').join(ch(2));
-    return val;
-  });
-};
-
-/**
- * Restore comment characters in quoted strings
- *
- * @param {String} str
- * @return {String}
- */
-
-utils.restore = function(str) {
-  return str.replace(quotesRegex(), function(val) {
-    val = val.split(ch(0)).join('//');
-    val = val.split(ch(1)).join('/*');
-    val = val.split(ch(2)).join('*/');
-    return val;
-  });
-};
-
-/**
- * Strip stars from the beginning of each comment line,
- * and strip whitespace from the end of each line. We
- * can't strip whitespace from the beginning since comments
- * use markdown or other whitespace-sensitive formatting.
- *
- * @param {Array} `lines`
- * @return {Array}
- */
-
-utils.strip = function(lines) {
-  var len = lines.length, i = -1;
-  var res = [];
-
-  while (++i < len) {
-    var line = lines[i].replace(/^\s*[*\/]+\s?|\s+$/g, '');
-    if (!line) continue;
-    res.push(line);
-  }
-  return res;
-};
-
-},{"cr":2,"noncharacters":41,"quoted-string-regex":45,"strip-bom-string":46}],9:[function(require,module,exports){
-/*!
- * is-extendable <https://github.com/jonschlinkert/is-extendable>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-'use strict';
-
-module.exports = function isExtendable(val) {
-  return typeof val !== 'undefined' && val !== null
-    && (typeof val === 'object' || typeof val === 'function');
-};
-
-},{}],10:[function(require,module,exports){
 (function (process){
 // Jison, an LR(0), SLR(1), LARL(1), LR(1) Parser Generator
 // Zachary Carter <zach@carter.name>
@@ -2413,7 +1923,7 @@ return function Parser (g, options) {
 })();
 
 }).call(this,require('_process'))
-},{"../package.json":39,"./util/set":11,"./util/typal":12,"JSONSelect":13,"_process":44,"ebnf-parser":14,"escodegen":18,"esprima":35,"fs":1,"jison-lex":37,"path":43}],11:[function(require,module,exports){
+},{"../package.json":31,"./util/set":3,"./util/typal":4,"JSONSelect":5,"_process":34,"ebnf-parser":6,"escodegen":10,"esprima":27,"fs":1,"jison-lex":29,"path":33}],3:[function(require,module,exports){
 // Set class to wrap arrays
 
 var typal = require("./typal").typal;
@@ -2508,7 +2018,7 @@ if (typeof exports !== 'undefined')
     exports.Set = Set;
 
 
-},{"./typal":12}],12:[function(require,module,exports){
+},{"./typal":4}],4:[function(require,module,exports){
 /*
  * Introduces a typal object to make classical/prototypal patterns easier
  * Plus some AOP sugar
@@ -2600,7 +2110,7 @@ return {
 if (typeof exports !== 'undefined')
     exports.typal = typal;
 
-},{}],13:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /*! Copyright (c) 2011, Lloyd Hilaiel, ISC License */
 /*
  * This is the JSONSelect reference implementation, in javascript.  This
@@ -3174,7 +2684,7 @@ if (typeof exports !== 'undefined')
     exports.compile = compile;
 })(typeof exports === "undefined" ? (window.JSONSelect = {}) : exports);
 
-},{}],14:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var bnf = require("./parser").parser,
     ebnf = require("./ebnf-transform"),
     jisonlex = require("lex-parser");
@@ -3217,7 +2727,7 @@ var parseLex = function (text) {
 };
 
 
-},{"./ebnf-transform":15,"./parser":16,"lex-parser":38}],15:[function(require,module,exports){
+},{"./ebnf-transform":7,"./parser":8,"lex-parser":30}],7:[function(require,module,exports){
 var EBNF = (function(){
     var parser = require('./transform-parser.js');
 
@@ -3354,7 +2864,7 @@ var EBNF = (function(){
 exports.transform = EBNF.transform;
 
 
-},{"./transform-parser.js":17}],16:[function(require,module,exports){
+},{"./transform-parser.js":9}],8:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.11 */
 /*
@@ -4159,7 +3669,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }
 }
 }).call(this,require('_process'))
-},{"./ebnf-transform":15,"_process":44,"fs":1,"path":43}],17:[function(require,module,exports){
+},{"./ebnf-transform":7,"_process":34,"fs":1,"path":33}],9:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.11 */
 /*
@@ -4791,7 +4301,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }
 }
 }).call(this,require('_process'))
-},{"_process":44,"fs":1,"path":43}],18:[function(require,module,exports){
+},{"_process":34,"fs":1,"path":33}],10:[function(require,module,exports){
 (function (global){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
@@ -7078,7 +6588,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 /* vim: set sw=4 ts=4 et tw=80 : */
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./package.json":34,"estraverse":19,"esutils":22,"source-map":23}],19:[function(require,module,exports){
+},{"./package.json":26,"estraverse":11,"esutils":14,"source-map":15}],11:[function(require,module,exports){
 /*
   Copyright (C) 2012-2013 Yusuke Suzuki <utatane.tea@gmail.com>
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
@@ -7769,7 +7279,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],20:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7861,7 +7371,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],21:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -7980,7 +7490,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":20}],22:[function(require,module,exports){
+},{"./code":12}],14:[function(require,module,exports){
 /*
   Copyright (C) 2013 Yusuke Suzuki <utatane.tea@gmail.com>
 
@@ -8014,7 +7524,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }());
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{"./code":20,"./keyword":21}],23:[function(require,module,exports){
+},{"./code":12,"./keyword":13}],15:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -8024,7 +7534,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":29,"./source-map/source-map-generator":30,"./source-map/source-node":31}],24:[function(require,module,exports){
+},{"./source-map/source-map-consumer":21,"./source-map/source-map-generator":22,"./source-map/source-node":23}],16:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8123,7 +7633,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":32,"amdefine":33}],25:[function(require,module,exports){
+},{"./util":24,"amdefine":25}],17:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8267,7 +7777,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":26,"amdefine":33}],26:[function(require,module,exports){
+},{"./base64":18,"amdefine":25}],18:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8311,7 +7821,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":33}],27:[function(require,module,exports){
+},{"amdefine":25}],19:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -8393,7 +7903,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":33}],28:[function(require,module,exports){
+},{"amdefine":25}],20:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -8481,7 +7991,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":32,"amdefine":33}],29:[function(require,module,exports){
+},{"./util":24,"amdefine":25}],21:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9058,7 +8568,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":24,"./base64-vlq":25,"./binary-search":27,"./util":32,"amdefine":33}],30:[function(require,module,exports){
+},{"./array-set":16,"./base64-vlq":17,"./binary-search":19,"./util":24,"amdefine":25}],22:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9460,7 +8970,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":24,"./base64-vlq":25,"./mapping-list":28,"./util":32,"amdefine":33}],31:[function(require,module,exports){
+},{"./array-set":16,"./base64-vlq":17,"./mapping-list":20,"./util":24,"amdefine":25}],23:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -9876,7 +9386,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":30,"./util":32,"amdefine":33}],32:[function(require,module,exports){
+},{"./source-map-generator":22,"./util":24,"amdefine":25}],24:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -10197,7 +9707,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":33}],33:[function(require,module,exports){
+},{"amdefine":25}],25:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
@@ -10502,7 +10012,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/jison/node_modules/escodegen/node_modules/source-map/node_modules/amdefine/amdefine.js")
-},{"_process":44,"path":43}],34:[function(require,module,exports){
+},{"_process":34,"path":33}],26:[function(require,module,exports){
 module.exports={
   "name": "escodegen",
   "description": "ECMAScript code generator",
@@ -10582,7 +10092,7 @@ module.exports={
   "readme": "ERROR: No README data found!"
 }
 
-},{}],35:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /*
   Copyright (C) 2013 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2013 Thaddee Tyl <thaddee.tyl@gmail.com>
@@ -14414,7 +13924,7 @@ parseStatement: true, parseSourceElement: true */
 }));
 /* vim: set sw=4 ts=4 et tw=80 : */
 
-},{}],36:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 module.exports={
   "author": {
     "name": "Zach Carter",
@@ -14484,7 +13994,7 @@ module.exports={
   "readme": "ERROR: No README data found!"
 }
 
-},{}],37:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 // Basic Lexer implemented using JavaScript regular expressions
 // MIT Licensed
 
@@ -15089,7 +14599,7 @@ RegExpLexer.generate = generate;
 module.exports = RegExpLexer;
 
 
-},{"./package.json":36,"lex-parser":38}],38:[function(require,module,exports){
+},{"./package.json":28,"lex-parser":30}],30:[function(require,module,exports){
 (function (process){
 /* parser generated by jison 0.4.6 */
 /*
@@ -15943,7 +15453,7 @@ if (typeof module !== 'undefined' && require.main === module) {
 }
 }
 }).call(this,require('_process'))
-},{"_process":44,"fs":1,"path":43}],39:[function(require,module,exports){
+},{"_process":34,"fs":1,"path":33}],31:[function(require,module,exports){
 module.exports={
   "author": {
     "name": "Zach Carter",
@@ -16010,7 +15520,7 @@ module.exports={
   "_resolved": "git+https://github.com/zaach/jison.git#a9e58a6ddcfe5b83345507664cbe6e6179412751"
 }
 
-},{}],40:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -28365,168 +27875,7 @@ module.exports={
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],41:[function(require,module,exports){
-/*!
- * noncharacters <https://github.com/jonschlinkert/noncharacters>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-'use strict';
-
-module.exports = [
-  '\uFFFF',
-  '\uFFFE',
-
-  '\uFDD1',
-  '\uFDD2',
-  '\uFDD3',
-  '\uFDD4',
-  '\uFDD5',
-  '\uFDD6',
-  '\uFDD7',
-  '\uFDD8',
-  '\uFDD9',
-  '\uFDDA',
-  '\uFDDB',
-  '\uFDDC',
-  '\uFDDD',
-  '\uFDDE',
-  '\uFDDF',
-  '\uFDE0',
-  '\uFDE1',
-  '\uFDE2',
-  '\uFDE3',
-  '\uFDE4',
-  '\uFDE5',
-  '\uFDE6',
-  '\uFDE7',
-  '\uFDE8',
-  '\uFDE9',
-  '\uFDEA',
-  '\uFDEB',
-  '\uFDEC',
-  '\uFDED',
-  '\uFDEE',
-  '\uFDEF'
-];
-
-},{}],42:[function(require,module,exports){
-/*!
- * parse-code-context <https://github.com/jonschlinkert/parse-code-context>
- * Regex originally sourced and modified from <https://github.com/visionmedia/dox>.
- *
- * Copyright (c) 2015 Jon Schlinkert.
- * Licensed under the MIT license.
- */
-
-'use strict';
-
-module.exports = function (str, i) {
-  var match = null;
-
-  // function statement
-  if (match = /^function[ \t]([\w$]+)[ \t]*([\w\W]+)?/.exec(str)) {
-    return {
-      begin: i,
-      type: 'function statement',
-      name: match[1],
-      params: (match[2]).split(/\W/g).filter(Boolean),
-      string: match[1] + '()',
-      original: str
-    };
-    // function expression
-  } else if (match = /^var[ \t]*([\w$]+)[ \t]*=[ \t]*function([\w\W]+)?/.exec(str)) {
-    return {
-      begin: i,
-      type: 'function expression',
-      name: match[1],
-      params: (match[2]).split(/\W/g).filter(Boolean),
-      string: match[1] + '()',
-      original: str
-    };
-    // module.exports expression
-  } else if (match = /^(module\.exports)[ \t]*=[ \t]*function[ \t]([\w$]+)[ \t]*([\w\W]+)?/.exec(str)) {
-    return {
-      begin: i,
-      type: 'function expression',
-      receiver: match[1],
-      name: match[2],
-      params: (match[3]).split(/\W/g).filter(Boolean),
-      string: match[1] + '()',
-      original: str
-    };
-    // module.exports method
-  } else if (match = /^(module\.exports)[ \t]*=[ \t]*function([\w\W]+)?/.exec(str)) {
-    return {
-      begin: i,
-      type: 'method',
-      receiver: match[1],
-      name: '',
-      params: (match[2]).split(/\W/g).filter(Boolean),
-      string: match[1] + '.' + match[2] + '()',
-      original: str
-    };
-    // prototype method
-  } else if (match = /^([\w$]+)\.prototype\.([\w$]+)[ \t]*=[ \t]*function([\w\W]+)?/.exec(str)) {
-    return {
-      begin: i,
-      type: 'prototype method',
-      class: match[1],
-      name: match[2],
-      params: (match[3]).split(/\W/g).filter(Boolean),
-      string: match[1] + '.prototype.' + match[2] + '()',
-      original: str
-    };
-    // prototype property
-  } else if (match = /^([\w$]+)\.prototype\.([\w$]+)[ \t]*=[ \t]*([^\n;]+)/.exec(str)) {
-    return {
-      begin: i,
-      type: 'prototype property',
-      class: match[1],
-      name: match[2],
-      value: match[3],
-      string: match[1] + '.prototype.' + match[2],
-      original: str
-    };
-    // method
-  } else if (match = /^([\w$.]+)\.([\w$]+)[ \t]*=[ \t]*function([\w\W]+)?/.exec(str)) {
-    return {
-      begin: i,
-      type: 'method',
-      receiver: match[1],
-      name: match[2],
-      params: (match[3]).split(/\W/g).filter(Boolean),
-      string: match[1] + '.' + match[2] + '()',
-      original: str
-    };
-    // property
-  } else if (match = /^([\w$]+)\.([\w$]+)[ \t]*=[ \t]*([^\n;]+)/.exec(str)) {
-    return {
-      begin: i,
-      type: 'property',
-      receiver: match[1],
-      name: match[2],
-      value: match[3],
-      string: match[1] + '.' + match[2],
-      original: str
-    };
-    // declaration
-  } else if (match = /^var[ \t]+([\w$]+)[ \t]*=[ \t]*([^\n;]+)/.exec(str)) {
-    return {
-      begin: i,
-      type: 'declaration',
-      name: match[1],
-      value: match[2],
-      string: match[1],
-      original: str
-    };
-  }
-  return null;
-};
-
-},{}],43:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -28754,7 +28103,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":44}],44:[function(require,module,exports){
+},{"_process":34}],34:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -28847,151 +28196,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],45:[function(require,module,exports){
-/*!
- * quoted-string-regex <https://github.com/jonschlinkert/quoted-string-regex>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-'use strict';
-
-module.exports = function() {
-  return /'([^'\\]*\\.)*[^']*'|"([^"\\]*\\.)*[^"]*"/g;
-};
-
-},{}],46:[function(require,module,exports){
-/*!
- * strip-bom-string <https://github.com/jonschlinkert/strip-bom-string>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-'use strict';
-
-module.exports = function(str) {
-  if (typeof str === 'string' && str.charAt(0) === '\ufeff') {
-    return str.slice(1);
-  }
-  return str;
-};
-
-},{}],47:[function(require,module,exports){
-'use strict';
-
-var extract = require('extract-comments');
-
-/**
- * Strip comments from the given `string`.
- *
- * @param {String} `string`
- * @param {Object} `options` Pass `safe: true` to keep comments with `!`
- * @return {String}
- * @api public
- */
-
-function strip(str, options) {
-  options = options || {};
-  if (options.line) {
-    return line(str, options);
-  }
-  if (options.block) {
-    return block(str, options);
-  }
-  if (options.first) {
-    return first(str, options);
-  }
-  str = block(str, options);
-  return line(str, options);
-}
-
-/**
- * Strip block comments from the given `string`.
- *
- * @param {String} `string`
- * @param {Object} `options` Pass `safe: true` to keep comments with `!`
- * @return {String}
- * @api public
- */
-
-function block(str, options) {
-  return stripEach(str, extract.block(str, options), options);
-}
-
-/**
- * Strip line comments from the given `string`.
- *
- * @param {String} `string`
- * @param {Object} `options` Pass `safe: true` to keep comments with `!`
- * @return {String}
- * @api public
- */
-
-function line(str, options) {
-  return stripEach(str, extract.line(str, options), options);
-}
-
-/**
- * Strip the first comment from the given `string`.
- *
- * @param {String} `string`
- * @param {Object} `options` Pass `safe: true` to keep comments with `!`
- * @return {String}
- * @api public
- */
-
-function first(str, options) {
-  return stripEach(str, extract.first(str), options);
-}
-
-/**
- * Private function for stripping comments.
- *
- * @param {String} `string`
- * @param {Object} `options` Pass `safe: true` to keep comments with `!`
- * @return {String}
- */
-
-function stripEach(str, comments, options) {
-  comments.forEach(function(comment) {
-    str = discard(str, comment, options);
-  });
-  return str;
-}
-
-/**
- * Remove a comment from the given string.
- *
- * @param {String} `string`
- * @param {Object} `options` Pass `safe: true` to keep comments with `!`
- * @return {String}
- */
-
-function discard(str, comment, opts) {
-  var ch = comment.value.charAt(0);
-  if (opts && opts.safe === true && ch === '!') {
-    return str;
-  }
-  return str.split(comment.raw).join('');
-}
-
-/**
- * Expose `strip`
- */
-
-module.exports = strip;
-
-/**
- * Expose methods
- */
-
-module.exports.block = block;
-module.exports.first = first;
-module.exports.line = line;
-
-},{"extract-comments":4}],48:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports = Element;
 
 Element.prototype.staticCheck = staticCheck;
@@ -29010,7 +28215,7 @@ function staticCheck() {
   _this.checked = true;
 }
 
-},{}],49:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var exports = module.exports = {};
 
 exports.parseError = parseError;
@@ -29031,7 +28236,7 @@ function parseError(str, hash) {
     throw new _parseError(str, hash);
   }
 }
-},{}],50:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 var ExpressionComparison = require('./expressions/expression-comparison');
 var ExpressionLogical = require('./expressions/expression-logical');
 var ExpressionNegation = require('./expressions/expression-negation');
@@ -29054,6 +28259,7 @@ function create(type, opts) {
   var _this = this
 
   opts.scope = _this.state.currentScope;
+  opts.function = _this.state.currentFunction;
 
   switch (type) {
     case 'UMINUS':
@@ -29109,7 +28315,7 @@ function init(state) {
 
   return _this;
 }
-},{"./expressions/expression-comparison":51,"./expressions/expression-funcall":52,"./expressions/expression-logical":53,"./expressions/expression-negation":54,"./expressions/expression-object":55,"./expressions/expression-operation":56,"./expressions/expression-uminus":58,"./expressions/expression-variable":59}],51:[function(require,module,exports){
+},{"./expressions/expression-comparison":38,"./expressions/expression-funcall":39,"./expressions/expression-logical":40,"./expressions/expression-negation":41,"./expressions/expression-object":42,"./expressions/expression-operation":43,"./expressions/expression-uminus":45,"./expressions/expression-variable":46}],38:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
 var parseError = require('../error').parseError;
 
@@ -29135,12 +28341,13 @@ function staticCheck() {
     parseError('Can\'t process diferent type: ' + _this.left.type + ' and ' + _this.right.type, _this);
   }
 
-  _this.type = _this.left.type;
+  _this.type = 'boolean';
 }
 
-},{"../error":49,"./expression-prototype.js":57}],52:[function(require,module,exports){
+},{"../error":36,"./expression-prototype.js":44}],39:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
 var parseError = require('../error').parseError;
+var _ = require('lodash');
 
 module.exports = ExpressionFuncall;
 
@@ -29156,15 +28363,23 @@ function ExpressionFuncall(opts) {
 
 function staticCheck() {
   var _this = this;
+  var fun = _this.scope.getFunction(_this.ident);
 
-  if(_this.scope.getFunction(_this.ident) === false) {
-    parseError('Undeclared variable in expression: ' + _this.ident, _this);
+  if (fun === false) {
+    parseError('Undeclared function: ' + _this.ident, _this);
+  } else if (fun.args.length !== _this.args.length) {
+    parseError('Wrong number of arguments for function ' + _this.ident + ' call: ' + _this.args.length + ' instead of ' + fun.args.length, _this);
   }
 
   _this.type = _this.scope.getFunction(_this.ident).type;
+
+
+  _.forEach(_this.args, function(arg) {
+    arg.staticCheck();
+  });
 }
 
-},{"../error":49,"./expression-prototype.js":57}],53:[function(require,module,exports){
+},{"../error":36,"./expression-prototype.js":44,"lodash":32}],40:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
 var parseError = require('../error').parseError;
 
@@ -29193,7 +28408,7 @@ function staticCheck() {
   _this.type = _this.left.type;
 }
 
-},{"../error":49,"./expression-prototype.js":57}],54:[function(require,module,exports){
+},{"../error":36,"./expression-prototype.js":44}],41:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
 
 module.exports = ExpressionNegation;
@@ -29216,7 +28431,7 @@ function staticCheck() {
   _this.type = _this.expr.type;
 }
 
-},{"./expression-prototype.js":57}],55:[function(require,module,exports){
+},{"./expression-prototype.js":44}],42:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
 
 module.exports = ExpressionObject;
@@ -29230,7 +28445,7 @@ function ExpressionObject(opts) {
   Expression.call(_this, opts);
 }
 
-},{"./expression-prototype.js":57}],56:[function(require,module,exports){
+},{"./expression-prototype.js":44}],43:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
 var parseError = require('../error').parseError;
 
@@ -29259,7 +28474,7 @@ function staticCheck() {
   _this.type = _this.left.type;
 }
 
-},{"../error":49,"./expression-prototype.js":57}],57:[function(require,module,exports){
+},{"../error":36,"./expression-prototype.js":44}],44:[function(require,module,exports){
 var Element = require('../element.js');
 var exports = module.exports = Expression;
 
@@ -29274,7 +28489,7 @@ function Expression(opts) {
   Element.call(_this, opts);
 }
 
-},{"../element.js":48}],58:[function(require,module,exports){
+},{"../element.js":35}],45:[function(require,module,exports){
 var Expression = require('./expression-prototype.js');
 
 module.exports = ExpressionUminus;
@@ -29297,7 +28512,7 @@ function staticCheck() {
   _this.type = _this.expr.type;
 }
 
-},{"./expression-prototype.js":57}],59:[function(require,module,exports){
+},{"./expression-prototype.js":44}],46:[function(require,module,exports){
 var Expression = require('./expression-prototype');
 var parseError = require('../error').parseError;
 
@@ -29323,8 +28538,9 @@ function staticCheck() {
   _this.type = _this.scope.getVariable(_this.ident).type;
 }
 
-},{"../error":49,"./expression-prototype":57}],60:[function(require,module,exports){
+},{"../error":36,"./expression-prototype":44}],47:[function(require,module,exports){
 var Element = require('./element.js');
+var _ = require('lodash');
 var exports = module.exports = {};
 
 exports.create = create;
@@ -29349,14 +28565,13 @@ function create(opts) {
 function staticCheck() {
   var _this = this;
 
-  _this.checked = true;
-
   _this.scope.staticCheck();
 }
 
-},{"./element.js":48}],61:[function(require,module,exports){
+},{"./element.js":35,"lodash":32}],48:[function(require,module,exports){
 var _ = require('lodash');
-var Variable = require('./variable');
+var Variable = require('./variables/variable');
+var parseError = require('./error').parseError;
 
 var exports = module.exports = {};
 
@@ -29376,12 +28591,15 @@ function Scope(opts) {
   opts = opts || {};
 
   _this.functions = {};
-  _this.vars = {};
+  _this.variables = {};
   _this.elements = [];
 
   _this.parent = opts.parent;
 
-  _.forEach(opts.vars, _this.addVariable.bind(_this));
+  _.forEach(opts.variables, function(variable) {
+    variable.scope = _this;
+    _this.addVariable(variable);
+  });
 }
 
 function create(opts) {
@@ -29392,7 +28610,11 @@ function addFunction(fun) {
   var _this = this;
 
   if (_this.functions[fun.ident] !== undefined) {
-    console.log('Redefining function', fun.ident);
+    if(_this.functions[fun.ident].scope === _this) {
+      parseError('Function ' + fun.ident + ' already defined', {loc: fun.loc});
+    } else {
+      console.log('Redefining function', fun.ident);
+    }
   }
   _this.functions[fun.ident] = fun;
 }
@@ -29400,10 +28622,14 @@ function addFunction(fun) {
 function addVariable(variable) {
   var _this = this;
 
-  if (_this.vars[variable.ident] !== undefined) {
-    console.log('Redefining variable', variable.ident);
+  if (_this.variables[variable.ident] !== undefined) {
+    if(_this.variables[variable.ident].scope === _this) {
+      parseError('Variable ' + variable.ident + ' already defined', {loc: variable.loc});
+    } else {
+      console.log('Redefining variable', variable.ident);
+    }
   }
-  _this.vars[variable.ident] = variable;
+  _this.variables[variable.ident] = variable;
 }
 
 function addVariables(type, idents) {
@@ -29420,7 +28646,9 @@ function addVariables(type, idents) {
 function addElement(element) {
   var _this = this;
 
-  if(_.isArray(element)) {
+  if (element === undefined){
+    return;
+  } else if(_.isArray(element)) {
     _this.elements = _this.elements.concat(_.flattenDeep(element));
   } else {
     _this.elements.push(element);
@@ -29429,8 +28657,8 @@ function addElement(element) {
 
 function getVariable(ident) {
   var _this = this;
-  if (_this.vars[ident] !== undefined) {
-    return _this.vars[ident];
+  if (_this.variables[ident] !== undefined) {
+    return _this.variables[ident];
   } else if (_this.parent === undefined) {
     return false;
   } else {
@@ -29459,7 +28687,7 @@ function staticCheck() {
   });
 }
 
-},{"./variable":72,"lodash":40}],62:[function(require,module,exports){
+},{"./error":36,"./variables/variable":61,"lodash":32}],49:[function(require,module,exports){
 var exports = module.exports = {};
 
 exports.create = create;
@@ -29510,7 +28738,7 @@ function popScope() {
   _this.scopes.splice(-1, 1);
   _this.currentScope = _this.scopes.length > 0 ? _this.scopes[_this.scopes.length -1] : undefined;
 }
-},{}],63:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 var StatementIf = require('./statements/statement-if');
 var StatementIncr = require('./statements/statement-incr');
 var StatementDecr = require('./statements/statement-decr');
@@ -29533,6 +28761,7 @@ function create(type, opts) {
   opts = opts || {};
 
   opts.scope = _this.state.currentScope;
+  opts.function = _this.state.currentFunction;
 
   switch (type) {
     case 'VARIABLE_ASSIGNMENT':
@@ -29574,7 +28803,7 @@ function init(state) {
 
   return _this;
 }
-},{"./statements/statement-assignment":64,"./statements/statement-declaration":65,"./statements/statement-decr":66,"./statements/statement-if":67,"./statements/statement-incr":68,"./statements/statement-return":70,"./statements/statement-while":71}],64:[function(require,module,exports){
+},{"./statements/statement-assignment":51,"./statements/statement-declaration":52,"./statements/statement-decr":53,"./statements/statement-if":54,"./statements/statement-incr":55,"./statements/statement-return":57,"./statements/statement-while":58}],51:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
 var parseError = require('../error').parseError;
 
@@ -29599,10 +28828,14 @@ function staticCheck() {
     parseError('Undeclared variable in assigment: ' + _this.ident, _this);
   }
 
-  _this.type = _this.scope.getVariable(_this.value).type;
+  _this.type = _this.scope.getVariable(_this.ident).type;
+
+  if(_this.expr.type !== _this.type) {
+    parseError('Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type, _this);
+  }
 }
 
-},{"../error":49,"./statement-prototype.js":69}],65:[function(require,module,exports){
+},{"../error":36,"./statement-prototype.js":56}],52:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
 
 module.exports = StatementDeclaration;
@@ -29622,7 +28855,7 @@ function staticCheck() {
 
   _this.scope.addVariable(_this);
 }
-},{"./statement-prototype.js":69}],66:[function(require,module,exports){
+},{"./statement-prototype.js":56}],53:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
 var parseError = require('../error').parseError;
 
@@ -29648,8 +28881,9 @@ function staticCheck() {
   _this.type = _this.scope.getVariable(_this.ident).type;
 }
 
-},{"../error":49,"./statement-prototype.js":69}],67:[function(require,module,exports){
+},{"../error":36,"./statement-prototype.js":56}],54:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
+var parseError = require('../error').parseError;
 
 module.exports = StatementIf;
 
@@ -29667,10 +28901,17 @@ function staticCheck() {
   var _this = this;
 
   _this.expr.staticCheck();
+
+  if (_this.expr.type !== 'boolean') {
+    parseError('Wrong type of if condition: ' + _this.expr.type + ' instead of boolean', _this);
+  }
+
   _this.right.staticCheck();
-  _this.wrong.staticCheck();
+  if (_this.wrong !== undefined) {
+    _this.wrong.staticCheck();
+  }
 }
-},{"./statement-prototype.js":69}],68:[function(require,module,exports){
+},{"../error":36,"./statement-prototype.js":56}],55:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
 var parseError = require('../error').parseError;
 
@@ -29698,7 +28939,7 @@ function staticCheck() {
   _this.type = _this.scope.getVariable(_this.ident).type;
 }
 
-},{"../error":49,"./statement-prototype.js":69}],69:[function(require,module,exports){
+},{"../error":36,"./statement-prototype.js":56}],56:[function(require,module,exports){
 var Element = require('../element.js');
 
 module.exports = Statement;
@@ -29712,8 +28953,9 @@ function Statement(opts) {
   Element.call(_this, opts);
 }
 
-},{"../element.js":48}],70:[function(require,module,exports){
+},{"../element.js":35}],57:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
+var parseError = require('../error').parseError;
 
 module.exports = StatementReturn;
 
@@ -29732,11 +28974,19 @@ function staticCheck() {
 
   if (_this.expr !== undefined) {
     _this.expr.staticCheck();
+    if (_this.function.type !== _this.expr.type) {
+      parseError('Wrong type of return: ' + _this.expr.type + ' instead of ' + _this.function.type, _this);
+    }
+  } else if (_this.function.type !== 'void') {
+    parseError('Wrong type of return: void instead of ' + _this.function.type, _this);
   }
+
+
 }
 
-},{"./statement-prototype.js":69}],71:[function(require,module,exports){
+},{"../error":36,"./statement-prototype.js":56}],58:[function(require,module,exports){
 var Statement = require('./statement-prototype.js');
+var parseError = require('../error').parseError;
 
 module.exports = StatementWhile;
 
@@ -29754,49 +29004,198 @@ function staticCheck() {
   var _this = this;
 
   _this.expr.staticCheck();
+
+  if (_this.expr.type !== 'boolean') {
+    parseError('Wrong type of if condition: ' + _this.expr.type + ' instead of boolean', _this);
+  }
+
   _this.stmt.staticCheck();
 }
 
-},{"./statement-prototype.js":69}],72:[function(require,module,exports){
-var Element = require('./element.js');
+},{"../error":36,"./statement-prototype.js":56}],59:[function(require,module,exports){
+var Element = require('../element.js');
+var exports = module.exports = {};
+
+exports.create = create;
+
+Argument.prototype = Object.create(Element.prototype);
+Argument.prototype.constructor = Argument;
+
+function Argument(opts) {
+  var _this = this;
+
+  Element.call(_this, opts);
+}
+
+function create(opts) {
+  return new Argument(opts);
+}
+
+},{"../element.js":35}],60:[function(require,module,exports){
+var Element = require('../element.js');
+var exports = module.exports = {};
+
+exports.create = create;
+
+VariableReference.prototype = Object.create(Element.prototype);
+VariableReference.prototype.constructor = VariableReference;
+
+function VariableReference(opts) {
+  var _this = this;
+
+  Element.call(_this, opts);
+}
+
+function create(opts) {
+  return new VariableReference(opts);
+}
+
+},{"../element.js":35}],61:[function(require,module,exports){
+var Element = require('../element.js');
 var exports = module.exports = {};
 
 exports.create = create;
 
 Variable.prototype = Object.create(Element.prototype);
-Variable.prototype.constructor = Element;
+Variable.prototype.constructor = Variable;
 
 function Variable(opts) {
   var _this = this;
 
   Element.call(_this, opts);
-
-  _this.type = opts.type;
-  _this.ident = opts.ident;
 }
 
 function create(opts) {
   return new Variable(opts);
 }
 
-},{"./element.js":48}],"latte":[function(require,module,exports){
+},{"../element.js":35}],62:[function(require,module,exports){
+module.exports={
+  "bad": {
+    "bad001.lat": "/*\n",
+    "bad002.lat": "a\n",
+    "bad003.lat": "// Repeated argument name\nint f(int x, int x) {\n   return x;\n}",
+    "bad004.lat": "int main() {\n        return 0;\n        return 1;\n}\n",
+    "bad005.lat": "foo() {}\n",
+    "bad006.lat": "int main() {\n        x = 14;\n\treturn 0 ;\n}\n",
+    "bad007.lat": "int main() {\n        int x;\n        int x;\n\treturn 0 ;\n}\n",
+    "bad008.lat": "  int main() { \n    if (false)\n       return 0; \n}\n",
+    "bad009.lat": "int main() {\n        int x;\n        x = true;\n        return 1;\n}\n",
+    "bad010.lat": "int main() {\n        if (true)\n                return;\n\t;\n        return 1;\n}\n",
+    "bad011.lat": "int main() {\n     return true;\n}\n",
+    "bad012.lat": "int main() {\n     int i = foo(true);\n     return 0 ;\n}\n\nint foo(boolean b) { b = true; }\n",
+    "bad013.lat": "int main() {\n      string x ;\n      x = \"pi\" + 1 ;\n      return 0 ;\n}\n",
+    "bad015.lat": "// passing string to printInt().\n\nint main() {\n\tprintInt(\"foo\");\n\treturn 0 ;\n}\n",
+    "bad016.lat": "// passing integers to printString().\n\nint main() {\n\tprintString(1);\n\treturn 0 ;\n}\n",
+    "bad017.lat": "// 0 instead of 1 argument\n\nint main() {\n\tint x = foo();\n\treturn 0 ;\n}\n\nint foo(int y) {\n return y;\n}\n\n",
+    "bad018.lat": "// 1 instead of 2 arguments\n\nint main() {\n\tint x = foo(1);\n\treturn 0 ;\n}\n\nint foo(int y,int z) {\n return y;\n}\n\n",
+    "bad019.lat": "// 2 instead of 1 arguments\n\nint main() {\n\tint x = foo(1,2);\n\treturn 0 ;\n}\n\nint foo(int y) {\n return y;\n}\n\n",
+    "bad020.lat": "// Compare string with boolean.\n\nint main() {\n  if (\"true\" == true) {\n   printString(\"foo\");\n  }\n  return 0 ;\n}",
+    "bad021.lat": "/* Testing that main must return. */\n\n/* All functions should return a value of their value type. This is not a valid Javalette program: */\n\nint main() {\n}\n",
+    "bad022.lat": "// Assigning string to int variable.\n\nint main () {\n int x = \"\";\n return 0 ;\n}",
+    "bad023.lat": "// Assigning int to string variable.\n\nint main () {\n string x = 1;\n return 0 ;\n}",
+    "bad024.lat": "int main() {\n    if (false) \n       return 0;\n}\n",
+    "bad025.lat": "int main() {\n   return f(3); \n}\n\nint f(int x) {\n    if (x<0) \n       return x;\n}\n",
+    "bad026.lat": "// Assigning string to int variable.\n\nint main () {\n int x;\n  x = \"foo\"+\"bar\";\n return 0 ;\n}",
+    "bad027.lat": "// Assigning int to string variable.\n\nint main () {\n string x;\n x = 1;\n return 0 ;\n}",
+    "test": {
+      "test.lat": ""
+    }
+  },
+  "good": {
+    "core001.lat": "int main() {\n\tprintInt(fac(10));\n\tprintInt(rfac(10));\n\tprintInt(mfac(10));\n        printInt(ifac(10));\n        string r ; // just to test blocks \n\t{\n\t  int n = 10;\n\t  int r = 1;\n\t  while (n>0) {\n\t    r = r * n;\n\t    n--;\n\t  }\n\t  printInt(r);\n\t}\n\tprintString (repStr(\"=\",60));\n\tprintString (\"hello */\");\n        printString (\"/* world\") ;\n        return 0 ;\n}\n\nint fac(int a) {\n\tint r;\n\tint n;\n\n\tr = 1;\n\tn = a;\n\twhile (n > 0) {\n\t  r = r * n;\n\t  n = n - 1;\n\t}\n\treturn r;\n}\n\nint rfac(int n) {\n\tif (n == 0)\n\t  return 1;\n\telse\n\t  return n * rfac(n-1);\n}\n\nint mfac(int n) {\n\tif (n == 0)\n\t  return 1;\n\telse\n\t  return n * nfac(n-1);\n}\n\nint nfac(int n) {\n\tif (n != 0)\n\t  return mfac(n-1) * n;\n\telse\n\t  return 1;\n}\n\nint ifac(int n) { return ifac2f(1,n); }\n\nint ifac2f(int l, int h) {\n        if (l == h)\n          return l;\n        if (l > h)\n          return 1;\n        int m;\n        m = (l + h) / 2;\n        return ifac2f(l,m) * ifac2f(m+1,h);\n}\n\nstring repStr(string s, int n) {\n  string r = \"\";\n  int i = 0;\n  while(i<n) {\n    r = r + s;\n    i++;\n  }\n return r;\n}",
+    "core001.output": "3628800\n3628800\n3628800\n3628800\n3628800\n============================================================\nhello */\n/* world\n",
+    "core002.lat": "/* void expression as statement */\n\nint main() {\n  foo();\n  return 0 ;\n\n}\n\nvoid foo() {\n   printString(\"foo\");\n   return;\n}\n",
+    "core002.output": "foo\n",
+    "core003.lat": "// Testing the return checker\n\nint f () {\n   if (true)\n     return 0;\n   else\n     {}\n}\n\nint g () {\n  if (false) \n      {}\n  else\n      return 0;\n}\n\nvoid p () {}\n  \n\nint main() {\n  p();\n  return 0;\n}\n",
+    "core003.output": "",
+    "core004.lat": "/* allow comparing booleans. */\n\nint main() {\n  if (true == true) { printInt(42); }\n  return 0 ;\n\n}",
+    "core004.output": "42\n",
+    "core005.lat": "/* usage of variable initialized in both branches. */\n\nint main () {\n  int x;\n  int y = 56;\n  if (y + 45 <= 2) {\n    x = 1;\n  } else {\n    x = 2;\n  }\n  printInt(x);\n  return 0 ;\n\n}",
+    "core005.output": "2\n",
+    "core006.lat": "// Declaration of multiple variables of the same type in one statement:\n\nint main () {\n  int x, y;\n  x = 45;\n  y = -36;\n  printInt(x);\n  printInt(y);\n  return 0 ;\n\n}",
+    "core006.output": "45\n-36\n",
+    "core007.lat": "// declaration and initialization in same statement\n\nint main() {\n int x = 7;\n printInt(x);\n return 0 ;\n\n}",
+    "core007.output": "7\n",
+    "core008.lat": "// multiple variables of the same type declared \n// and possibly initialized in the same statement\n\nint main() {\n int x, y = 7;\n x = -1234234;\n printInt(x);\n printInt(y);\n return 0 ;\n\n}",
+    "core008.output": "-1234234\n7\n",
+    "core009.lat": "// Calling functions which take zero parameters\n\nint main() {\n int x = foo();\n printInt(x);\n return 0 ;\n\n}\n\nint foo() {\n return 10;\n}\n\n",
+    "core009.output": "10\n",
+    "core010.lat": "// count function parameters as initialized\n\nint main() {\n  printInt(fac(5));\n  return 0 ;\n}\n\nint fac (int a) {\n  int r;\n  int n;\n  r = 1;\n  n = a;\n  while (n > 0)\n  {\n    r = r * n;\n    n = n - 1;\n  }\n  return r;\n}\n",
+    "core010.output": "120\n",
+    "core011.lat": "/* Test pushing -1. */\n\nint main() {\n  printInt(-1);\n  return 0 ;\n}",
+    "core011.output": "-1\n",
+    "core012.lat": "/* Test arithmetic and comparisons. */\n\nint main() {\n    int x = 56;\n    int y = -23;\n    printInt(x+y);\n    printInt(x-y);\n    printInt(x*y);\n    printInt(45/2);\n    printInt(78%3);\n    printBool(x-y > x+y);\n    printBool(x/y <= x*y);\n    printString(\"string\"+\" \"+\"concatenation\");\n    return 0 ;\n}\n\nvoid printBool(boolean b) {\n  if (b) {\n    printString(\"true\");\n    return;\n  } else {\n    printString(\"false\");\n    return;\n }\n}",
+    "core012.output": "33\n79\n-1288\n22\n0\ntrue\nfalse\nstring concatenation\n",
+    "core013.lat": "/* Test boolean operators. */\n\nint main() {\n  printString(\"&&\");\n  printBool(test(-1) && test(0));\n  printBool(test(-2) && test(1));\n  printBool(test(3) && test(-5));\n  printBool(test(234234) && test(21321));\n  printString(\"||\");\n  printBool(test(-1) || test(0));\n  printBool(test(-2) || test(1));\n  printBool(test(3) || test(-5));\n  printBool(test(234234) || test(21321));\n  printString(\"!\");\n  printBool(true);\n  printBool(false);\n  return 0 ;\n\n}\n\nvoid printBool(boolean b) {\n  if (!b) {\n    printString(\"false\");\n  } else {\n    printString(\"true\");\n }\n return;\n}\n\nboolean test(int i) {\n  printInt(i);\n  return i > 0;\n}",
+    "core013.output": "&&\n-1\nfalse\n-2\nfalse\n3\n-5\nfalse\n234234\n21321\ntrue\n||\n-1\n0\nfalse\n-2\n1\ntrue\n3\ntrue\n234234\ntrue\n!\ntrue\nfalse\n",
+    "core014.lat": "/* Fibonacci. */\n\nint main () {\n  int lo,hi,mx ;\n  lo = 1 ;\n  hi = lo ;\n  mx = 5000000 ;\n  printInt(lo) ;\n  while (hi < mx) {\n    printInt(hi) ;\n    hi = lo + hi ;\n    lo = hi - lo ;\n  }\n  return 0 ;\n\n}\n\n",
+    "core014.output": "1\n1\n2\n3\n5\n8\n13\n21\n34\n55\n89\n144\n233\n377\n610\n987\n1597\n2584\n4181\n6765\n10946\n17711\n28657\n46368\n75025\n121393\n196418\n317811\n514229\n832040\n1346269\n2178309\n3524578\n",
+    "core015.lat": "/* parity of positive integers by recursion */\n\nint main () {\n  printInt(ev(17)) ;\n  return 0 ;\n}\n\nint ev (int y) {\n  if (y > 0)\n    return ev (y-2) ;\n  else\n    if (y < 0)\n      return 0 ;\n    else\n      return 1 ;\n}",
+    "core015.output": "0\n",
+    "core016.lat": "/* parity of positive integers by loop */\n\nint main () {\n  int y = 17;\n  while (y > 0)\n    y = y - 2;\n  if (y < 0) {\n    printInt(0);\n    return 0 ;\n    }\n  else {\n    printInt(1);\n    return 0 ;\n    }\n}\n",
+    "core016.output": "0\n",
+    "core017.lat": "/* Test boolean operators */\n\nint main () {\n  int x = 4;\n  if (3 <= x && 4 != 2 && true) {\n    printBool(true);\n  } else {\n    printString(\"apa\");\n  }\n\n  printBool(true == true || dontCallMe(1));\n  printBool(4 < -5 && dontCallMe(2));\n\n  printBool(4 == x && true == !false && true);\n\n  printBool(implies(false,false));\n  printBool(implies(false,true));\n  printBool(implies(true,false));\n  printBool(implies(true,true));\n  return 0 ;\n\n}\n\nboolean dontCallMe(int x) {\n  printInt(x);\n  return true;\n}\n\nvoid printBool(boolean b) {\n  if (b) {\n    printString(\"true\");\n  } else {\n    printString(\"false\");\n }\n return;\n}\n\nboolean implies(boolean x, boolean y) {\n  return !x || x == y;\n}\n",
+    "core017.output": "true\ntrue\nfalse\ntrue\ntrue\ntrue\nfalse\ntrue\n",
+    "core018.input": "-37\nfoo\nbar\n",
+    "core018.lat": "/* test input */\n\nint main() {\n  int x = readInt();\n  string y = readString();\n  string z = readString();\n\n  printInt(x-5);\n  printString(y+z);  \n  return 0 ;\n}",
+    "core018.output": "-42\nfoobar\n",
+    "core019.lat": "int main() {\n  int i = 78;\n  {\n    int i = 1;\n    printInt(i);\n  }\n  printInt(i);\n  while (i > 76) {\n    i--;\n    printInt(i);\n   // this is a little tricky\n   // on the right hand side, i refers to the outer i\n   int i = i + 7;\n   printInt(i);\n  }\n  printInt(i);\n  if (i > 4) {\n    int i = 4;\n    printInt(i);\n  } else {\n    printString(\"foo\");\n  } \n  printInt(i);\n  return 0 ;\n\n}",
+    "core019.output": "1\n78\n77\n84\n76\n83\n76\n4\n76\n",
+    "core020.lat": "int main() {\n    p();\n    printInt(1);\n    return 0;\n}\n\nvoid p() {}\n",
+    "core020.output": "1\n",
+    "core021.lat": "int main() {\n    if (true) {\n      printInt(1);\n      return 0;\n    }\n}",
+    "core021.output": "1\n",
+    "core022.lat": "int main() {\n    int x;\n    printInt(x);\n    return 0;\n}\n",
+    "core022.output": "0\n"
+  },
+  "extensions": {
+    "arrays1": {
+      "array001.lat": "int main() {\n\n  int[] a = new int[10];\n  int j=0;\n  while (j<a.length) {\n     a[j] = j;\n     j++;\n  }\n\n  for (int x : a) \n     printInt(x);\n\n  int x = 45;\n  printInt(x);\n  return 0;\n}",
+      "array001.output": "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n45\n",
+      "array002.lat": "int [] doubleArray (int [] a){\n  int [] res = new int [a . length];\n  int i = 0 ;\n  for (int n : a){\n    res [i] = 2 * n ;\n    i ++ ;\n  }\n  return res ;\n}\n\nvoid shiftLeft (int [] a){\n  int x = a [0];\n  int i = 0 ;\n  while (i < a.length - 1){\n    a [i] = a [i + 1];\n    i ++ ;\n  }\n  a[a.length - 1]= x ;\n  return;\n }\n\nint scalProd(int[] a, int[] b) {\n  int res = 0;\n  int i = 0;\n  while (i < a.length) {\n    res = res + a[i] * b[i];\n    i++;\n  }\n  return res;\n}\n\nint main () {\n  int [] a = new int [5];\n  int i = 0 ;\n  while (i < a.length){\n    a [i]= i ;\n    i ++ ;\n    }\n  shiftLeft (a);\n  int [] b = doubleArray (a);\n  for (int x : a)printInt (x);\n  for (int x : b)printInt (x);\n  printInt(scalProd(a,b));\n  return 0 ;\n}\n ",
+      "array002.output": "1\n2\n3\n4\n0\n2\n4\n6\n8\n0\n60\n"
+    },
+    "objects1": {
+      "counter.lat": "int main () {\n  Counter c;\n  c = new Counter;\n  c.incr();\n  c.incr();\n  c.incr();\n  int x = c.value();\n  printInt(x);\n  return 0;\n}\n\nclass Counter {\n  int val;\n\n  void incr () {val++; return;}\n\n  int value () {return val;}\n\n}\n",
+      "counter.output": "3\n",
+      "linked.lat": "class Node {\n  int elem;\n  Node next;\n\n  void setElem(int c) { elem = c; }\n\n  void setNext(Node n) { next = n; }\n\n  int getElem() { return elem; }\n\n  Node getNext() { return next; }\n}\n\nclass Stack {\n  Node head;\n\n  void push(int c) {\n    Node newHead = new Node;\n    newHead.setElem(c);\n    newHead.setNext(head);\n    head = newHead;\n  }\n\n  boolean isEmpty() {\n    return head==(Node)null;\n  }\n\n  int top() {\n    return head.getElem();\n  }\n\n  void pop() {\n    head = head.getNext();\n  }\n}\n\nint main() {\n   Stack s = new Stack;\n   int i= 0;\n   while (i<10) {\n     s.push(i);\n     i++;\n   }\n     \n   while (!s.isEmpty()) {\n     printInt(s.top());\n     s.pop();\n   }\n   return 0;\n}\n",
+      "linked.output": "9\n8\n7\n6\n5\n4\n3\n2\n1\n0\n",
+      "points.lat": "class Point2 {\n  int x;\n  int y;\n\n  void move (int dx, int dy) {\n     x = x + dx;\n     y = y + dy;\n  }\n\n  int getX () { return x; }\n\n  int getY () { return y; }\n}\n\nclass Point3 extends Point2 {\n  int z;\n\n  void moveZ (int dz) {\n    z = z + dz;\n  }\n\n  int getZ () { return z; }\n\n}\n\nclass Point4 extends Point3 {\n  int w;\n\n  void moveW (int dw) {\n    w = w + dw;\n  }\n\n  int getW () { return w; }\n\n}\n\n\n\nint main () {\n  Point2 p = new Point3;\n\n  Point3 q = new Point3;\n\n  Point4 r = new Point4;\n\n  q.move(2,4);\n  q.moveZ(7);\n  p = q;\n\n  p.move(3,5);\n \n  r.move(1,3);\n  r.moveZ(6);\n  r.moveW(2);\n\n  printInt(p.getX());  \n  printInt(p.getY());  \n  printInt(q.getZ());  \n  printInt(r.getW());\n  return 0;\n\n}",
+      "points.output": "5\n9\n7\n2\n",
+      "queue.lat": "class Node {\n  int elem;\n  Node next;\n\n  void setElem (int e)  { elem = e; }\n  void setNext (Node n) { next = n; }\n\n  int  getElem () { return elem; }\n  Node getNext () { return next; }\n\n}\n\nclass IntQueue {\n  Node front;\n  Node rear;\n\n  boolean isEmpty () { return front == (Node)null; }\n\n  void insert (int x) {\n    Node last = new Node;\n    last.setElem(x);\n    if (self.isEmpty())\n      front = last;\n    else \n      rear.setNext(last);\n    rear = last;\n  }\n\n  int first () { return front.getElem(); }\n\n  void rmFirst () {\n    front = front.getNext();\n  }\n\n  int size () {\n      Node n = front;\n      int res = 0;\n      while (n != (Node)null) {\n        n = n.getNext();\n        res++;\n      }\n     return res;\n  }\n}\n\nint f (int x) {\n  return x*x + 3;\n}\n\nint main () {\n  IntQueue q = new IntQueue;\n  q.insert(f(3));\n  q.insert(5);\n  q.insert(7);\n  printInt(q.first());\n  q.rmFirst();\n  printInt(q.size());\n  return 0;\n}\n\n     ",
+      "queue.output": "12\n2\n"
+    },
+    "objects2": {
+      "shapes.lat": "class Node {\n  Shape elem;\n  Node next;\n\n  void setElem(Shape c) { elem = c; }\n\n  void setNext(Node n) { next = n; }\n\n  Shape getElem() { return elem; }\n\n  Node getNext() { return next; }\n}\n\nclass Stack {\n  Node head;\n\n  void push(Shape c) {\n    Node newHead = new Node;\n    newHead.setElem(c);\n    newHead.setNext(head);\n    head = newHead;\n  }\n\n  boolean isEmpty() {\n    return head==(Node)null;\n  }\n\n  Shape top() {\n    return head.getElem();\n  }\n\n  void pop() {\n    head = head.getNext();\n  }\n}\n\nclass Shape {\n  void tell () {\n    printString(\"I'm a shape\");\n  }\n\n  void tellAgain() {\n     printString(\"I'm just a shape\");\n  }\n}\n\nclass Rectangle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a rectangle\");\n  }\n}\n\nclass Circle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a circle\");\n  }\n}\n\nclass Square extends Rectangle {\n  void tellAgain() {\n    printString(\"I'm really a square\");\n  }\n}\n\nint main() {\n  Stack stk = new Stack;\n  Shape s = new Shape;\n  stk.push(s);\n  s = new Rectangle;\n  stk.push(s);\n  s = new Square;\n  stk.push(s);\n  s = new Circle;\n  stk.push(s);\n  while (!stk.isEmpty()) {\n    s = stk.top();\n    s.tell();\n    s.tellAgain();\n    stk.pop();\n  }\n  return 0;\n}\n",
+      "shapes.output": "I'm a shape\nI'm really a circle\nI'm a shape\nI'm really a square\nI'm a shape\nI'm really a rectangle\nI'm a shape\nI'm just a shape\n"
+    },
+    "struct": {
+      "list.lat": "class list {\n  int elem;\n  list next;\n}\n\nint main() {\n  printInt(length(fromTo(1,50)));\n  printInt(length2(fromTo(1,100)));\n  return 0;\n}\n\nint head (list xs) {\n  return xs . elem;\n}\n \nlist cons (int x, list xs) {\n  list n;\n  n = new list;\n  n.elem = x;\n  n.next = xs;\n  return n;\n}\n\nint length (list xs) {\n  if (xs==(list)null)\n    return 0;\n  else\n    return 1 + length (xs.next);\n}\n\nlist fromTo (int m, int n) {\n  if (m>n)\n    return (list)null;\n  else \n    return cons (m,fromTo (m+1,n));\n}\n\nint length2 (list xs) {\n  int res = 0;\n  while (xs != (list)null) {\n    res++;\n    xs = xs.next;\n  }\n  return res;\n}\n",
+      "list.output": "50\n100\n"
+    }
+  }
+}
+},{}],"latte":[function(require,module,exports){
 
 var Parser = require('jison').Parser;
-var strip = require('strip-comments');
+var samples = require('./samples.json');
 
-// var grammar = Hjson.parse(fs.readFileSync(__dirname + '/syntax.json', 'utf8'));
-var grammar = "\n/* description: Latte language parser */\n\n%lex\n\n%%\n\\s+                       /* skip whitespace */\n\"//\".*                    /* skip line comments */\n\"/*\"((\\*+[^/*])|([^*]))*\\**\"*/\" /* skip block comments */\n\ntrue                      return 'TRUE'\nfalse                     return 'FALSE'\nif                        return 'IF'\nelse                      return 'ELSE'\nwhile                     return 'WHILE'\nint                       return 'INTEGER'\nstring                    return 'STRING'\nboolean                   return 'BOOLEAN'\nvoid                      return 'VOID'\nreturn                    return 'RETURN'\n[0-9]+                    return 'NUMBER'\n[a-zA-Z_][0-9a-zA-Z_]*    return 'LITERAL'\nL?\\\"(\\\\.|[^\\\\\"])*\\\"       return 'STRING_LITERAL'\n\"++\"                      return 'INCR'\n\"--\"                      return 'DECR'\n\"*\"                       return '*'\n\"/\"                       return '/'\n\"-\"                       return '-'\n\"+\"                       return '+'\n\"=\"                       return '='\n\"<\"                       return '<'\n\"<=\"                      return '<='\n\">\"                       return '>'\n\">=\"                      return '>='\n\"==\"                      return '=='\n\"!=\"                      return '!='\n\";\"                       return ';'\n\",\"                       return ','\n<<EOF>>                   return 'EOF'\n\"!\"                       return '!'\n\"%\"                       return '%'\n\"&&\"                      return '&&'\n\"||\"                      return '||'\n\"(\"                       return '('\n\")\"                       return ')'\n\"]\"                       return ']'\n\"[\"                       return '['\n\"{\"                       return '{'\n\"}\"                       return '}'\n\n/lex\n\n%left '&&' '||'\n%left '<' '<=' '>' '>=' '==' '!=' RELOP\n%left '-' '+' ADDOP\n%left '*' '/' '%' MULOP\n%nonassoc INCR DECR\n%nonassoc UMINUS NEGATION\n%nonassoc IF_WITHOUT_ELSE\n%nonassoc ELSE\n\n%%\n\nProgram\n  : TopDefs EOF\n    {return yy.state.mainScope;}\n  ;\n\nTopDefs\n  : TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  | TopDefs TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  ;\n\nTopDef\n  : FunctionSignature Block\n    {\n      yy.state.currentFunction.location = _$[_$.length-1];\n      yy.state.popFunction();\n      yy.state.popScope(scope);\n\n      $$ = $FunctionSignature;\n    }\n  ;\n\nFunctionSignature\n  : Type Ident '(' Args ')'\n    {\n      var scope = yy.Scope.create({\n        vars: $Args,\n        parent: yy.state.currentScope\n      });\n      var fun = yy.Function.create({\n        type: $Type,\n        ident: $Ident,\n        args: $Args,\n        scope: scope,\n        parent: yy.state.currentScope\n      });\n      yy.state.pushFunction(fun);\n      yy.state.pushScope(scope);\n\n      $$ = fun;\n    }\n  ;\n\nArgs\n  :\n    {$$ = []}\n  | Arg\n    {$$ = [$Arg]}\n  | Args ',' Arg\n    {$Args.push($Arg); $$ = $Args;}\n  ;\n\nArg\n  : Type Ident\n    {$$ = yy.Variable.create({\n      type: $Type,\n      ident: $Ident,\n      loc: _$[_$.length-1]\n    });}\n  ;\n\nBlock\n  : '{' Stmts '}'\n    {}\n  ;\n\nBlockInit\n  :\n    {\n      var scope = yy.Scope.create({\n        parent: yy.state.currentScope\n      });\n\n      yy.state.pushScope(scope);\n\n      $$ = scope;\n    }\n  ;\n\nStmts\n  : Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  | Stmts Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  ;\n\nStmt\n  : BlockInit Block\n    {\n      $$ = $BlockInit;\n      yy.state.currentScope.location = _$[_$.length-1];\n      yy.state.popScope(scope);\n    }\n  | Type Items ';'\n    {\n      $$ = $Items;\n    }\n  | Ident '=' Expr ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$[_$.length-4]\n      });\n    }\n  | Ident INCR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_INCR', {\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Ident DECR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_DECR', {\n        ident: $Ident,\n      loc: _$[_$.length-1]\n      });\n    }\n  | RETURN Expr ';'\n    {\n      {\n        $$ = yy.Statement.create('RETURN', {\n          value: $Expr,\n      loc: _$[_$.length-1]\n        });\n      }\n    }\n  | RETURN ';'\n    {\n      $$ = yy.Statement.create('RETURN', {\n        loc: _$[_$.length-1]\n      });\n    }\n  | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt,\n        loc: _$[_$.length-1]\n      });\n    }\n  | IF '(' Expr ')' Stmt ELSE Stmt\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt1,\n        wrong: $Stmt2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | WHILE '(' Expr ')' Stmt\n    {\n      $$ = yy.Statement.create('WHILE', {\n        expr: $Expr,\n        stmt: $Stmt,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr ';'\n    { $$ = $Expr; }\n  | ';'\n    {}\n  ;\n\nItems\n  : Item\n    {$$ = [$Item]}\n  | Items ',' Item\n    {\n      $Items.push($Item);\n      $$ = $Items;\n    }\n  ;\n\nItem\n  : Ident\n    {\n      $$ = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      })\n    }\n  | Ident '=' Expr\n    {\n      var decl = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n      var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n      $$ = [decl, ass];\n    }\n  ;\n\nType\n  : INTEGER\n    {\n      yy.state.declarationType = $1;\n    }\n  | STRING\n    {\n      yy.state.declarationType = $1;\n    }\n  | BOOLEAN\n    {\n      yy.state.declarationType = $1;\n    }\n  | VOID\n    {\n      yy.state.declarationType = $1;\n    }\n  ;\n\nIdent\n  : LITERAL\n    { $$ = String(yytext); }\n  ;\n\nExprs\n  : Expr\n    { $$ = [$Expr]; }\n  | Exprs ',' Expr\n    {\n      $Exprs.push($Expr);\n      $$ = $Exprs;\n    }\n  ;\n\nExpr\n  : Number\n    { $$ = $Number; }\n  | String\n    { $$ = $String; }\n  | Logical\n    { $$ = $Logical }\n  | Ident\n    {\n      $$ = yy.Expression.create('VARIABLE', {\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Ident '(' Exprs ')'\n    {\n      $$ = yy.Expression.create('FUNCALL', {\n        args: $Exprs,\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n    }\n  | '-' Expr %prec UMINUS\n    {\n      $$ = yy.Expression.create('UMINUS', {\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n    }\n  | '!' Expr %prec NEGATION\n    {\n      $$ = yy.Expression.create('NEGATION', {\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr MulOp Expr %prec MULOP\n    {\n      $$ = yy.Expression.create('MULOP', {\n        operator: $MulOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr AddOp Expr %prec ADDOP\n    {\n      $$ = yy.Expression.create('ADDOP', {\n        operator: $AddOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr RelOp Expr %prec RELOP\n    {\n      $$ = yy.Expression.create('RELOP', {\n        operator: $RelOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr '&&' Expr\n    {\n      $$ = yy.Expression.create('LOGAND', {\n        operator: '&&',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr '||' Expr\n    {\n      $$ = yy.Expression.create('LOGOR', {\n        operator: '||',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | '(' Expr ')'\n    {$$ = $2}\n  ;\n\nNumber\n  : NUMBER\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'int',\n        value: Number(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nString\n  : STRING_LITERAL\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'string',\n        value: String(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nLogical\n  : TRUE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  | FALSE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nAddOp\n  : '+'\n    {}\n  | '-'\n    {}\n  ;\n\nMulOp\n  : '*'\n    {}\n  | '/'\n    {}\n  | '%'\n    {}\n  ;\n\nRelOp\n  : '<'\n    {}\n  | '<='\n    {}\n  | '>'\n    {}\n  | '>='\n    {}\n  | '=='\n    {}\n  | '!='\n    {}\n  ;\n";
+var grammar = "\n/* description: Latte language parser */\n\n%lex\n\n%%\n\\s+                       /* skip whitespace */\n\"//\".*                    /* skip line comments */\n\"/*\"((\\*+[^/*])|([^*]))*\\**\"*/\" /* skip block comments */\n\ntrue                      return 'TRUE'\nfalse                     return 'FALSE'\nif                        return 'IF'\nelse                      return 'ELSE'\nwhile                     return 'WHILE'\nint                       return 'INTEGER'\nstring                    return 'STRING'\nboolean                   return 'BOOLEAN'\nvoid                      return 'VOID'\nreturn                    return 'RETURN'\n[0-9]+                    return 'NUMBER'\n[a-zA-Z_][0-9a-zA-Z_]*    return 'LITERAL'\nL?\\\"(\\\\.|[^\\\\\"])*\\\"       return 'STRING_LITERAL'\n\"++\"                      return 'INCR'\n\"--\"                      return 'DECR'\n\"*\"                       return '*'\n\"/\"                       return '/'\n\"-\"                       return '-'\n\"+\"                       return '+'\n\"<\"                       return '<'\n\"<=\"                      return '<='\n\">\"                       return '>'\n\">=\"                      return '>='\n\"==\"                      return '=='\n\"!=\"                      return '!='\n\"=\"                       return '='\n\";\"                       return ';'\n\",\"                       return ','\n<<EOF>>                   return 'EOF'\n\"!\"                       return '!'\n\"%\"                       return '%'\n\"&&\"                      return '&&'\n\"||\"                      return '||'\n\"(\"                       return '('\n\")\"                       return ')'\n\"]\"                       return ']'\n\"[\"                       return '['\n\"{\"                       return '{'\n\"}\"                       return '}'\n\n/lex\n\n%left '&&' '||'\n%left '<' '<=' '>' '>=' '==' '!=' RELOP\n%left '-' '+' ADDOP\n%left '*' '/' '%' MULOP\n%nonassoc INCR DECR\n%nonassoc UMINUS NEGATION\n%nonassoc IF_WITHOUT_ELSE\n%nonassoc ELSE\n\n%%\n\nProgram\n  : TopDefs EOF\n    {return yy.state.mainScope;}\n  ;\n\nTopDefs\n  : TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  | TopDefs TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  ;\n\nTopDef\n  : FunctionSignature Block\n    {\n      yy.state.currentFunction.location = _$[_$.length-1];\n      yy.state.popFunction();\n      yy.state.popScope(scope);\n\n      $$ = $FunctionSignature;\n    }\n  ;\n\nFunctionSignature\n  : Type Ident '(' Args ')'\n    {\n      var scope = yy.Scope.create({\n        variables: $Args,\n        parent: yy.state.currentScope\n      });\n      var fun = yy.Function.create({\n        type: $Type,\n        ident: $Ident,\n        args: $Args,\n        scope: scope,\n        parent: yy.state.currentScope\n      });\n      yy.state.pushFunction(fun);\n      yy.state.pushScope(scope);\n\n      $$ = fun;\n    }\n  ;\n\nArgs\n  :\n    {$$ = []}\n  | Arg\n    {$$ = [$Arg]}\n  | Args ',' Arg\n    {$Args.push($Arg); $$ = $Args;}\n  ;\n\nArg\n  : Type Ident\n    {$$ = yy.Argument.create({\n      type: $Type,\n      ident: $Ident,\n      loc: _$[_$.length-1]\n    });}\n  ;\n\nBlock\n  : '{' Stmts '}'\n    {}\n  | '{' '}'\n    {}\n  ;\n\nBlockInit\n  :\n    {\n      var scope = yy.Scope.create({\n        parent: yy.state.currentScope\n      });\n\n      yy.state.pushScope(scope);\n\n      $$ = scope;\n    }\n  ;\n\nStmts\n  : Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  | Stmts Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  ;\n\nStmt\n  : BlockInit Block\n    {\n      $$ = $BlockInit;\n      yy.state.currentScope.location = _$[_$.length-1];\n      yy.state.popScope(scope);\n    }\n  | Type Items ';'\n    {\n      $$ = $Items;\n    }\n  | Ident '=' Expr ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$[_$.length-4]\n      });\n    }\n  | Ident INCR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_INCR', {\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Ident DECR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_DECR', {\n        ident: $Ident,\n      loc: _$[_$.length-1]\n      });\n    }\n  | RETURN Expr ';'\n    {\n      {\n        $$ = yy.Statement.create('RETURN', {\n          expr: $Expr,\n          loc: _$[_$.length-1]\n        });\n      }\n    }\n  | RETURN ';'\n    {\n      $$ = yy.Statement.create('RETURN', {\n        loc: _$[_$.length-1]\n      });\n    }\n  | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt,\n        loc: _$[_$.length-3]\n      });\n    }\n  | IF '(' Expr ')' Stmt ELSE Stmt\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt1,\n        wrong: $Stmt2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | WHILE '(' Expr ')' Stmt\n    {\n      $$ = yy.Statement.create('WHILE', {\n        expr: $Expr,\n        stmt: $Stmt,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr ';'\n    { $$ = $Expr; }\n  | ';'\n    {$$ = undefined;}\n  ;\n\nItems\n  : Item\n    {$$ = [$Item]}\n  | Items ',' Item\n    {\n      $Items.push($Item);\n      $$ = $Items;\n    }\n  ;\n\nItem\n  : Ident\n    {\n      $$ = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      })\n    }\n  | Ident '=' Expr\n    {\n      var decl = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n      var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n      $$ = [decl, ass];\n    }\n  ;\n\nType\n  : INTEGER\n    {\n      yy.state.declarationType = $1;\n    }\n  | STRING\n    {\n      yy.state.declarationType = $1;\n    }\n  | BOOLEAN\n    {\n      yy.state.declarationType = $1;\n    }\n  | VOID\n    {\n      yy.state.declarationType = $1;\n    }\n  ;\n\nIdent\n  : LITERAL\n    { $$ = String(yytext); }\n  ;\n\nExprs\n  :\n    { $$ = [] }\n  | Expr\n    { $$ = [$Expr]; }\n  | Exprs ',' Expr\n    {\n      $Exprs.push($Expr);\n      $$ = $Exprs;\n    }\n  ;\n\nExpr\n  : Number\n    { $$ = $Number; }\n  | String\n    { $$ = $String; }\n  | Logical\n    { $$ = $Logical }\n  | Ident\n    {\n      $$ = yy.Expression.create('VARIABLE', {\n        ident: $Ident,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Ident '(' Exprs ')'\n    {\n      $$ = yy.Expression.create('FUNCALL', {\n        args: $Exprs,\n        ident: $Ident,\n        loc: _$[_$.length-4]\n      });\n    }\n  | '-' Expr %prec UMINUS\n    {\n      $$ = yy.Expression.create('UMINUS', {\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n    }\n  | '!' Expr %prec NEGATION\n    {\n      $$ = yy.Expression.create('NEGATION', {\n        expr: $Expr,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr MulOp Expr %prec MULOP\n    {\n      $$ = yy.Expression.create('MULOP', {\n        operator: $MulOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr AddOp Expr %prec ADDOP\n    {\n      $$ = yy.Expression.create('ADDOP', {\n        operator: $AddOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr RelOp Expr %prec RELOP\n    {\n      $$ = yy.Expression.create('RELOP', {\n        operator: $RelOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr '&&' Expr\n    {\n      $$ = yy.Expression.create('LOGAND', {\n        operator: '&&',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | Expr '||' Expr\n    {\n      $$ = yy.Expression.create('LOGOR', {\n        operator: '||',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$[_$.length-1]\n      });\n    }\n  | '(' Expr ')'\n    {$$ = $2}\n  ;\n\nNumber\n  : NUMBER\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'int',\n        value: Number(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nString\n  : STRING_LITERAL\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'string',\n        value: String(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nLogical\n  : TRUE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  | FALSE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$[_$.length-1]\n      });\n    }\n  ;\n\nAddOp\n  : '+'\n    {}\n  | '-'\n    {}\n  ;\n\nMulOp\n  : '*'\n    {}\n  | '/'\n    {}\n  | '%'\n    {}\n  ;\n\nRelOp\n  : '<'\n    {}\n  | '<='\n    {}\n  | '>'\n    {}\n  | '>='\n    {}\n  | '=='\n    {}\n  | '!='\n    {}\n  ;\n";
 
 var Expression = require('./core/expression.js');
 var Statement = require('./core/statement.js');
 var Scope = require('./core/scope.js');
 var Function = require('./core/function.js');
 var State = require('./core/state.js');
-var Variable = require('./core/variable.js');
+var Argument = require('./core/variables/argument.js');
+var Variable = require('./core/variables/variable.js');
+var VariableReference = require('./core/variables/variable-reference.js');
 
 var exports = module.exports = {};
 
 exports.parse = parse;
+exports.samples = samples;
 
 function parse(code) {
   var parser = new Parser(grammar);
@@ -29813,6 +29212,13 @@ function parse(code) {
     parent: scope
   });
 
+  Function.create({
+    type: 'void',
+    ident: 'printString',
+    args: [],
+    parent: scope
+  });
+
   state.pushScope(scope);
 
   parser.yy.state = state;
@@ -29821,7 +29227,9 @@ function parse(code) {
   parser.yy.Statement = Statement.init(state);
   parser.yy.Scope = Scope;
   parser.yy.Function = Function;
+  parser.yy.Argument = Argument;
   parser.yy.Variable = Variable;
+  parser.yy.VariableReference = VariableReference;
 
   tree = parser.parse(code);
   tree.staticCheck();
@@ -29829,4 +29237,4 @@ function parse(code) {
   return tree;
 }
 
-},{"./core/expression.js":50,"./core/function.js":60,"./core/scope.js":61,"./core/state.js":62,"./core/statement.js":63,"./core/variable.js":72,"jison":10,"strip-comments":47}]},{},["latte"]);
+},{"./core/expression.js":37,"./core/function.js":47,"./core/scope.js":48,"./core/state.js":49,"./core/statement.js":50,"./core/variables/argument.js":59,"./core/variables/variable-reference.js":60,"./core/variables/variable.js":61,"./samples.json":62,"jison":2}]},{},["latte"]);
