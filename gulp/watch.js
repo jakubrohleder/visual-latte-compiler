@@ -10,15 +10,14 @@ function isOnlyChange(event) {
   return event.type === 'changed';
 }
 
-gulp.task('watch', ['inject'], function () {
-
+gulp.task('watch', ['inject'], function() {
   gulp.watch([path.join(conf.paths.web.src, '/*.html'), 'bower.json'], ['inject']);
 
   gulp.watch([
     path.join(conf.paths.web.src, '/app/**/*.css'),
     path.join(conf.paths.web.src, '/app/**/*.scss')
   ], function(event) {
-    if(isOnlyChange(event)) {
+    if (isOnlyChange(event)) {
       gulp.start('styles');
     } else {
       gulp.start('inject');
@@ -26,7 +25,7 @@ gulp.task('watch', ['inject'], function () {
   });
 
   gulp.watch(path.join(conf.paths.web.src, '/app/**/*.js'), function(event) {
-    if(isOnlyChange(event)) {
+    if (isOnlyChange(event)) {
       gulp.start('scripts');
     } else {
       gulp.start('inject');
@@ -43,5 +42,5 @@ gulp.task('watch', ['inject'], function () {
 
   gulp.watch(path.join(conf.paths.lib.samples, '/**/*'), function() {
     gulp.start('samples');
-  })
+  });
 });

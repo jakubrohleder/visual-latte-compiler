@@ -12,6 +12,7 @@
   "rules": {
     "no-undefined": 0,
     "func-names": 0,
-    "no-param-reassign": 0
+    "no-param-reassign": 0,
+    "valid-jsdoc": 0
   }
 }

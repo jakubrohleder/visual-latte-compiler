@@ -12,7 +12,7 @@ var browserSync = require('browser-sync');
 
 var $ = require('gulp-load-plugins')();
 
-gulp.task('browserify', function () {
+gulp.task('browserify', function() {
   var bundle = browserify({
     entries: path.join(conf.paths.lib.src, '/main.js')
   });
@@ -30,5 +30,5 @@ gulp.task('browserify', function () {
     .on('error', function(err) {
       console.log(err);
       this.emit('end');
-    });
+    }).pipe($.size());
 });

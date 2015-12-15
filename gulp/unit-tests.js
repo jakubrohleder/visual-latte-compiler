@@ -14,19 +14,19 @@ var pathSrcJs = [
   path.join(conf.paths.web.src, '/**/!(*.spec).js')
 ];
 
-function runTests (singleRun, done) {
+function runTests(singleRun, done) {
   var reporters = ['progress'];
   var preprocessors = {};
 
-  pathSrcHtml.forEach(function(path) {
-    preprocessors[path] = ['ng-html2js'];
+  pathSrcHtml.forEach(function(srcPath) {
+    preprocessors[srcPath] = ['ng-html2js'];
   });
 
   if (singleRun) {
-    pathSrcJs.forEach(function(path) {
-      preprocessors[path] = ['coverage'];
+    pathSrcJs.forEach(function(srcPath) {
+      preprocessors[srcPath] = ['coverage'];
     });
-    reporters.push('coverage')
+    reporters.push('coverage');
   }
 
   var localConfig = {
@@ -38,8 +38,9 @@ function runTests (singleRun, done) {
   };
 
   var server = new karma.Server(localConfig, function(failCount) {
-    done(failCount ? new Error("Failed " + failCount + " tests.") : null);
-  })
+    done(failCount ? new Error('Failed ' + failCount + ' tests.') : null);
+  });
+
   server.start();
 }
 

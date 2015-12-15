@@ -8,7 +8,7 @@ var $ = require('gulp-load-plugins')({
   pattern: ['gulp-*', 'main-bower-files', 'uglify-save-license', 'del']
 });
 
-gulp.task('partials', function () {
+gulp.task('partials', function() {
   return gulp.src([
     path.join(conf.paths.web.src, '/app/**/*.html'),
     path.join(conf.paths.web.tmp, '/serve/app/**/*.html')
@@ -25,7 +25,7 @@ gulp.task('partials', function () {
     .pipe(gulp.dest(conf.paths.web.tmp + '/partials/'));
 });
 
-gulp.task('html', ['inject', 'partials'], function () {
+gulp.task('html', ['inject', 'partials'], function() {
   var partialsInjectFile = gulp.src(path.join(conf.paths.web.tmp, '/partials/templateCacheHtml.js'), { read: false });
   var partialsInjectOptions = {
     starttag: '<!-- inject:partials -->',
@@ -66,19 +66,19 @@ gulp.task('html', ['inject', 'partials'], function () {
     .pipe(htmlFilter.restore)
     .pipe(gulp.dest(path.join(conf.paths.web.dist, '/')))
     .pipe($.size({ title: path.join(conf.paths.web.dist, '/'), showFiles: true }));
-  });
+});
 
 // Only applies for fonts from bower dependencies
 // Custom fonts are handled by the "other" task
-gulp.task('fonts', function () {
+gulp.task('fonts', function() {
   return gulp.src($.mainBowerFiles({overrides: conf.overrides}))
     .pipe($.filter('**/*.{eot,svg,ttf,woff,woff2}'))
     .pipe($.flatten())
     .pipe(gulp.dest(path.join(conf.paths.web.dist, '/fonts/')));
 });
 
-gulp.task('other', function () {
-  var fileFilter = $.filter(function (file) {
+gulp.task('other', function() {
+  var fileFilter = $.filter(function(file) {
     return file.stat.isFile();
   });
 
@@ -90,7 +90,7 @@ gulp.task('other', function () {
     .pipe(gulp.dest(path.join(conf.paths.web.dist, '/')));
 });
 
-gulp.task('clean', function () {
+gulp.task('clean', function() {
   return $.del([path.join(conf.paths.web.dist, '/'), path.join(conf.paths.web.tmp, '/')]);
 });
 
