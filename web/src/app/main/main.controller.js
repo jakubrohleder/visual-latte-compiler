@@ -6,64 +6,95 @@
     .controller('MainController', MainController);
 
   /** @ngInject */
-  function MainController($scope, latte, $timeout) {
-    $scope.parse = parse;
-    $scope.showCodeArea = true;
+  function MainController($scope, latte) {
     $scope.samples = latte.samples;
     $scope.code = localStorage.getItem('code');
+
     $scope.options = JSON.parse(localStorage.getItem('options')) || {
       debounce: 500,
-      compile: false,
-      semanticCheck: true
+      parse: true,
+      semantic: true,
+      optimize: false,
+      compile: false
     };
 
     $scope.data = {};
+
+    $scope.parse = parse;
+    $scope.semantic = semantic;
+    $scope.optimize = optimize;
+    $scope.compile = compile;
+    $scope.auto = auto;
+
     $scope.$on('code', setCode);
     $scope.$watch('code', watchCode);
-    $scope.$watchCollection('options', watchOptions, true);
 
     function setCode(event, code) {
       $scope.code = code;
     }
 
     function watchCode(code) {
-      if (code !== undefined) {
-        localStorage.setItem('code', code);
-        if($scope.options.semanticCheck) {
-          $scope.data = parse(code);
-        } else {
-          $scope.data.error = undefined;
-        }
+      if (code === undefined || code === '') {
+        return;
+      }
+
+      localStorage.setItem('code', code);
+
+      auto();
+    }
+
+    function auto() {
+      if ($scope.options.parse === true) {
+        parse();
+      }
+
+      if ($scope.options.semantic === true) {
+        semantic();
+      }
+
+      if ($scope.options.optimize === true) {
+        optimize();
+      }
+
+      if ($scope.options.compile === true) {
+        compile();
       }
     }
 
-    function watchOptions(options) {
-      options.compile = options.compile && options.semanticCheck;
-      localStorage.setItem('options', JSON.stringify(options));
-      if (options.semanticCheck === true) {
-        $scope.data = parse($scope.code);
-      } else {
-        $scope.data.error = undefined;
-      }
-    }
+    function processCode(fun, args) {
+      args = args || [];
 
-    function parse(code) {
-      var data = {};
       try {
-        data.tree = latte.parse(code);
-        data.error = undefined;
+        fun();
+        $scope.data.error = undefined;
       } catch (error) {
-        data.error = error;
-        data.tree = undefined;
-        data.llvm = undefined;
-        data.jvm = undefined;
-        if(error.hash === undefined) {
-          console.error(error);
-        }
-      } finally {
-        data.code = code;
+        console.log(error);
+        $scope.data.error = error;
+        $scope.data.rootScope = undefined;
       }
-      return data;
+    }
+
+    function parse() {
+      processCode(parseCode);
+
+      function parseCode() {
+        $scope.data.rootScope = latte.parse($scope.code);
+      }
+    }
+
+    function semantic() {
+      var obj = $scope.data.rootScope;
+      processCode(obj.semanticCheck.bind(obj));
+    }
+
+    function optimize() {
+      var obj = $scope.data.rootScope;
+      processCode(obj.optimize.bind(obj));
+    }
+
+    function compile() {
+      var obj = $scope.data.rootScope;
+      processCode(obj.compile.bind(obj));
     }
   }
 })();

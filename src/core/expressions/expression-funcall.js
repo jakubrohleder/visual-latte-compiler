@@ -21,7 +21,7 @@ function semanticCheck() {
   if (fun === false) {
     parseError(
       'Undeclared function: ' + _this.ident,
-      _this.loc,
+      _this.loc[_this.loc.length - 4],
       _this
     );
   } else if (fun.args.length !== _this.args.length) {
@@ -32,7 +32,7 @@ function semanticCheck() {
     );
   }
 
-  _this.type = _this.scope.getFunction(_this.ident).type;
+  _this.type = fun.type;
 
 
   _.forEach(_this.args, function(arg) {

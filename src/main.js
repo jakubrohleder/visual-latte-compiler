@@ -1,6 +1,7 @@
 var fs = require('fs');
 var Parser = require('jison').Parser;
 var samples = require('./samples.json');
+var parseError = require('./core/error').parseError;
 
 var grammar = fs.readFileSync(__dirname + '/syntax.jison', 'utf8');
 
@@ -54,8 +55,20 @@ function parse(code) {
   parser.yy.Variable = Variable;
   parser.yy.VariableReference = VariableReference;
 
-  tree = parser.parse(code);
-  tree.semanticCheck();
+  try {
+    tree = parser.parse(code);
+  } catch (error) {
+    console.log(error);
+    error.hash.loc.first_line ++;
+    error.hash.loc.last_line ++;
+    parseError(
+      'Parse error: expected ' + error.hash.expected.join(' ') + ' instead of ' + error.hash.token,
+      error.hash.loc,
+      error
+    );
+  }
+
+  // tree.semanticCheck();
 
   return tree;
 }

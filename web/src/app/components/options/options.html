@@ -1,0 +1,72 @@
+<div class="options">
+  <form class="ui form">
+    <div class="field">
+      <label>Auto parse</label>
+      <div ui-checkbox class="ui toggle checkbox" ng-model="options.parse">
+        <input type="checkbox" tabindex="0" class="hidden" ng-model="options.parse">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Auto semantic-check</label>
+      <div ui-checkbox
+        class="ui toggle checkbox"
+        ng-model="options.semantic"
+        ng-class="{disabled: !options.parse}"
+      >
+        <input type="checkbox" tabindex="0" class="hidden" ng-model="options.semantic">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Auto optimize</label>
+      <div ui-checkbox
+        class="ui toggle checkbox"
+        ng-model="options.optimize"
+        ng-class="{disabled: !options.semantic}"
+      >
+        <input type="checkbox" tabindex="0" class="hidden" ng-model="options.optimize">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Auto compile</label>
+      <div ui-checkbox
+        class="ui toggle checkbox"
+        ng-model="options.compile"
+        ng-class="{disabled: !options.semantic}"
+      >
+        <input type="checkbox" tabindex="0" class="hidden" ng-model="options.compile">
+      </div>
+    </div>
+
+  </form>
+
+  <div
+    class="ui button fluid primary"
+    style="margin-top: 5px"
+    ng-click="parse()"
+    ng-show="!options.parse"
+  >Parse</div>
+  <div
+    class="ui button fluid primary"
+    style="margin-top: 5px"
+    ng-click="semantic()"
+    ng-show="!options.semantic"
+    ng-class="{disabled: data.rootScope === undefined}"
+  >Semantic check</div>
+  <div
+    class="ui button fluid primary"
+    style="margin-top: 5px"
+    ng-click="optimize()"
+    ng-show="!options.optimize"
+    ng-class="{disabled: data.rootScope === undefined || data.rootScope.state.checked === false}"
+  >Optimize</div>
+  <div
+    class="ui button fluid primary"
+    style="margin-top: 5px"
+    ng-click="compile()"
+    ng-show="!options.compile"
+    ng-class="{disabled: data.rootScope === undefined || data.rootScope.state.checked === false}"
+  >Compile</div>
+</div>

@@ -1,5 +1,4 @@
 var _ = require('lodash');
-var Variable = require('./variables/variable');
 var parseError = require('./error').parseError;
 
 var exports = module.exports = {};
@@ -8,7 +7,6 @@ exports.create = create;
 
 Scope.prototype.addFunction = addFunction;
 Scope.prototype.addVariable = addVariable;
-Scope.prototype.addVariables = addVariables;
 Scope.prototype.addElement = addElement;
 Scope.prototype.getVariable = getVariable;
 Scope.prototype.getFunction = getFunction;
@@ -19,17 +17,19 @@ function Scope(opts) {
 
   opts = opts || {};
 
+  _this.opts = opts;
+
   _this.root = opts.root || false;
   _this.functions = {};
   _this.variables = {};
   _this.elements = [];
 
-  _this.parent = opts.parent;
+  _this.state = {
+    checked: false,
+    optimized: false
+  }
 
-  _.forEach(opts.variables, function(variable) {
-    variable.scope = _this;
-    _this.addVariable(variable);
-  });
+  _this.parent = opts.parent;
 }
 
 function create(opts) {
@@ -38,6 +38,8 @@ function create(opts) {
 
 function addFunction(fun) {
   var _this = this;
+
+  console.log('addFunction', fun);
 
   if (_this.functions[fun.ident] !== undefined) {
     if(_this.functions[fun.ident].scope === _this) {
@@ -64,17 +66,6 @@ function addVariable(variable) {
     }
   }
   _this.variables[variable.ident] = variable;
-}
-
-function addVariables(type, idents) {
-  var _this = this;
-
-  _.forEach(idents, function(ident) {
-    _this.addVariable(Variable.create({
-      type: type,
-      ident: ident
-    }))
-  })
 }
 
 function addElement(element) {
@@ -114,11 +105,24 @@ function getFunction(ident) {
 function semanticCheck() {
   var _this = this;
 
+  if (_this.root === true) {
+    _.forEach(_this.elements, function (element) {
+      _this.addFunction(element);
+    });
+
+    if (_this.functions.main === undefined) {
+      parseError('Main function not declared', _this);
+    }
+  }
+
+  _.forEach(_this.opts.variables, function(variable) {
+    variable.scope = _this;
+    _this.addVariable(variable);
+  });
+
   _.forEach(_this.elements, function (element) {
     element.semanticCheck();
   });
 
-  if (_this.root === true && _this.functions.main === undefined) {
-    parseError('Main function not declared', _this);
-  }
+  _this.state.checked = true;
 }

@@ -12,39 +12,7 @@
   <br>
 
   <samples class="samples" code="code"></samples>
-  <div class="options">
-    <form class="ui form">
-      <div class="field">
-        <label>Auto semantic-check</label>
-        <div ui-checkbox class="ui toggle checkbox" ng-model="options.semanticCheck">
-          <input type="checkbox" tabindex="0" class="hidden" ng-model="options.semanticCheck">
-        </div>
-      </div>
-      <div class="field">
-        <label>Auto compile</label>
-        <div ui-checkbox
-          class="ui toggle checkbox"
-          ng-model="options.compile"
-          ng-class="{disabled: !options.semanticCheck}"
-        >
-          <input type="checkbox" tabindex="0" class="hidden" ng-model="options.compile">
-        </div>
-      </div>
-    </form>
-
-    <div
-      class="ui button fluid primary"
-      style="margin-top: 5px"
-      ng-click="data = parse(code)"
-      ng-show="!options.semanticCheck"
-    >Semantic check</div>
-    <div
-      class="ui button fluid primary"
-      style="margin-top: 5px"
-      ng-click="data = parse(code)"
-      ng-show="!options.compile"
-    >Compile</div>
-  </div>
+  <options data="options"></options>
 </div>
 
 <br>

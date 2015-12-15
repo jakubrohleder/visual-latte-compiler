@@ -98,6 +98,9 @@ FunctionSignature
         scope: scope,
         parent: yy.state.currentScope
       });
+
+      scope.function = fun;
+
       yy.state.pushFunction(fun);
       yy.state.pushScope(scope);
 

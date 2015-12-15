@@ -27,7 +27,8 @@
         lineNumbers: true,
         gutters: ['error'],
         mode: 'text/x-c++src',
-        theme: 'ambiance'
+        theme: 'ambiance',
+        tabSize: 2
       };
 
       $scope.$watch('error', markError);
@@ -57,11 +58,6 @@
               line: error.hash.loc.last_line - 1,
               ch: error.hash.loc.last_column
             };
-
-            if(error.hash.parse !== true) {
-              from.ch += 1;
-              to.ch += 1;
-            }
 
             var doc = codeMirror.getDoc();
 

@@ -28231,21 +28231,18 @@ function parseError(str, loc, object) {
   var hash;
   if (loc === undefined) {
     loc = {
-      first_line: 1,
-      last_line: 1,
-      first_column: 1,
-      last_column: 1
+      first_line: 0,
+      last_line: 0,
+      first_column: 0,
+      last_column: 0
     };
   } else if (_.isArray(loc)) {
     loc = loc[loc.length - 1];
   }
 
-  console.log(loc);
-
   hash = {
     loc: loc,
-    object: object,
-    parse: true
+    object: object
   };
 
   throw new _parseError(str, hash);
@@ -28387,7 +28384,7 @@ function semanticCheck() {
   if (fun === false) {
     parseError(
       'Undeclared function: ' + _this.ident,
-      _this.loc,
+      _this.loc[_this.loc.length - 4],
       _this
     );
   } else if (fun.args.length !== _this.args.length) {
@@ -28398,7 +28395,7 @@ function semanticCheck() {
     );
   }
 
-  _this.type = _this.scope.getFunction(_this.ident).type;
+  _this.type = fun.type;
 
 
   _.forEach(_this.args, function(arg) {
@@ -28597,8 +28594,6 @@ function Function(opts) {
   Element.call(_this, opts);
 
   _this.main = _this.ident === 'main';
-
-  _this.parent.addFunction(_this);
 }
 
 function create(opts) {
@@ -28611,7 +28606,7 @@ function semanticCheck() {
   if (_this.main === true && _this.args.length > 0) {
     parseError(
       'Main function cannot have arguments',
-      _this.loc[_this.loc.length -2],
+      _this.loc[_this.loc.length - 2],
       _this
     );
   } else {
@@ -28626,7 +28621,6 @@ function semanticCheck() {
 
 },{"./element.js":35,"./error":36,"lodash":32}],48:[function(require,module,exports){
 var _ = require('lodash');
-var Variable = require('./variables/variable');
 var parseError = require('./error').parseError;
 
 var exports = module.exports = {};
@@ -28635,7 +28629,6 @@ exports.create = create;
 
 Scope.prototype.addFunction = addFunction;
 Scope.prototype.addVariable = addVariable;
-Scope.prototype.addVariables = addVariables;
 Scope.prototype.addElement = addElement;
 Scope.prototype.getVariable = getVariable;
 Scope.prototype.getFunction = getFunction;
@@ -28646,17 +28639,19 @@ function Scope(opts) {
 
   opts = opts || {};
 
+  _this.opts = opts;
+
   _this.root = opts.root || false;
   _this.functions = {};
   _this.variables = {};
   _this.elements = [];
 
-  _this.parent = opts.parent;
+  _this.state = {
+    checked: false,
+    optimized: false
+  }
 
-  _.forEach(opts.variables, function(variable) {
-    variable.scope = _this;
-    _this.addVariable(variable);
-  });
+  _this.parent = opts.parent;
 }
 
 function create(opts) {
@@ -28665,6 +28660,8 @@ function create(opts) {
 
 function addFunction(fun) {
   var _this = this;
+
+  console.log('addFunction', fun);
 
   if (_this.functions[fun.ident] !== undefined) {
     if(_this.functions[fun.ident].scope === _this) {
@@ -28691,17 +28688,6 @@ function addVariable(variable) {
     }
   }
   _this.variables[variable.ident] = variable;
-}
-
-function addVariables(type, idents) {
-  var _this = this;
-
-  _.forEach(idents, function(ident) {
-    _this.addVariable(Variable.create({
-      type: type,
-      ident: ident
-    }))
-  })
 }
 
 function addElement(element) {
@@ -28741,16 +28727,29 @@ function getFunction(ident) {
 function semanticCheck() {
   var _this = this;
 
+  if (_this.root === true) {
+    _.forEach(_this.elements, function (element) {
+      _this.addFunction(element);
+    });
+
+    if (_this.functions.main === undefined) {
+      parseError('Main function not declared', _this);
+    }
+  }
+
+  _.forEach(_this.opts.variables, function(variable) {
+    variable.scope = _this;
+    _this.addVariable(variable);
+  });
+
   _.forEach(_this.elements, function (element) {
     element.semanticCheck();
   });
 
-  if (_this.root === true && _this.functions.main === undefined) {
-    parseError('Main function not declared', _this);
-  }
+  _this.state.checked = true;
 }
 
-},{"./error":36,"./variables/variable":61,"lodash":32}],49:[function(require,module,exports){
+},{"./error":36,"lodash":32}],49:[function(require,module,exports){
 var exports = module.exports = {};
 
 exports.create = create;
@@ -29202,11 +29201,11 @@ module.exports={
   "bad": {
     "bad001.lat": "// Not closed comment block\n/*\n",
     "bad002.lat": "// Wat?\na\n",
-    "bad003.lat": "// Repeated argument name\nint f(int x, int x) {\n   return x;\n}",
+    "bad003.lat": "// Repeated argument name\nint main(int x, int x) {\n   return x;\n}",
     "bad004.lat": "// Double return\nint main() {\n        return 0;\n        return 1;\n}\n",
     "bad005.lat": "// Function with no type\nfoo() {}\n",
     "bad006.lat": "//Assigment to undeclared variable\nint main() {\n        x = 14;\n\treturn 0 ;\n}\n",
-    "bad007.lat": "//Redeclaration\nint main() {\n        int x;\n        int x;\n\treturn 0 ;\n}\n",
+    "bad007.lat": "//Variable redeclaration\nint main() {\n        int x;\n        int x;\n\treturn 0 ;\n}\n",
     "bad008.lat": "//Path with no return\n  int main() {\n    if (false)\n       return 0;\n}\n",
     "bad009.lat": "// boolean to int assigment\nint main() {\n        int x;\n        x = true;\n        return 1;\n}\n",
     "bad010.lat": "// return with no value for int function\nint main() {\n        if (true)\n                return;\n\t;\n        return 1;\n}\n",
@@ -29227,7 +29226,8 @@ module.exports={
     "bad026.lat": "// Assigning string to int variable.\n\nint main () {\n int x;\n  x = \"foo\"+\"bar\";\n return 0 ;\n}",
     "bad027.lat": "// Assigning int to string variable.\n\nint main () {\n string x;\n x = 1;\n return 0 ;\n}",
     "bad028.lat": "// Variable declaration as an only if instruction\n\nint main () {\n if(true)\n    int x;\n return 0 ;\n}",
-    "bad029.lat": "// Using variable declared in if block\n\nint main () {\n if(true) {\n    int x;\n }\n x = 10;\n return 0 ;\n}"
+    "bad029.lat": "// Using variable declared in if block\n\nint main () {\n if(true) {\n    int x;\n }\n x = 10;\n return 0 ;\n}",
+    "bad030.lat": "//Function redeclaration\nint main() {\n  int x;\n  int x;\n\treturn 0 ;\n}\n\nint f() {\n  return 0;\n}\n\nint f() {\n  return 0;\n}"
   },
   "good": {
     "core001.lat": "int main() {\n\tprintInt(fac(10));\n\tprintInt(rfac(10));\n\tprintInt(mfac(10));\n        printInt(ifac(10));\n        string r ; // just to test blocks \n\t{\n\t  int n = 10;\n\t  int r = 1;\n\t  while (n>0) {\n\t    r = r * n;\n\t    n--;\n\t  }\n\t  printInt(r);\n\t}\n\tprintString (repStr(\"=\",60));\n\tprintString (\"hello */\");\n        printString (\"/* world\") ;\n        return 0 ;\n}\n\nint fac(int a) {\n\tint r;\n\tint n;\n\n\tr = 1;\n\tn = a;\n\twhile (n > 0) {\n\t  r = r * n;\n\t  n = n - 1;\n\t}\n\treturn r;\n}\n\nint rfac(int n) {\n\tif (n == 0)\n\t  return 1;\n\telse\n\t  return n * rfac(n-1);\n}\n\nint mfac(int n) {\n\tif (n == 0)\n\t  return 1;\n\telse\n\t  return n * nfac(n-1);\n}\n\nint nfac(int n) {\n\tif (n != 0)\n\t  return mfac(n-1) * n;\n\telse\n\t  return 1;\n}\n\nint ifac(int n) { return ifac2f(1,n); }\n\nint ifac2f(int l, int h) {\n        if (l == h)\n          return l;\n        if (l > h)\n          return 1;\n        int m;\n        m = (l + h) / 2;\n        return ifac2f(l,m) * ifac2f(m+1,h);\n}\n\nstring repStr(string s, int n) {\n  string r = \"\";\n  int i = 0;\n  while(i<n) {\n    r = r + s;\n    i++;\n  }\n return r;\n}",
@@ -29283,10 +29283,6 @@ module.exports={
       "array002.lat": "int [] doubleArray (int [] a){\n  int [] res = new int [a . length];\n  int i = 0 ;\n  for (int n : a){\n    res [i] = 2 * n ;\n    i ++ ;\n  }\n  return res ;\n}\n\nvoid shiftLeft (int [] a){\n  int x = a [0];\n  int i = 0 ;\n  while (i < a.length - 1){\n    a [i] = a [i + 1];\n    i ++ ;\n  }\n  a[a.length - 1]= x ;\n  return;\n }\n\nint scalProd(int[] a, int[] b) {\n  int res = 0;\n  int i = 0;\n  while (i < a.length) {\n    res = res + a[i] * b[i];\n    i++;\n  }\n  return res;\n}\n\nint main () {\n  int [] a = new int [5];\n  int i = 0 ;\n  while (i < a.length){\n    a [i]= i ;\n    i ++ ;\n    }\n  shiftLeft (a);\n  int [] b = doubleArray (a);\n  for (int x : a)printInt (x);\n  for (int x : b)printInt (x);\n  printInt(scalProd(a,b));\n  return 0 ;\n}\n ",
       "array002.output": "1\n2\n3\n4\n0\n2\n4\n6\n8\n0\n60\n"
     },
-    "objects2": {
-      "shapes.lat": "class Node {\n  Shape elem;\n  Node next;\n\n  void setElem(Shape c) { elem = c; }\n\n  void setNext(Node n) { next = n; }\n\n  Shape getElem() { return elem; }\n\n  Node getNext() { return next; }\n}\n\nclass Stack {\n  Node head;\n\n  void push(Shape c) {\n    Node newHead = new Node;\n    newHead.setElem(c);\n    newHead.setNext(head);\n    head = newHead;\n  }\n\n  boolean isEmpty() {\n    return head==(Node)null;\n  }\n\n  Shape top() {\n    return head.getElem();\n  }\n\n  void pop() {\n    head = head.getNext();\n  }\n}\n\nclass Shape {\n  void tell () {\n    printString(\"I'm a shape\");\n  }\n\n  void tellAgain() {\n     printString(\"I'm just a shape\");\n  }\n}\n\nclass Rectangle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a rectangle\");\n  }\n}\n\nclass Circle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a circle\");\n  }\n}\n\nclass Square extends Rectangle {\n  void tellAgain() {\n    printString(\"I'm really a square\");\n  }\n}\n\nint main() {\n  Stack stk = new Stack;\n  Shape s = new Shape;\n  stk.push(s);\n  s = new Rectangle;\n  stk.push(s);\n  s = new Square;\n  stk.push(s);\n  s = new Circle;\n  stk.push(s);\n  while (!stk.isEmpty()) {\n    s = stk.top();\n    s.tell();\n    s.tellAgain();\n    stk.pop();\n  }\n  return 0;\n}\n",
-      "shapes.output": "I'm a shape\nI'm really a circle\nI'm a shape\nI'm really a square\nI'm a shape\nI'm really a rectangle\nI'm a shape\nI'm just a shape\n"
-    },
     "objects1": {
       "counter.lat": "int main () {\n  Counter c;\n  c = new Counter;\n  c.incr();\n  c.incr();\n  c.incr();\n  int x = c.value();\n  printInt(x);\n  return 0;\n}\n\nclass Counter {\n  int val;\n\n  void incr () {val++; return;}\n\n  int value () {return val;}\n\n}\n",
       "counter.output": "3\n",
@@ -29296,6 +29292,10 @@ module.exports={
       "points.output": "5\n9\n7\n2\n",
       "queue.lat": "class Node {\n  int elem;\n  Node next;\n\n  void setElem (int e)  { elem = e; }\n  void setNext (Node n) { next = n; }\n\n  int  getElem () { return elem; }\n  Node getNext () { return next; }\n\n}\n\nclass IntQueue {\n  Node front;\n  Node rear;\n\n  boolean isEmpty () { return front == (Node)null; }\n\n  void insert (int x) {\n    Node last = new Node;\n    last.setElem(x);\n    if (self.isEmpty())\n      front = last;\n    else \n      rear.setNext(last);\n    rear = last;\n  }\n\n  int first () { return front.getElem(); }\n\n  void rmFirst () {\n    front = front.getNext();\n  }\n\n  int size () {\n      Node n = front;\n      int res = 0;\n      while (n != (Node)null) {\n        n = n.getNext();\n        res++;\n      }\n     return res;\n  }\n}\n\nint f (int x) {\n  return x*x + 3;\n}\n\nint main () {\n  IntQueue q = new IntQueue;\n  q.insert(f(3));\n  q.insert(5);\n  q.insert(7);\n  printInt(q.first());\n  q.rmFirst();\n  printInt(q.size());\n  return 0;\n}\n\n     ",
       "queue.output": "12\n2\n"
+    },
+    "objects2": {
+      "shapes.lat": "class Node {\n  Shape elem;\n  Node next;\n\n  void setElem(Shape c) { elem = c; }\n\n  void setNext(Node n) { next = n; }\n\n  Shape getElem() { return elem; }\n\n  Node getNext() { return next; }\n}\n\nclass Stack {\n  Node head;\n\n  void push(Shape c) {\n    Node newHead = new Node;\n    newHead.setElem(c);\n    newHead.setNext(head);\n    head = newHead;\n  }\n\n  boolean isEmpty() {\n    return head==(Node)null;\n  }\n\n  Shape top() {\n    return head.getElem();\n  }\n\n  void pop() {\n    head = head.getNext();\n  }\n}\n\nclass Shape {\n  void tell () {\n    printString(\"I'm a shape\");\n  }\n\n  void tellAgain() {\n     printString(\"I'm just a shape\");\n  }\n}\n\nclass Rectangle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a rectangle\");\n  }\n}\n\nclass Circle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a circle\");\n  }\n}\n\nclass Square extends Rectangle {\n  void tellAgain() {\n    printString(\"I'm really a square\");\n  }\n}\n\nint main() {\n  Stack stk = new Stack;\n  Shape s = new Shape;\n  stk.push(s);\n  s = new Rectangle;\n  stk.push(s);\n  s = new Square;\n  stk.push(s);\n  s = new Circle;\n  stk.push(s);\n  while (!stk.isEmpty()) {\n    s = stk.top();\n    s.tell();\n    s.tellAgain();\n    stk.pop();\n  }\n  return 0;\n}\n",
+      "shapes.output": "I'm a shape\nI'm really a circle\nI'm a shape\nI'm really a square\nI'm a shape\nI'm really a rectangle\nI'm a shape\nI'm just a shape\n"
     },
     "struct": {
       "list.lat": "class list {\n  int elem;\n  list next;\n}\n\nint main() {\n  printInt(length(fromTo(1,50)));\n  printInt(length2(fromTo(1,100)));\n  return 0;\n}\n\nint head (list xs) {\n  return xs . elem;\n}\n \nlist cons (int x, list xs) {\n  list n;\n  n = new list;\n  n.elem = x;\n  n.next = xs;\n  return n;\n}\n\nint length (list xs) {\n  if (xs==(list)null)\n    return 0;\n  else\n    return 1 + length (xs.next);\n}\n\nlist fromTo (int m, int n) {\n  if (m>n)\n    return (list)null;\n  else \n    return cons (m,fromTo (m+1,n));\n}\n\nint length2 (list xs) {\n  int res = 0;\n  while (xs != (list)null) {\n    res++;\n    xs = xs.next;\n  }\n  return res;\n}\n",
@@ -29423,8 +29423,9 @@ module.exports={
 
 var Parser = require('jison').Parser;
 var samples = require('./samples.json');
+var parseError = require('./core/error').parseError;
 
-var grammar = "\n/* description: Latte language parser */\n\n%lex\n\n%%\n\\s+                       /* skip whitespace */\n\"//\".*                    /* skip line comments */\n\"/*\"((\\*+[^/*])|([^*]))*\\**\"*/\" /* skip block comments */\n\ntrue                      return 'TRUE'\nfalse                     return 'FALSE'\nif                        return 'IF'\nelse                      return 'ELSE'\nwhile                     return 'WHILE'\nint                       return 'INTEGER'\nstring                    return 'STRING'\nboolean                   return 'BOOLEAN'\nvoid                      return 'VOID'\nreturn                    return 'RETURN'\n[0-9]+                    return 'NUMBER'\n[a-zA-Z_][0-9a-zA-Z_]*    return 'LITERAL'\nL?\\\"(\\\\.|[^\\\\\"])*\\\"       return 'STRING_LITERAL'\n\"++\"                      return 'INCR'\n\"--\"                      return 'DECR'\n\"*\"                       return '*'\n\"/\"                       return '/'\n\"-\"                       return '-'\n\"+\"                       return '+'\n\"<\"                       return '<'\n\"<=\"                      return '<='\n\">\"                       return '>'\n\">=\"                      return '>='\n\"==\"                      return '=='\n\"!=\"                      return '!='\n\"=\"                       return '='\n\";\"                       return ';'\n\",\"                       return ','\n<<EOF>>                   return 'EOF'\n\"!\"                       return '!'\n\"%\"                       return '%'\n\"&&\"                      return '&&'\n\"||\"                      return '||'\n\"(\"                       return '('\n\")\"                       return ')'\n\"]\"                       return ']'\n\"[\"                       return '['\n\"{\"                       return '{'\n\"}\"                       return '}'\n\n/lex\n\n%left '&&' '||'\n%left '<' '<=' '>' '>=' '==' '!=' RELOP\n%left '-' '+' ADDOP\n%left '*' '/' '%' MULOP\n%nonassoc INCR DECR\n%nonassoc UMINUS NEGATION\n%nonassoc IF_WITHOUT_ELSE\n%nonassoc ELSE\n\n%%\n\nProgram\n  : TopDefs EOF\n    {return yy.state.rootScope;}\n  ;\n\nTopDefs\n  : TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  | TopDefs TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  ;\n\nTopDef\n  : FunctionSignature Block\n    {\n      yy.state.currentFunction.loc = _$;\n      yy.state.popFunction();\n      yy.state.popScope(scope);\n\n      $$ = $FunctionSignature;\n    }\n  ;\n\nFunctionSignature\n  : Type Ident '(' Args ')'\n    {\n      var scope = yy.Scope.create({\n        variables: $Args,\n        parent: yy.state.currentScope\n      });\n      var fun = yy.Function.create({\n        type: $Type,\n        ident: $Ident,\n        args: $Args,\n        scope: scope,\n        parent: yy.state.currentScope\n      });\n      yy.state.pushFunction(fun);\n      yy.state.pushScope(scope);\n\n      $$ = fun;\n    }\n  ;\n\nArgs\n  :\n    {$$ = []}\n  | Arg\n    {$$ = [$Arg]}\n  | Args ',' Arg\n    {$Args.push($Arg); $$ = $Args;}\n  ;\n\nArg\n  : Type Ident\n    {$$ = yy.Argument.create({\n      type: $Type,\n      ident: $Ident,\n      loc: _$\n    });}\n  ;\n\nBlock\n  : '{' Stmts '}'\n    {}\n  | '{' '}'\n    {}\n  ;\n\nBlockInit\n  :\n    {\n      var scope = yy.Scope.create({\n        parent: yy.state.currentScope\n      });\n\n      yy.state.pushScope(scope);\n\n      $$ = scope;\n    }\n  ;\n\nStmts\n  : Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  | Stmts Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  ;\n\nStmt\n  : BlockInit Block\n    {\n      $$ = $BlockInit;\n      yy.state.currentScope.loc = _$;\n      yy.state.popScope(scope);\n    }\n  | Type Items ';'\n    {\n      $$ = $Items;\n    }\n  | Ident '=' Expr ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$\n      });\n    }\n  | Ident INCR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_INCR', {\n        ident: $Ident,\n        loc: _$\n      });\n    }\n  | Ident DECR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_DECR', {\n        ident: $Ident,\n        loc: _$\n      });\n    }\n  | RETURN Expr ';'\n    {\n      {\n        $$ = yy.Statement.create('RETURN', {\n          expr: $Expr,\n          loc: _$\n        });\n      }\n    }\n  | RETURN ';'\n    {\n      $$ = yy.Statement.create('RETURN', {\n        loc: _$\n      });\n    }\n  | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt,\n        loc: _$\n      });\n    }\n  | IF '(' Expr ')' Stmt ELSE Stmt\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt1,\n        wrong: $Stmt2,\n        loc: _$\n      });\n    }\n  | WHILE '(' Expr ')' Stmt\n    {\n      $$ = yy.Statement.create('WHILE', {\n        expr: $Expr,\n        stmt: $Stmt,\n        loc: _$\n      });\n    }\n  | Expr ';'\n    { $$ = $Expr; }\n  | ';'\n    {$$ = undefined;}\n  ;\n\nItems\n  : Item\n    {$$ = [$Item]}\n  | Items ',' Item\n    {\n      $Items.push($Item);\n      $$ = $Items;\n    }\n  ;\n\nItem\n  : Ident\n    {\n      $$ = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$\n      })\n    }\n  | Ident '=' Expr\n    {\n      var decl = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$\n      });\n      var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$\n      });\n      $$ = [decl, ass];\n    }\n  ;\n\nType\n  : INTEGER\n    {\n      yy.state.declarationType = $1;\n    }\n  | STRING\n    {\n      yy.state.declarationType = $1;\n    }\n  | BOOLEAN\n    {\n      yy.state.declarationType = $1;\n    }\n  | VOID\n    {\n      yy.state.declarationType = $1;\n    }\n  ;\n\nIdent\n  : LITERAL\n    { $$ = String(yytext); }\n  ;\n\nExprs\n  :\n    { $$ = [] }\n  | Expr\n    { $$ = [$Expr]; }\n  | Exprs ',' Expr\n    {\n      $Exprs.push($Expr);\n      $$ = $Exprs;\n    }\n  ;\n\nExpr\n  : Number\n    { $$ = $Number; }\n  | String\n    { $$ = $String; }\n  | Logical\n    { $$ = $Logical }\n  | Ident\n    {\n      $$ = yy.Expression.create('VARIABLE', {\n        ident: $Ident,\n        loc: _$\n      });\n    }\n  | Ident '(' Exprs ')'\n    {\n      $$ = yy.Expression.create('FUNCALL', {\n        args: $Exprs,\n        ident: $Ident,\n        loc: _$\n      });\n    }\n  | '-' Expr %prec UMINUS\n    {\n      $$ = yy.Expression.create('UMINUS', {\n        expr: $Expr,\n        loc: _$\n      });\n    }\n  | '!' Expr %prec NEGATION\n    {\n      $$ = yy.Expression.create('NEGATION', {\n        expr: $Expr,\n        loc: _$\n      });\n    }\n  | Expr MulOp Expr %prec MULOP\n    {\n      $$ = yy.Expression.create('MULOP', {\n        operator: $MulOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | Expr AddOp Expr %prec ADDOP\n    {\n      $$ = yy.Expression.create('ADDOP', {\n        operator: $AddOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | Expr RelOp Expr %prec RELOP\n    {\n      $$ = yy.Expression.create('RELOP', {\n        operator: $RelOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | Expr '&&' Expr\n    {\n      $$ = yy.Expression.create('LOGAND', {\n        operator: '&&',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | Expr '||' Expr\n    {\n      $$ = yy.Expression.create('LOGOR', {\n        operator: '||',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | '(' Expr ')'\n    {$$ = $2}\n  ;\n\nNumber\n  : NUMBER\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'int',\n        value: Number(yytext),\n        loc: _$\n      });\n    }\n  ;\n\nString\n  : STRING_LITERAL\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'string',\n        value: String(yytext),\n        loc: _$\n      });\n    }\n  ;\n\nLogical\n  : TRUE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$\n      });\n    }\n  | FALSE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$\n      });\n    }\n  ;\n\nAddOp\n  : '+'\n    {}\n  | '-'\n    {}\n  ;\n\nMulOp\n  : '*'\n    {}\n  | '/'\n    {}\n  | '%'\n    {}\n  ;\n\nRelOp\n  : '<'\n    {}\n  | '<='\n    {}\n  | '>'\n    {}\n  | '>='\n    {}\n  | '=='\n    {}\n  | '!='\n    {}\n  ;\n";
+var grammar = "\n/* description: Latte language parser */\n\n%lex\n\n%%\n\\s+                       /* skip whitespace */\n\"//\".*                    /* skip line comments */\n\"/*\"((\\*+[^/*])|([^*]))*\\**\"*/\" /* skip block comments */\n\ntrue                      return 'TRUE'\nfalse                     return 'FALSE'\nif                        return 'IF'\nelse                      return 'ELSE'\nwhile                     return 'WHILE'\nint                       return 'INTEGER'\nstring                    return 'STRING'\nboolean                   return 'BOOLEAN'\nvoid                      return 'VOID'\nreturn                    return 'RETURN'\n[0-9]+                    return 'NUMBER'\n[a-zA-Z_][0-9a-zA-Z_]*    return 'LITERAL'\nL?\\\"(\\\\.|[^\\\\\"])*\\\"       return 'STRING_LITERAL'\n\"++\"                      return 'INCR'\n\"--\"                      return 'DECR'\n\"*\"                       return '*'\n\"/\"                       return '/'\n\"-\"                       return '-'\n\"+\"                       return '+'\n\"<\"                       return '<'\n\"<=\"                      return '<='\n\">\"                       return '>'\n\">=\"                      return '>='\n\"==\"                      return '=='\n\"!=\"                      return '!='\n\"=\"                       return '='\n\";\"                       return ';'\n\",\"                       return ','\n<<EOF>>                   return 'EOF'\n\"!\"                       return '!'\n\"%\"                       return '%'\n\"&&\"                      return '&&'\n\"||\"                      return '||'\n\"(\"                       return '('\n\")\"                       return ')'\n\"]\"                       return ']'\n\"[\"                       return '['\n\"{\"                       return '{'\n\"}\"                       return '}'\n\n/lex\n\n%left '&&' '||'\n%left '<' '<=' '>' '>=' '==' '!=' RELOP\n%left '-' '+' ADDOP\n%left '*' '/' '%' MULOP\n%nonassoc INCR DECR\n%nonassoc UMINUS NEGATION\n%nonassoc IF_WITHOUT_ELSE\n%nonassoc ELSE\n\n%%\n\nProgram\n  : TopDefs EOF\n    {return yy.state.rootScope;}\n  ;\n\nTopDefs\n  : TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  | TopDefs TopDef\n    { yy.state.currentScope.addElement($TopDef) }\n  ;\n\nTopDef\n  : FunctionSignature Block\n    {\n      yy.state.currentFunction.loc = _$;\n      yy.state.popFunction();\n      yy.state.popScope(scope);\n\n      $$ = $FunctionSignature;\n    }\n  ;\n\nFunctionSignature\n  : Type Ident '(' Args ')'\n    {\n      var scope = yy.Scope.create({\n        variables: $Args,\n        parent: yy.state.currentScope\n      });\n      var fun = yy.Function.create({\n        type: $Type,\n        ident: $Ident,\n        args: $Args,\n        scope: scope,\n        parent: yy.state.currentScope\n      });\n\n      scope.function = fun;\n\n      yy.state.pushFunction(fun);\n      yy.state.pushScope(scope);\n\n      $$ = fun;\n    }\n  ;\n\nArgs\n  :\n    {$$ = []}\n  | Arg\n    {$$ = [$Arg]}\n  | Args ',' Arg\n    {$Args.push($Arg); $$ = $Args;}\n  ;\n\nArg\n  : Type Ident\n    {$$ = yy.Argument.create({\n      type: $Type,\n      ident: $Ident,\n      loc: _$\n    });}\n  ;\n\nBlock\n  : '{' Stmts '}'\n    {}\n  | '{' '}'\n    {}\n  ;\n\nBlockInit\n  :\n    {\n      var scope = yy.Scope.create({\n        parent: yy.state.currentScope\n      });\n\n      yy.state.pushScope(scope);\n\n      $$ = scope;\n    }\n  ;\n\nStmts\n  : Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  | Stmts Stmt\n    {\n      yy.state.currentScope.addElement($Stmt);\n    }\n  ;\n\nStmt\n  : BlockInit Block\n    {\n      $$ = $BlockInit;\n      yy.state.currentScope.loc = _$;\n      yy.state.popScope(scope);\n    }\n  | Type Items ';'\n    {\n      $$ = $Items;\n    }\n  | Ident '=' Expr ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$\n      });\n    }\n  | Ident INCR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_INCR', {\n        ident: $Ident,\n        loc: _$\n      });\n    }\n  | Ident DECR ';'\n    {\n      $$ = yy.Statement.create('VARIABLE_DECR', {\n        ident: $Ident,\n        loc: _$\n      });\n    }\n  | RETURN Expr ';'\n    {\n      {\n        $$ = yy.Statement.create('RETURN', {\n          expr: $Expr,\n          loc: _$\n        });\n      }\n    }\n  | RETURN ';'\n    {\n      $$ = yy.Statement.create('RETURN', {\n        loc: _$\n      });\n    }\n  | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt,\n        loc: _$\n      });\n    }\n  | IF '(' Expr ')' Stmt ELSE Stmt\n    {\n      $$ = yy.Statement.create('IF', {\n        expr: $Expr,\n        right: $Stmt1,\n        wrong: $Stmt2,\n        loc: _$\n      });\n    }\n  | WHILE '(' Expr ')' Stmt\n    {\n      $$ = yy.Statement.create('WHILE', {\n        expr: $Expr,\n        stmt: $Stmt,\n        loc: _$\n      });\n    }\n  | Expr ';'\n    { $$ = $Expr; }\n  | ';'\n    {$$ = undefined;}\n  ;\n\nItems\n  : Item\n    {$$ = [$Item]}\n  | Items ',' Item\n    {\n      $Items.push($Item);\n      $$ = $Items;\n    }\n  ;\n\nItem\n  : Ident\n    {\n      $$ = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$\n      })\n    }\n  | Ident '=' Expr\n    {\n      var decl = yy.Statement.create('VARIABLE_DECLARATION', {\n        type: yy.state.declarationType,\n        ident: $Ident,\n        loc: _$\n      });\n      var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {\n        ident: $Ident,\n        expr: $Expr,\n        loc: _$\n      });\n      $$ = [decl, ass];\n    }\n  ;\n\nType\n  : INTEGER\n    {\n      yy.state.declarationType = $1;\n    }\n  | STRING\n    {\n      yy.state.declarationType = $1;\n    }\n  | BOOLEAN\n    {\n      yy.state.declarationType = $1;\n    }\n  | VOID\n    {\n      yy.state.declarationType = $1;\n    }\n  ;\n\nIdent\n  : LITERAL\n    { $$ = String(yytext); }\n  ;\n\nExprs\n  :\n    { $$ = [] }\n  | Expr\n    { $$ = [$Expr]; }\n  | Exprs ',' Expr\n    {\n      $Exprs.push($Expr);\n      $$ = $Exprs;\n    }\n  ;\n\nExpr\n  : Number\n    { $$ = $Number; }\n  | String\n    { $$ = $String; }\n  | Logical\n    { $$ = $Logical }\n  | Ident\n    {\n      $$ = yy.Expression.create('VARIABLE', {\n        ident: $Ident,\n        loc: _$\n      });\n    }\n  | Ident '(' Exprs ')'\n    {\n      $$ = yy.Expression.create('FUNCALL', {\n        args: $Exprs,\n        ident: $Ident,\n        loc: _$\n      });\n    }\n  | '-' Expr %prec UMINUS\n    {\n      $$ = yy.Expression.create('UMINUS', {\n        expr: $Expr,\n        loc: _$\n      });\n    }\n  | '!' Expr %prec NEGATION\n    {\n      $$ = yy.Expression.create('NEGATION', {\n        expr: $Expr,\n        loc: _$\n      });\n    }\n  | Expr MulOp Expr %prec MULOP\n    {\n      $$ = yy.Expression.create('MULOP', {\n        operator: $MulOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | Expr AddOp Expr %prec ADDOP\n    {\n      $$ = yy.Expression.create('ADDOP', {\n        operator: $AddOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | Expr RelOp Expr %prec RELOP\n    {\n      $$ = yy.Expression.create('RELOP', {\n        operator: $RelOp,\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | Expr '&&' Expr\n    {\n      $$ = yy.Expression.create('LOGAND', {\n        operator: '&&',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | Expr '||' Expr\n    {\n      $$ = yy.Expression.create('LOGOR', {\n        operator: '||',\n        left: $Expr1,\n        right: $Expr2,\n        loc: _$\n      });\n    }\n  | '(' Expr ')'\n    {$$ = $2}\n  ;\n\nNumber\n  : NUMBER\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'int',\n        value: Number(yytext),\n        loc: _$\n      });\n    }\n  ;\n\nString\n  : STRING_LITERAL\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'string',\n        value: String(yytext),\n        loc: _$\n      });\n    }\n  ;\n\nLogical\n  : TRUE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$\n      });\n    }\n  | FALSE\n    {\n      $$ = yy.Expression.create('OBJECT', {\n        type: 'boolean',\n        value: JSON.parse(yytext),\n        loc: _$\n      });\n    }\n  ;\n\nAddOp\n  : '+'\n    {}\n  | '-'\n    {}\n  ;\n\nMulOp\n  : '*'\n    {}\n  | '/'\n    {}\n  | '%'\n    {}\n  ;\n\nRelOp\n  : '<'\n    {}\n  | '<='\n    {}\n  | '>'\n    {}\n  | '>='\n    {}\n  | '=='\n    {}\n  | '!='\n    {}\n  ;\n";
 
 var Expression = require('./core/expression.js');
 var Statement = require('./core/statement.js');
@@ -29476,10 +29477,22 @@ function parse(code) {
   parser.yy.Variable = Variable;
   parser.yy.VariableReference = VariableReference;
 
-  tree = parser.parse(code);
-  tree.semanticCheck();
+  try {
+    tree = parser.parse(code);
+  } catch (error) {
+    console.log(error);
+    error.hash.loc.first_line ++;
+    error.hash.loc.last_line ++;
+    parseError(
+      'Parse error: expected ' + error.hash.expected.join(' ') + ' instead of ' + error.hash.token,
+      error.hash.loc,
+      error
+    );
+  }
+
+  // tree.semanticCheck();
 
   return tree;
 }
 
-},{"./core/expression.js":37,"./core/function.js":47,"./core/scope.js":48,"./core/state.js":49,"./core/statement.js":50,"./core/variables/argument.js":59,"./core/variables/variable-reference.js":60,"./core/variables/variable.js":61,"./samples.json":62,"jison":2}]},{},["latte"]);
+},{"./core/error":36,"./core/expression.js":37,"./core/function.js":47,"./core/scope.js":48,"./core/state.js":49,"./core/statement.js":50,"./core/variables/argument.js":59,"./core/variables/variable-reference.js":60,"./core/variables/variable.js":61,"./samples.json":62,"jison":2}]},{},["latte"]);

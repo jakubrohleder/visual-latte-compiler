@@ -17,8 +17,6 @@ function Function(opts) {
   Element.call(_this, opts);
 
   _this.main = _this.ident === 'main';
-
-  _this.parent.addFunction(_this);
 }
 
 function create(opts) {
@@ -31,7 +29,7 @@ function semanticCheck() {
   if (_this.main === true && _this.args.length > 0) {
     parseError(
       'Main function cannot have arguments',
-      _this.loc[_this.loc.length -2],
+      _this.loc[_this.loc.length - 2],
       _this
     );
   } else {
