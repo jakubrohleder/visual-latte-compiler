@@ -1,3 +1,5 @@
+var RootScope = require('./scopes/scope-root.js');
+
 var exports = module.exports = {};
 
 exports.create = create;
@@ -9,12 +11,14 @@ State.prototype.popScope = popScope;
 
 function State(opts) {
   var _this = this;
+  var rootScope = RootScope.create();
 
   opts = opts || {};
 
+  _this.rootScope = rootScope;
   _this.functions = [];
-  _this.scopes = [];
-  _this.rootScope = opts.rootScope;
+  _this.scopes = [rootScope];
+  _this.currentScope = rootScope;
 }
 
 function create(opts) {

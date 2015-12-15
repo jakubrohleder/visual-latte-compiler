@@ -5,14 +5,14 @@ var parseError = require('./core/error').parseError;
 
 var grammar = fs.readFileSync(__dirname + '/syntax.jison', 'utf8');
 
-var Expression = require('./core/expression.js');
-var Statement = require('./core/statement.js');
-var Scope = require('./core/scope.js');
-var Function = require('./core/function.js');
-var State = require('./core/state.js');
-var Argument = require('./core/variables/argument.js');
-var Variable = require('./core/variables/variable.js');
-var VariableReference = require('./core/variables/variable-reference.js');
+var Expression = require('./core/expression');
+var Statement = require('./core/statement');
+var Scope = require('./core/scopes/scope');
+var Function = require('./core/function');
+var State = require('./core/state');
+var Argument = require('./core/variables/argument');
+var Variable = require('./core/variables/variable');
+var VariableReference = require('./core/variables/variable-reference');
 
 var exports = module.exports = {};
 
@@ -22,28 +22,7 @@ exports.samples = samples;
 function parse(code) {
   var parser = new Parser(grammar);
   var tree;
-  var scope = Scope.create({
-    root: true
-  });
-  var state = State.create({
-    rootScope: scope
-  });
-
-  Function.create({
-    type: 'void',
-    ident: 'printInt',
-    args: [],
-    parent: scope
-  });
-
-  Function.create({
-    type: 'void',
-    ident: 'printString',
-    args: [],
-    parent: scope
-  });
-
-  state.pushScope(scope);
+  var state = State.create();
 
   parser.yy.state = state;
 

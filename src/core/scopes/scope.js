@@ -1,9 +1,10 @@
 var _ = require('lodash');
-var parseError = require('./error').parseError;
+var parseError = require('../error').parseError;
 
 var exports = module.exports = {};
 
 exports.create = create;
+exports.Scope = Scope;
 
 Scope.prototype.addFunction = addFunction;
 Scope.prototype.addVariable = addVariable;
@@ -11,6 +12,7 @@ Scope.prototype.addElement = addElement;
 Scope.prototype.getVariable = getVariable;
 Scope.prototype.getFunction = getFunction;
 Scope.prototype.semanticCheck = semanticCheck;
+Scope.prototype.optimize = optimize;
 
 function Scope(opts) {
   var _this = this;
@@ -19,7 +21,7 @@ function Scope(opts) {
 
   _this.opts = opts;
 
-  _this.root = opts.root || false;
+  _this.root = false;
   _this.functions = {};
   _this.variables = {};
   _this.elements = [];
@@ -38,8 +40,6 @@ function create(opts) {
 
 function addFunction(fun) {
   var _this = this;
-
-  console.log('addFunction', fun);
 
   if (_this.functions[fun.ident] !== undefined) {
     if(_this.functions[fun.ident].scope === _this) {
@@ -105,16 +105,6 @@ function getFunction(ident) {
 function semanticCheck() {
   var _this = this;
 
-  if (_this.root === true) {
-    _.forEach(_this.elements, function (element) {
-      _this.addFunction(element);
-    });
-
-    if (_this.functions.main === undefined) {
-      parseError('Main function not declared', _this);
-    }
-  }
-
   _.forEach(_this.opts.variables, function(variable) {
     variable.scope = _this;
     _this.addVariable(variable);
@@ -125,4 +115,10 @@ function semanticCheck() {
   });
 
   _this.state.checked = true;
+}
+
+function optimize() {
+  var _this = this;
+
+  _this.state.optimized = true;
 }
