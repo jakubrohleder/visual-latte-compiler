@@ -37,12 +37,20 @@ function parse(code) {
   try {
     parser.parse(code);
   } catch (error) {
-    console.log(error);
     var current = error.hash.token === 'EOF' ? error.hash.token : error.hash.text;
-    error.hash.loc.first_line ++;
-    error.hash.loc.last_line ++;
+    var expected = '';
+
+    // if (error.hash.loc !== undefined) {
+    //   error.hash.loc.first_line ++;
+    //   error.hash.loc.last_line ++;
+    // }
+
+    if (error.hash.expected !== undefined) {
+      expected = error.hash.expected.join(', ');
+    }
+
     parseError(
-      'Parse error: expected ' + error.hash.expected.join(' ') + ' instead of \'' + current + '\'',
+      'Parse error: expected ' + expected + ' instead of \'' + current + '\'',
       error.hash.loc,
       error
     );

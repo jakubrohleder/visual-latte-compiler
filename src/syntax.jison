@@ -17,6 +17,7 @@ int                       return 'INTEGER'
 string                    return 'STRING'
 boolean                   return 'BOOLEAN'
 void                      return 'VOID'
+new                       return 'NEW'
 return                    return 'RETURN'
 [0-9]+                    return 'NUMBER'
 [a-zA-Z_][0-9a-zA-Z_]*    return 'LITERAL'
@@ -36,6 +37,7 @@ L?\"(\\.|[^\\"])*\"       return 'STRING_LITERAL'
 "="                       return '='
 ";"                       return ';'
 ","                       return ','
+"."                       return '.'
 <<EOF>>                   return 'EOF'
 "!"                       return '!'
 "%"                       return '%'
@@ -85,15 +87,15 @@ TopDef
   ;
 
 FunctionSignature
-  : Type Ident '(' Args ')'
+  : FunType SingleIdent '(' Args ')'
     {
       var scope = yy.Scope.create({
         variables: $Args,
         parent: yy.state.currentScope
       });
       var fun = yy.Function.create({
-        type: $Type,
-        ident: $Ident,
+        type: $FunType,
+        ident: $SingleIdent,
         args: $Args,
         scope: scope,
         parent: yy.state.currentScope
@@ -118,10 +120,10 @@ Args
   ;
 
 Arg
-  : Type Ident
+  : Type SingleIdent
     {$$ = yy.Argument.create({
       type: $Type,
-      ident: $Ident,
+      ident: $SingleIdent,
       loc: _$
     });}
   ;
@@ -247,23 +249,23 @@ Items
   ;
 
 Item
-  : Ident
+  : SingleIdent
     {
       $$ = yy.Statement.create('VARIABLE_DECLARATION', {
         type: yy.state.declarationType,
-        ident: $Ident,
+        ident: $SingleIdent,
         loc: _$
       })
     }
-  | Ident '=' Expr
+  | SingleIdent '=' Expr
     {
       var decl = yy.Statement.create('VARIABLE_DECLARATION', {
         type: yy.state.declarationType,
-        ident: $Ident,
+        ident: $SingleIdent,
         loc: _$
       });
       var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {
-        ident: $Ident,
+        ident: $SingleIdent,
         expr: $Expr,
         loc: _$
       });
@@ -272,6 +274,22 @@ Item
   ;
 
 Type
+  : PrimitiveType
+    { }
+  | PrimitiveType '[' ']'
+    { }
+  ;
+
+FunType
+  : Type
+    {}
+  | VOID
+    {
+      yy.state.declarationType = $1;
+    }
+  ;
+
+PrimitiveType
   : INTEGER
     {
       yy.state.declarationType = $1;
@@ -284,16 +302,26 @@ Type
     {
       yy.state.declarationType = $1;
     }
-  | VOID
+  /*| LITERAL
     {
       yy.state.declarationType = $1;
-    }
+    } */
   ;
 
 Ident
+  : SingleIdent
+    {}
+  | Ident '.' SingleIdent
+    {}
+  | Ident '[' Expr ']'
+    {}
+  ;
+
+SingleIdent
   : LITERAL
     { $$ = String(yytext); }
   ;
+
 
 Exprs
   :
@@ -314,6 +342,8 @@ Expr
     { $$ = $String; }
   | Logical
     { $$ = $Logical }
+  | NEW PrimitiveType '[' Expr ']'
+    { }
   | Ident
     {
       $$ = yy.Expression.create('VARIABLE', {

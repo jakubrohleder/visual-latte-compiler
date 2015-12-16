@@ -72,6 +72,7 @@
         fun();
         $scope.data.error = undefined;
       } catch (error) {
+        console.error(error);
         $scope.data.error = error;
         $scope.data.rootScope = undefined;
       }

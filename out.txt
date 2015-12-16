@@ -1,0 +1,1617 @@
+Processing grammar.
+$accept(0)
+$end(1)
+error(2)
+Program(3)
+TopDefs(4)
+EOF(5)
+TopDef(6)
+FunctionSignature(7)
+Block(8)
+ClassSignature(9)
+ClassBlock(10)
+FunType(11)
+SingleIdent(12)
+((13)
+Args(14)
+)(15)
+CLASS(16)
+Arg(17)
+,(18)
+Type(19)
+{(20)
+ClassStmts(21)
+}(22)
+ClassStmt(23)
+;(24)
+Stmts(25)
+BlockInit(26)
+Stmt(27)
+Items(28)
+Ident(29)
+=(30)
+Expr(31)
+INCR(32)
+DECR(33)
+RETURN(34)
+IF(35)
+ELSE(36)
+WHILE(37)
+Item(38)
+PrimitiveType(39)
+[(40)
+](41)
+VOID(42)
+INTEGER(43)
+STRING(44)
+BOOLEAN(45)
+.(46)
+LITERAL(47)
+Exprs(48)
+Number(49)
+String(50)
+Logical(51)
+NEW(52)
+-(53)
+!(54)
+MulOp(55)
+AddOp(56)
+RelOp(57)
+&&(58)
+||(59)
+NUMBER(60)
+STRING_LITERAL(61)
+TRUE(62)
+FALSE(63)
++(64)
+*(65)
+/(66)
+%(67)
+<(68)
+<=(69)
+>(70)
+>=(71)
+==(72)
+!=(73)
+
+Item sets
+------
+
+item set 0 
+$accept -> .Program $end #lookaheads= $end
+Program -> .TopDefs EOF
+TopDefs -> .TopDef
+TopDefs -> .TopDefs TopDef
+TopDef -> .FunctionSignature Block
+TopDef -> .ClassSignature ClassBlock
+FunctionSignature -> .FunType SingleIdent ( Args )
+ClassSignature -> .CLASS SingleIdent
+FunType -> .Type
+FunType -> .VOID
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN 
+transitions ->  {"Program":1,"TopDefs":2,"TopDef":3,"FunctionSignature":4,"ClassSignature":5,"FunType":6,"CLASS":7,"Type":8,"VOID":9,"PrimitiveType":10,"INTEGER":11,"STRING":12,"BOOLEAN":13}
+
+item set 1 
+$accept -> Program .$end #lookaheads= $end 
+transitions ->  {}
+
+item set 2 
+Program -> TopDefs .EOF
+TopDefs -> TopDefs .TopDef
+TopDef -> .FunctionSignature Block
+TopDef -> .ClassSignature ClassBlock
+FunctionSignature -> .FunType SingleIdent ( Args )
+ClassSignature -> .CLASS SingleIdent
+FunType -> .Type
+FunType -> .VOID
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN 
+transitions ->  {"EOF":14,"TopDef":15,"FunctionSignature":4,"ClassSignature":5,"FunType":6,"CLASS":7,"Type":8,"VOID":9,"PrimitiveType":10,"INTEGER":11,"STRING":12,"BOOLEAN":13}
+
+item set 3 
+TopDefs -> TopDef . 
+transitions ->  {}
+
+item set 4 
+TopDef -> FunctionSignature .Block
+Block -> .{ Stmts }
+Block -> .{ } 
+transitions ->  {"Block":16,"{":17}
+
+item set 5 
+TopDef -> ClassSignature .ClassBlock
+ClassBlock -> .{ ClassStmts } 
+transitions ->  {"ClassBlock":18,"{":19}
+
+item set 6 
+FunctionSignature -> FunType .SingleIdent ( Args )
+SingleIdent -> .LITERAL 
+transitions ->  {"SingleIdent":20,"LITERAL":21}
+
+item set 7 
+ClassSignature -> CLASS .SingleIdent
+SingleIdent -> .LITERAL 
+transitions ->  {"SingleIdent":22,"LITERAL":21}
+
+item set 8 
+FunType -> Type . 
+transitions ->  {}
+
+item set 9 
+FunType -> VOID . 
+transitions ->  {}
+
+item set 10 
+Type -> PrimitiveType .
+Type -> PrimitiveType .[ ] 
+transitions ->  {"[":23}
+
+item set 11 
+PrimitiveType -> INTEGER . 
+transitions ->  {}
+
+item set 12 
+PrimitiveType -> STRING . 
+transitions ->  {}
+
+item set 13 
+PrimitiveType -> BOOLEAN . 
+transitions ->  {}
+
+item set 14 
+Program -> TopDefs EOF . 
+transitions ->  {}
+
+item set 15 
+TopDefs -> TopDefs TopDef . 
+transitions ->  {}
+
+item set 16 
+TopDef -> FunctionSignature Block . 
+transitions ->  {}
+
+item set 17 
+Block -> { .Stmts }
+Block -> { .}
+Stmts -> .Stmt
+Stmts -> .Stmts Stmt
+Stmt -> .BlockInit Block
+Stmt -> .Type Items ;
+Stmt -> .Ident = Expr ;
+Stmt -> .Ident INCR ;
+Stmt -> .Ident DECR ;
+Stmt -> .RETURN Expr ;
+Stmt -> .RETURN ;
+Stmt -> .IF ( Expr ) Stmt
+Stmt -> .IF ( Expr ) Stmt ELSE Stmt
+Stmt -> .WHILE ( Expr ) Stmt
+Stmt -> .Expr ;
+Stmt -> .;
+BlockInit -> .
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN
+SingleIdent -> .LITERAL
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE 
+transitions ->  {"Stmts":24,"}":25,"Stmt":26,"BlockInit":27,"Type":28,"Ident":29,"RETURN":30,"IF":31,"WHILE":32,"Expr":33,";":34,"PrimitiveType":10,"SingleIdent":35,"Number":36,"String":37,"Logical":38,"NEW":39,"-":40,"!":41,"(":42,"INTEGER":11,"STRING":12,"BOOLEAN":13,"LITERAL":21,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46}
+
+item set 18 
+TopDef -> ClassSignature ClassBlock . 
+transitions ->  {}
+
+item set 19 
+ClassBlock -> { .ClassStmts }
+ClassStmts -> .ClassStmt
+ClassStmts -> .ClassStmts ClassStmt
+ClassStmt -> .Type SingleIdent ;
+ClassStmt -> .TopDef
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+TopDef -> .FunctionSignature Block
+TopDef -> .ClassSignature ClassBlock
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN
+FunctionSignature -> .FunType SingleIdent ( Args )
+ClassSignature -> .CLASS SingleIdent
+FunType -> .Type
+FunType -> .VOID 
+transitions ->  {"ClassStmts":47,"ClassStmt":48,"Type":49,"TopDef":50,"PrimitiveType":10,"FunctionSignature":4,"ClassSignature":5,"INTEGER":11,"STRING":12,"BOOLEAN":13,"FunType":6,"CLASS":7,"VOID":9}
+
+item set 20 
+FunctionSignature -> FunType SingleIdent .( Args ) 
+transitions ->  {"(":51}
+
+item set 21 
+SingleIdent -> LITERAL . 
+transitions ->  {}
+
+item set 22 
+ClassSignature -> CLASS SingleIdent . 
+transitions ->  {}
+
+item set 23 
+Type -> PrimitiveType [ .] 
+transitions ->  {"]":52}
+
+item set 24 
+Block -> { Stmts .}
+Stmts -> Stmts .Stmt
+Stmt -> .BlockInit Block
+Stmt -> .Type Items ;
+Stmt -> .Ident = Expr ;
+Stmt -> .Ident INCR ;
+Stmt -> .Ident DECR ;
+Stmt -> .RETURN Expr ;
+Stmt -> .RETURN ;
+Stmt -> .IF ( Expr ) Stmt
+Stmt -> .IF ( Expr ) Stmt ELSE Stmt
+Stmt -> .WHILE ( Expr ) Stmt
+Stmt -> .Expr ;
+Stmt -> .;
+BlockInit -> .
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN
+SingleIdent -> .LITERAL
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE 
+transitions ->  {"}":53,"Stmt":54,"BlockInit":27,"Type":28,"Ident":29,"RETURN":30,"IF":31,"WHILE":32,"Expr":33,";":34,"PrimitiveType":10,"SingleIdent":35,"Number":36,"String":37,"Logical":38,"NEW":39,"-":40,"!":41,"(":42,"INTEGER":11,"STRING":12,"BOOLEAN":13,"LITERAL":21,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46}
+
+item set 25 
+Block -> { } . 
+transitions ->  {}
+
+item set 26 
+Stmts -> Stmt . 
+transitions ->  {}
+
+item set 27 
+Stmt -> BlockInit .Block
+Block -> .{ Stmts }
+Block -> .{ } 
+transitions ->  {"Block":55,"{":17}
+
+item set 28 
+Stmt -> Type .Items ;
+Items -> .Item
+Items -> .Items , Item
+Item -> .SingleIdent
+Item -> .SingleIdent = Expr
+SingleIdent -> .LITERAL 
+transitions ->  {"Items":56,"Item":57,"SingleIdent":58,"LITERAL":21}
+
+item set 29 
+Stmt -> Ident .= Expr ;
+Stmt -> Ident .INCR ;
+Stmt -> Ident .DECR ;
+Ident -> Ident .. SingleIdent
+Ident -> Ident .[ Expr ]
+Expr -> Ident .
+Expr -> Ident .( Exprs ) 
+transitions ->  {"=":59,"INCR":60,"DECR":61,".":62,"[":63,"(":64}
+
+item set 30 
+Stmt -> RETURN .Expr ;
+Stmt -> RETURN .;
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":65,";":66,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 31 
+Stmt -> IF .( Expr ) Stmt
+Stmt -> IF .( Expr ) Stmt ELSE Stmt 
+transitions ->  {"(":68}
+
+item set 32 
+Stmt -> WHILE .( Expr ) Stmt 
+transitions ->  {"(":69}
+
+item set 33 
+Stmt -> Expr .;
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {";":70,"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 34 
+Stmt -> ; . 
+transitions ->  {}
+
+item set 35 
+Ident -> SingleIdent . 
+transitions ->  {}
+
+item set 36 
+Expr -> Number . 
+transitions ->  {}
+
+item set 37 
+Expr -> String . 
+transitions ->  {}
+
+item set 38 
+Expr -> Logical . 
+transitions ->  {}
+
+item set 39 
+Expr -> NEW .PrimitiveType [ Expr ]
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN 
+transitions ->  {"PrimitiveType":87,"INTEGER":11,"STRING":12,"BOOLEAN":13}
+
+item set 40 
+Expr -> - .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":88,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 41 
+Expr -> ! .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":89,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 42 
+Expr -> ( .Expr )
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":90,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 43 
+Number -> NUMBER . 
+transitions ->  {}
+
+item set 44 
+String -> STRING_LITERAL . 
+transitions ->  {}
+
+item set 45 
+Logical -> TRUE . 
+transitions ->  {}
+
+item set 46 
+Logical -> FALSE . 
+transitions ->  {}
+
+item set 47 
+ClassBlock -> { ClassStmts .}
+ClassStmts -> ClassStmts .ClassStmt
+ClassStmt -> .Type SingleIdent ;
+ClassStmt -> .TopDef
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+TopDef -> .FunctionSignature Block
+TopDef -> .ClassSignature ClassBlock
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN
+FunctionSignature -> .FunType SingleIdent ( Args )
+ClassSignature -> .CLASS SingleIdent
+FunType -> .Type
+FunType -> .VOID 
+transitions ->  {"}":91,"ClassStmt":92,"Type":49,"TopDef":50,"PrimitiveType":10,"FunctionSignature":4,"ClassSignature":5,"INTEGER":11,"STRING":12,"BOOLEAN":13,"FunType":6,"CLASS":7,"VOID":9}
+
+item set 48 
+ClassStmts -> ClassStmt . 
+transitions ->  {}
+
+item set 49 
+ClassStmt -> Type .SingleIdent ;
+FunType -> Type .
+SingleIdent -> .LITERAL 
+transitions ->  {"SingleIdent":93,"LITERAL":21}
+
+item set 50 
+ClassStmt -> TopDef . 
+transitions ->  {}
+
+item set 51 
+FunctionSignature -> FunType SingleIdent ( .Args )
+Args -> .
+Args -> .Arg
+Args -> .Args , Arg
+Arg -> .Type SingleIdent
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN 
+transitions ->  {"Args":94,"Arg":95,"Type":96,"PrimitiveType":10,"INTEGER":11,"STRING":12,"BOOLEAN":13}
+
+item set 52 
+Type -> PrimitiveType [ ] . 
+transitions ->  {}
+
+item set 53 
+Block -> { Stmts } . 
+transitions ->  {}
+
+item set 54 
+Stmts -> Stmts Stmt . 
+transitions ->  {}
+
+item set 55 
+Stmt -> BlockInit Block . 
+transitions ->  {}
+
+item set 56 
+Stmt -> Type Items .;
+Items -> Items ., Item 
+transitions ->  {";":97,",":98}
+
+item set 57 
+Items -> Item . 
+transitions ->  {}
+
+item set 58 
+Item -> SingleIdent .
+Item -> SingleIdent .= Expr 
+transitions ->  {"=":99}
+
+item set 59 
+Stmt -> Ident = .Expr ;
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":100,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 60 
+Stmt -> Ident INCR .; 
+transitions ->  {";":101}
+
+item set 61 
+Stmt -> Ident DECR .; 
+transitions ->  {";":102}
+
+item set 62 
+Ident -> Ident . .SingleIdent
+SingleIdent -> .LITERAL 
+transitions ->  {"SingleIdent":103,"LITERAL":21}
+
+item set 63 
+Ident -> Ident [ .Expr ]
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":104,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 64 
+Expr -> Ident ( .Exprs )
+Exprs -> .
+Exprs -> .Expr
+Exprs -> .Exprs , Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Exprs":105,"Expr":106,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 65 
+Stmt -> RETURN Expr .;
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {";":107,"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 66 
+Stmt -> RETURN ; . 
+transitions ->  {}
+
+item set 67 
+Expr -> Ident .
+Expr -> Ident .( Exprs )
+Ident -> Ident .. SingleIdent
+Ident -> Ident .[ Expr ] 
+transitions ->  {"(":64,".":62,"[":63}
+
+item set 68 
+Stmt -> IF ( .Expr ) Stmt
+Stmt -> IF ( .Expr ) Stmt ELSE Stmt
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":108,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 69 
+Stmt -> WHILE ( .Expr ) Stmt
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":109,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 70 
+Stmt -> Expr ; . 
+transitions ->  {}
+
+item set 71 
+Expr -> Expr MulOp .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":110,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 72 
+Expr -> Expr AddOp .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":111,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 73 
+Expr -> Expr RelOp .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":112,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 74 
+Expr -> Expr && .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":113,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 75 
+Expr -> Expr || .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":114,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 76 
+MulOp -> * . 
+transitions ->  {}
+
+item set 77 
+MulOp -> / . 
+transitions ->  {}
+
+item set 78 
+MulOp -> % . 
+transitions ->  {}
+
+item set 79 
+AddOp -> + . 
+transitions ->  {}
+
+item set 80 
+AddOp -> - . 
+transitions ->  {}
+
+item set 81 
+RelOp -> < . 
+transitions ->  {}
+
+item set 82 
+RelOp -> <= . 
+transitions ->  {}
+
+item set 83 
+RelOp -> > . 
+transitions ->  {}
+
+item set 84 
+RelOp -> >= . 
+transitions ->  {}
+
+item set 85 
+RelOp -> == . 
+transitions ->  {}
+
+item set 86 
+RelOp -> != . 
+transitions ->  {}
+
+item set 87 
+Expr -> NEW PrimitiveType .[ Expr ] 
+transitions ->  {"[":115}
+
+item set 88 
+Expr -> - Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 89 
+Expr -> ! Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 90 
+Expr -> ( Expr .)
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {")":116,"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 91 
+ClassBlock -> { ClassStmts } . 
+transitions ->  {}
+
+item set 92 
+ClassStmts -> ClassStmts ClassStmt . 
+transitions ->  {}
+
+item set 93 
+ClassStmt -> Type SingleIdent .; 
+transitions ->  {";":117}
+
+item set 94 
+FunctionSignature -> FunType SingleIdent ( Args .)
+Args -> Args ., Arg 
+transitions ->  {")":118,",":119}
+
+item set 95 
+Args -> Arg . 
+transitions ->  {}
+
+item set 96 
+Arg -> Type .SingleIdent
+SingleIdent -> .LITERAL 
+transitions ->  {"SingleIdent":120,"LITERAL":21}
+
+item set 97 
+Stmt -> Type Items ; . 
+transitions ->  {}
+
+item set 98 
+Items -> Items , .Item
+Item -> .SingleIdent
+Item -> .SingleIdent = Expr
+SingleIdent -> .LITERAL 
+transitions ->  {"Item":121,"SingleIdent":58,"LITERAL":21}
+
+item set 99 
+Item -> SingleIdent = .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":122,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 100 
+Stmt -> Ident = Expr .;
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {";":123,"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 101 
+Stmt -> Ident INCR ; . 
+transitions ->  {}
+
+item set 102 
+Stmt -> Ident DECR ; . 
+transitions ->  {}
+
+item set 103 
+Ident -> Ident . SingleIdent . 
+transitions ->  {}
+
+item set 104 
+Ident -> Ident [ Expr .]
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"]":124,"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 105 
+Expr -> Ident ( Exprs .)
+Exprs -> Exprs ., Expr 
+transitions ->  {")":125,",":126}
+
+item set 106 
+Exprs -> Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 107 
+Stmt -> RETURN Expr ; . 
+transitions ->  {}
+
+item set 108 
+Stmt -> IF ( Expr .) Stmt
+Stmt -> IF ( Expr .) Stmt ELSE Stmt
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {")":127,"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 109 
+Stmt -> WHILE ( Expr .) Stmt
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {")":128,"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 110 
+Expr -> Expr MulOp Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 111 
+Expr -> Expr AddOp Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 112 
+Expr -> Expr RelOp Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 113 
+Expr -> Expr && Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 114 
+Expr -> Expr || Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 115 
+Expr -> NEW PrimitiveType [ .Expr ]
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":129,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 116 
+Expr -> ( Expr ) . 
+transitions ->  {}
+
+item set 117 
+ClassStmt -> Type SingleIdent ; . 
+transitions ->  {}
+
+item set 118 
+FunctionSignature -> FunType SingleIdent ( Args ) . 
+transitions ->  {}
+
+item set 119 
+Args -> Args , .Arg
+Arg -> .Type SingleIdent
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN 
+transitions ->  {"Arg":130,"Type":96,"PrimitiveType":10,"INTEGER":11,"STRING":12,"BOOLEAN":13}
+
+item set 120 
+Arg -> Type SingleIdent . 
+transitions ->  {}
+
+item set 121 
+Items -> Items , Item . 
+transitions ->  {}
+
+item set 122 
+Item -> SingleIdent = Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 123 
+Stmt -> Ident = Expr ; . 
+transitions ->  {}
+
+item set 124 
+Ident -> Ident [ Expr ] . 
+transitions ->  {}
+
+item set 125 
+Expr -> Ident ( Exprs ) . 
+transitions ->  {}
+
+item set 126 
+Exprs -> Exprs , .Expr
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+SingleIdent -> .LITERAL 
+transitions ->  {"Expr":131,"Number":36,"String":37,"Logical":38,"NEW":39,"Ident":67,"-":40,"!":41,"(":42,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46,"SingleIdent":35,"LITERAL":21}
+
+item set 127 
+Stmt -> IF ( Expr ) .Stmt
+Stmt -> IF ( Expr ) .Stmt ELSE Stmt
+Stmt -> .BlockInit Block
+Stmt -> .Type Items ;
+Stmt -> .Ident = Expr ;
+Stmt -> .Ident INCR ;
+Stmt -> .Ident DECR ;
+Stmt -> .RETURN Expr ;
+Stmt -> .RETURN ;
+Stmt -> .IF ( Expr ) Stmt
+Stmt -> .IF ( Expr ) Stmt ELSE Stmt
+Stmt -> .WHILE ( Expr ) Stmt
+Stmt -> .Expr ;
+Stmt -> .;
+BlockInit -> .
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN
+SingleIdent -> .LITERAL
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE 
+transitions ->  {"Stmt":132,"BlockInit":27,"Type":28,"Ident":29,"RETURN":30,"IF":31,"WHILE":32,"Expr":33,";":34,"PrimitiveType":10,"SingleIdent":35,"Number":36,"String":37,"Logical":38,"NEW":39,"-":40,"!":41,"(":42,"INTEGER":11,"STRING":12,"BOOLEAN":13,"LITERAL":21,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46}
+
+item set 128 
+Stmt -> WHILE ( Expr ) .Stmt
+Stmt -> .BlockInit Block
+Stmt -> .Type Items ;
+Stmt -> .Ident = Expr ;
+Stmt -> .Ident INCR ;
+Stmt -> .Ident DECR ;
+Stmt -> .RETURN Expr ;
+Stmt -> .RETURN ;
+Stmt -> .IF ( Expr ) Stmt
+Stmt -> .IF ( Expr ) Stmt ELSE Stmt
+Stmt -> .WHILE ( Expr ) Stmt
+Stmt -> .Expr ;
+Stmt -> .;
+BlockInit -> .
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN
+SingleIdent -> .LITERAL
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE 
+transitions ->  {"Stmt":133,"BlockInit":27,"Type":28,"Ident":29,"RETURN":30,"IF":31,"WHILE":32,"Expr":33,";":34,"PrimitiveType":10,"SingleIdent":35,"Number":36,"String":37,"Logical":38,"NEW":39,"-":40,"!":41,"(":42,"INTEGER":11,"STRING":12,"BOOLEAN":13,"LITERAL":21,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46}
+
+item set 129 
+Expr -> NEW PrimitiveType [ Expr .]
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"]":134,"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 130 
+Args -> Args , Arg . 
+transitions ->  {}
+
+item set 131 
+Exprs -> Exprs , Expr .
+Expr -> Expr .MulOp Expr
+Expr -> Expr .AddOp Expr
+Expr -> Expr .RelOp Expr
+Expr -> Expr .&& Expr
+Expr -> Expr .|| Expr
+MulOp -> .*
+MulOp -> ./
+MulOp -> .%
+AddOp -> .+
+AddOp -> .-
+RelOp -> .<
+RelOp -> .<=
+RelOp -> .>
+RelOp -> .>=
+RelOp -> .==
+RelOp -> .!= 
+transitions ->  {"MulOp":71,"AddOp":72,"RelOp":73,"&&":74,"||":75,"*":76,"/":77,"%":78,"+":79,"-":80,"<":81,"<=":82,">":83,">=":84,"==":85,"!=":86}
+
+item set 132 
+Stmt -> IF ( Expr ) Stmt .
+Stmt -> IF ( Expr ) Stmt .ELSE Stmt 
+transitions ->  {"ELSE":135}
+
+item set 133 
+Stmt -> WHILE ( Expr ) Stmt . 
+transitions ->  {}
+
+item set 134 
+Expr -> NEW PrimitiveType [ Expr ] . 
+transitions ->  {}
+
+item set 135 
+Stmt -> IF ( Expr ) Stmt ELSE .Stmt
+Stmt -> .BlockInit Block
+Stmt -> .Type Items ;
+Stmt -> .Ident = Expr ;
+Stmt -> .Ident INCR ;
+Stmt -> .Ident DECR ;
+Stmt -> .RETURN Expr ;
+Stmt -> .RETURN ;
+Stmt -> .IF ( Expr ) Stmt
+Stmt -> .IF ( Expr ) Stmt ELSE Stmt
+Stmt -> .WHILE ( Expr ) Stmt
+Stmt -> .Expr ;
+Stmt -> .;
+BlockInit -> .
+Type -> .PrimitiveType
+Type -> .PrimitiveType [ ]
+Ident -> .SingleIdent
+Ident -> .Ident . SingleIdent
+Ident -> .Ident [ Expr ]
+Expr -> .Number
+Expr -> .String
+Expr -> .Logical
+Expr -> .NEW PrimitiveType [ Expr ]
+Expr -> .Ident
+Expr -> .Ident ( Exprs )
+Expr -> .- Expr
+Expr -> .! Expr
+Expr -> .Expr MulOp Expr
+Expr -> .Expr AddOp Expr
+Expr -> .Expr RelOp Expr
+Expr -> .Expr && Expr
+Expr -> .Expr || Expr
+Expr -> .( Expr )
+PrimitiveType -> .INTEGER
+PrimitiveType -> .STRING
+PrimitiveType -> .BOOLEAN
+SingleIdent -> .LITERAL
+Number -> .NUMBER
+String -> .STRING_LITERAL
+Logical -> .TRUE
+Logical -> .FALSE 
+transitions ->  {"Stmt":136,"BlockInit":27,"Type":28,"Ident":29,"RETURN":30,"IF":31,"WHILE":32,"Expr":33,";":34,"PrimitiveType":10,"SingleIdent":35,"Number":36,"String":37,"Logical":38,"NEW":39,"-":40,"!":41,"(":42,"INTEGER":11,"STRING":12,"BOOLEAN":13,"LITERAL":21,"NUMBER":43,"STRING_LITERAL":44,"TRUE":45,"FALSE":46}
+
+item set 136 
+Stmt -> IF ( Expr ) Stmt ELSE Stmt . 
+transitions ->  {}
+137 states.
+Building lookahead grammar.
+Computing lookaheads.
+Building parse table.
+Conflict at state: 49, token: LITERAL
+  reduce by rule: FunType -> Type
+  shift token (then go to state 21)
+
+1 Conflict(s) found in grammar.
+Done.

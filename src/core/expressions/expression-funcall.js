@@ -18,7 +18,7 @@ function semanticCheck() {
   var _this = this;
   var fun = _this.scope.getFunction(_this.ident);
 
-  if (fun === false) {
+  if (fun === undefined) {
     parseError(
       'Undeclared function: ' + _this.ident,
       _this.loc[_this.loc.length - 4],
