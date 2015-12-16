@@ -1,11 +1,9 @@
-var Statement = require('./statement-prototype.js');
+var Variable = require('./variable-prototype.js');
 var parseError = require('../error').parseError;
 
 module.exports = StatementReturn;
 
-StatementReturn.prototype = Object.create(Statement.prototype);
-StatementReturn.prototype.constructor = StatementReturn;
-StatementReturn.prototype.semanticCheck = semanticCheck;
+Boolean.prototype = Object.create(Variable.prototype);
 
 function StatementReturn(opts) {
   var _this = this;

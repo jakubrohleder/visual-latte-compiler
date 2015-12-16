@@ -30,6 +30,10 @@ function semanticCheck() {
   if (!_.isArray(_this.stmt)) {
     _this.stmt.semanticCheck();
   } else {
-    parseError('Declaration as only instruction in while', {loc: _this.stmt[0].loc});
+    parseError(
+      'Declaration as only instruction in while',
+      _this.stmt[0].loc,
+      _this
+    );
   }
 }

@@ -1,5 +1,4 @@
 var Element = require('../element.js');
-var parseError = require('../error').parseError;
 
 var exports = module.exports = {};
 
@@ -20,13 +19,5 @@ function create(opts) {
 }
 
 function semanticCheck() {
-  var _this = this;
-
-  if (_this.type === 'void') {
-    parseError(
-      'Void argument ' + _this.ident + ' in function declaration',
-       _this.loc,
-      _this
-    );
-  }
+  // Empty
 }

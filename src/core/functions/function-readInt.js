@@ -6,12 +6,13 @@ FunctionReadInt.prototype = Object.create(FunctionDecl.prototype);
 FunctionReadInt.prototype.constructor = FunctionReadInt;
 FunctionReadInt.prototype.semanticCheck = semanticCheck;
 
-function FunctionReadInt() {
+function FunctionReadInt(rootScope) {
   var _this = this;
 
   _this.ident = 'readInt';
   _this.type = 'int';
   _this.args = [];
+  _this.parent = rootScope;
 }
 
 function semanticCheck() {

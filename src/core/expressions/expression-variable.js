@@ -16,7 +16,7 @@ function ExpressionVariable(opts) {
 function semanticCheck() {
   var _this = this;
 
-  if (_this.scope.getVariable(_this.ident) === false) {
+  if (_this.scope.getVariable(_this.ident) === undefined) {
     parseError(
       'Undeclared variable in expression: ' + _this.ident,
       _this.loc,

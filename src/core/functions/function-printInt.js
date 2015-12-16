@@ -7,7 +7,7 @@ FunctionPrintInt.prototype = Object.create(FunctionDecl.prototype);
 FunctionPrintInt.prototype.constructor = FunctionPrintInt;
 FunctionPrintInt.prototype.semanticCheck = semanticCheck;
 
-function FunctionPrintInt() {
+function FunctionPrintInt(rootScope) {
   var _this = this;
   var arg = Argument.create({
     type: 'int',
@@ -17,6 +17,7 @@ function FunctionPrintInt() {
   _this.ident = 'printInt';
   _this.type = 'void';
   _this.args = [arg];
+  _this.parent = rootScope;
 }
 
 function semanticCheck() {

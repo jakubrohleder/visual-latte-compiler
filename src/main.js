@@ -12,7 +12,7 @@ var Scope = require('./core/scopes/scope');
 var Function = require('./core/function');
 var State = require('./core/state');
 var Argument = require('./core/variables/argument');
-var Variable = require('./core/variables/variable');
+var Variable = require('./core/variables/variable-prototype');
 var VariableReference = require('./core/variables/variable-reference');
 
 var exports = module.exports = {};
@@ -37,10 +37,12 @@ function parse(code) {
   try {
     parser.parse(code);
   } catch (error) {
+    console.log(error);
+    var current = error.hash.token === 'EOF' ? error.hash.token : error.hash.text;
     error.hash.loc.first_line ++;
     error.hash.loc.last_line ++;
     parseError(
-      'Parse error: expected ' + error.hash.expected.join(' ') + ' instead of ' + error.hash.token,
+      'Parse error: expected ' + error.hash.expected.join(' ') + ' instead of \'' + current + '\'',
       error.hash.loc,
       error
     );

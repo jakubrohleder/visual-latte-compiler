@@ -22,11 +22,11 @@ function RootScope(opts) {
 
   Scope.call(_this, opts);
 
-  _this.addFunction(new FunctionError());
-  _this.addFunction(new FunctionPrintInt());
-  _this.addFunction(new FunctionPrintString());
-  _this.addFunction(new FunctionReadInt());
-  _this.addFunction(new FunctionReadString());
+  _this.addFunction(new FunctionError(_this));
+  _this.addFunction(new FunctionPrintInt(_this));
+  _this.addFunction(new FunctionPrintString(_this));
+  _this.addFunction(new FunctionReadInt(_this));
+  _this.addFunction(new FunctionReadString(_this));
 
   _this.root = true;
 }

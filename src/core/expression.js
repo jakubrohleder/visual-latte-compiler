@@ -64,7 +64,7 @@ function create(type, opts) {
     break;
 
   default:
-    console.log('Unmached', opts);
+    console.error('Unmached expression', opts);
   }
   return expr;
 }

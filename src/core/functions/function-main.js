@@ -30,6 +30,12 @@ function semanticCheck() {
       _this.loc[_this.loc.length - 2],
       _this
     );
+  } else if (_this.type !== 'int') {
+    parseError(
+      'Main must have type \'int\'',
+      _this.loc[_this.loc.length - 2],
+      _this
+    );
   }
 
   FunctionDecl.prototype.semanticCheck.call(_this);

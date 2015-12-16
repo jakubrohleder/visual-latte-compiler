@@ -1,4 +1,5 @@
 var Expression = require('./expression-prototype.js');
+var parseError = require('../error').parseError;
 
 module.exports = ExpressionUminus;
 
@@ -16,6 +17,14 @@ function semanticCheck() {
   var _this = this;
 
   _this.expr.semanticCheck();
+
+  if (_this.expr.type !== 'int') {
+    parseError(
+      'Wrong type for integer negation \'' + _this.expr.type + '\' instead of \'int\'',
+      _this.loc,
+      _this
+    );
+  }
 
   _this.type = _this.expr.type;
 }

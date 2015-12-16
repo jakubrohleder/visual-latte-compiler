@@ -42,12 +42,17 @@ function addFunction(fun) {
   var _this = this;
 
   if (_this.functions[fun.ident] !== undefined) {
-    if (_this.functions[fun.ident].scope === _this) {
-      parseError('Function ' + fun.ident + ' already defined', {loc: fun.loc});
-    } else {
-      console.log('Redefining function', fun.ident);
-    }
+    parseError(
+      'Function \'' + fun.ident + '\' already defined',
+      fun.loc[fun.loc.length - 2],
+      _this
+    );
   }
+
+  if (_this.getFunction(fun.ident) !== undefined) {
+    console.log('Redefining function', fun.ident);
+  }
+
   _this.functions[fun.ident] = fun;
 }
 
@@ -55,16 +60,17 @@ function addVariable(variable) {
   var _this = this;
 
   if (_this.variables[variable.ident] !== undefined) {
-    if (_this.variables[variable.ident].scope === _this) {
-      parseError(
-        'Variable ' + variable.ident + ' already defined',
-        variable.loc,
-        _this
-      );
-    } else {
-      console.log('Redefining variable', variable.ident);
-    }
+    parseError(
+      'Variable ' + variable.ident + ' already defined',
+      variable.loc,
+      _this
+    );
   }
+
+  if (_this.getVariable(variable.ident) !== undefined) {
+    console.log('Redefining variable', variable.ident);
+  }
+
   _this.variables[variable.ident] = variable;
 }
 
@@ -85,7 +91,7 @@ function getVariable(ident) {
   if (_this.variables[ident] !== undefined) {
     return _this.variables[ident];
   } else if (_this.parent === undefined) {
-    return false;
+    return undefined;
   }
 
   return _this.parent.getVariable(ident);
@@ -96,7 +102,7 @@ function getFunction(ident) {
   if (_this.functions[ident] !== undefined) {
     return _this.functions[ident];
   } else if (_this.parent === undefined) {
-    return false;
+    return undefined;
   }
 
   return _this.parent.getFunction(ident);
