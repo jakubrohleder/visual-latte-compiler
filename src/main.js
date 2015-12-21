@@ -37,6 +37,10 @@ function parse(code) {
   try {
     parser.parse(code);
   } catch (error) {
+    if(error. hash === undefined) {
+      throw error;
+    }
+
     var current = error.hash.token === 'EOF' ? error.hash.token : error.hash.text;
     var expected = '';
 

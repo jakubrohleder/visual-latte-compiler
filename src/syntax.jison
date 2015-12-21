@@ -13,15 +13,15 @@ false                     return 'FALSE'
 if                        return 'IF'
 else                      return 'ELSE'
 while                     return 'WHILE'
-int                       return 'INTEGER'
-string                    return 'STRING'
-boolean                   return 'BOOLEAN'
-void                      return 'VOID'
+for                       return 'FOR'
 new                       return 'NEW'
+class                     return 'CLASS'
 return                    return 'RETURN'
+extends                   return 'EXTENDS'
 [0-9]+                    return 'NUMBER'
-[a-zA-Z_][0-9a-zA-Z_]*    return 'LITERAL'
-L?\"(\\.|[^\\"])*\"       return 'STRING_LITERAL'
+[a-zA-Z_][0-9a-zA-Z_]*    return 'IDENT'
+L?\"(\\.|[^\\"])*\"       return 'STRING_IDENT'
+"[]"                      return 'ARRAY'
 "++"                      return 'INCR'
 "--"                      return 'DECR'
 "*"                       return '*'
@@ -36,6 +36,7 @@ L?\"(\\.|[^\\"])*\"       return 'STRING_LITERAL'
 "!="                      return '!='
 "="                       return '='
 ";"                       return ';'
+":"                       return ':'
 ","                       return ','
 "."                       return '.'
 <<EOF>>                   return 'EOF'
@@ -60,11 +61,19 @@ L?\"(\\.|[^\\"])*\"       return 'STRING_LITERAL'
 %nonassoc UMINUS NEGATION
 %nonassoc IF_WITHOUT_ELSE
 %nonassoc ELSE
+%nonassoc CLASS_WITHOUT_EXTENDS
+%nonassoc EXTENDS
 
 %%
 
+/**
+ * TOP DEF
+ */
+
 Program
-  : TopDefs EOF
+  : EOF
+    {}
+  | TopDefs EOF
     {return yy.state.rootScope;}
   ;
 
@@ -84,18 +93,50 @@ TopDef
 
       $$ = $FunctionSignature;
     }
+  | ClassSignature ClassBlock
   ;
 
+
+/**
+ * CLASS
+ */
+
+ClassSignature
+  : CLASS IDENT %prec CLASS_WITHOUT_EXTENDS
+  | CLASS IDENT EXTENDS IDENT
+  ;
+
+ClassBlock
+  : '{' '}'
+    {}
+  | '{' ClassStms '}'
+    {}
+  ;
+
+ClassStms
+  : ClassStms ClassStm
+  | ClassStm
+  ;
+
+ClassStm
+ : Type Items ';'
+ | FunctionSignature Block
+ ;
+
+/**
+ * FUNCTION
+ */
+
 FunctionSignature
-  : FunType SingleIdent '(' Args ')'
+  : Type IDENT '(' Args ')'
     {
       var scope = yy.Scope.create({
         variables: $Args,
         parent: yy.state.currentScope
       });
       var fun = yy.Function.create({
-        type: $FunType,
-        ident: $SingleIdent,
+        type: $Type,
+        ident: $IDENT,
         args: $Args,
         scope: scope,
         parent: yy.state.currentScope
@@ -120,33 +161,24 @@ Args
   ;
 
 Arg
-  : Type SingleIdent
+  : Type IDENT
     {$$ = yy.Argument.create({
       type: $Type,
-      ident: $SingleIdent,
+      ident: $IDENT,
       loc: _$
     });}
   ;
 
 Block
-  : '{' Stmts '}'
+  : '{' '}'
     {}
-  | '{' '}'
+  | '{' Stmts '}'
     {}
   ;
 
-BlockInit
-  :
-    {
-      var scope = yy.Scope.create({
-        parent: yy.state.currentScope
-      });
-
-      yy.state.pushScope(scope);
-
-      $$ = scope;
-    }
-  ;
+/**
+ * STATEMENTS
+ */
 
 Stmts
   : Stmt
@@ -166,7 +198,11 @@ Stmt
       yy.state.currentScope.loc = _$;
       yy.state.popScope(scope);
     }
-  | Type Items ';'
+  | IDENT Items ';'
+    {
+      $$ = $Items;
+    }
+  | IDENT ARRAY Items ';'
     {
       $$ = $Items;
     }
@@ -232,12 +268,29 @@ Stmt
         loc: _$
       });
     }
+  | FOR '(' IDENT IDENT ':' IDENT ')' Stmt
+  | FOR '(' IDENT ':' IDENT ')' Stmt
   | Expr ';'
     { $$ = $Expr; }
   | ';'
     {$$ = undefined;}
   ;
 
+// For block statements to create a scope
+BlockInit
+  :
+    {
+      var scope = yy.Scope.create({
+        parent: yy.state.currentScope
+      });
+
+      yy.state.pushScope(scope);
+
+      $$ = scope;
+    }
+  ;
+
+// For function call
 Items
   : Item
     {$$ = [$Item]}
@@ -249,23 +302,23 @@ Items
   ;
 
 Item
-  : SingleIdent
+  : IDENT
     {
       $$ = yy.Statement.create('VARIABLE_DECLARATION', {
         type: yy.state.declarationType,
-        ident: $SingleIdent,
+        ident: $IDENT,
         loc: _$
       })
     }
-  | SingleIdent '=' Expr
+  | IDENT '=' Expr
     {
       var decl = yy.Statement.create('VARIABLE_DECLARATION', {
         type: yy.state.declarationType,
-        ident: $SingleIdent,
+        ident: $IDENT,
         loc: _$
       });
       var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {
-        ident: $SingleIdent,
+        ident: $IDENT,
         expr: $Expr,
         loc: _$
       });
@@ -273,55 +326,9 @@ Item
     }
   ;
 
-Type
-  : PrimitiveType
-    { }
-  | PrimitiveType '[' ']'
-    { }
-  ;
-
-FunType
-  : Type
-    {}
-  | VOID
-    {
-      yy.state.declarationType = $1;
-    }
-  ;
-
-PrimitiveType
-  : INTEGER
-    {
-      yy.state.declarationType = $1;
-    }
-  | STRING
-    {
-      yy.state.declarationType = $1;
-    }
-  | BOOLEAN
-    {
-      yy.state.declarationType = $1;
-    }
-  /*| LITERAL
-    {
-      yy.state.declarationType = $1;
-    } */
-  ;
-
-Ident
-  : SingleIdent
-    {}
-  | Ident '.' SingleIdent
-    {}
-  | Ident '[' Expr ']'
-    {}
-  ;
-
-SingleIdent
-  : LITERAL
-    { $$ = String(yytext); }
-  ;
-
+/**
+ * EXPRESSIONS
+ */
 
 Exprs
   :
@@ -342,8 +349,6 @@ Expr
     { $$ = $String; }
   | Logical
     { $$ = $Logical }
-  | NEW PrimitiveType '[' Expr ']'
-    { }
   | Ident
     {
       $$ = yy.Expression.create('VARIABLE', {
@@ -359,6 +364,10 @@ Expr
         loc: _$
       });
     }
+  | NEW IDENT '[' Expr ']'
+    { }
+  | NEW IDENT
+    { }
   | '-' Expr %prec UMINUS
     {
       $$ = yy.Expression.create('UMINUS', {
@@ -420,6 +429,31 @@ Expr
     }
   | '(' Expr ')'
     {$$ = $2}
+  //| Cast Expr %prec CAST
+  ;
+
+Cast
+  : '(' IDENT ')'
+  ;
+
+/**
+ * TYPES, CONSTANTS AND OPERATORS
+ */
+
+Type
+  : IDENT
+    { }
+  | IDENT ARRAY
+    { }
+  ;
+
+Ident
+  : IDENT
+    {}
+  | Ident '.' IDENT
+    {}
+  | Ident '[' Expr ']'
+    {}
   ;
 
 Number
@@ -434,7 +468,7 @@ Number
   ;
 
 String
-  : STRING_LITERAL
+  : STRING_IDENT
     {
       $$ = yy.Expression.create('OBJECT', {
         type: 'string',
