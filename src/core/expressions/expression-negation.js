@@ -1,6 +1,8 @@
-var Expression = require('./expression-prototype.js');
+var Expression = require('./expression');
 
-module.exports = ExpressionNegation;
+module.exports = {
+  create: create
+};
 
 ExpressionNegation.prototype = Object.create(Expression.prototype);
 ExpressionNegation.prototype.constructor = ExpressionNegation;
@@ -12,10 +14,14 @@ function ExpressionNegation(opts) {
   Expression.call(_this, opts);
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
 
-  _this.expr.semanticCheck();
+  _this.expr.semanticCheck(state);
 
   _this.type = _this.expr.type;
+}
+
+function create(opts) {
+  return new ExpressionNegation(opts);
 }

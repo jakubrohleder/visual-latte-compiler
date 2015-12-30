@@ -1,4 +1,4 @@
-var Element = require('../element.js');
+var Element = require('../element');
 var exports = module.exports = Expression;
 
 exports.Expression = Expression;

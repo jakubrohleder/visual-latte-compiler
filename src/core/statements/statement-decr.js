@@ -1,7 +1,9 @@
-var Statement = require('./statement-prototype.js');
+var Statement = require('./statement-prototype');
 var parseError = require('../error').parseError;
 
-module.exports = StatementDecr;
+module.exports = {
+  create: create
+};
 
 StatementDecr.prototype = Object.create(Statement.prototype);
 StatementDecr.prototype.constructor = StatementDecr;
@@ -13,9 +15,10 @@ function StatementDecr(opts) {
   Statement.call(_this, opts);
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
-  var variable = _this.scope.getVariable(_this.ident);
+  var variable = state.scope.getVariable(_this.ident);
+  var integer = state.scope.getType('int');
 
   if (variable === undefined) {
     parseError(
@@ -25,13 +28,15 @@ function semanticCheck() {
     );
   }
 
-  if (variable.type !== 'int') {
+  if (variable.type !== integer) {
     parseError(
-      'Can\'t decrement \'' + variable.type + '\' works only for \'int\'',
+      'Can\'t decrement \'' + variable.type + '\' works only for \'' + integer + '\'',
       _this.loc[_this.loc.length - 3],
       _this
     );
   }
+}
 
-  _this.type = variable.type;
+function create(opts) {
+  return new StatementDecr(opts);
 }

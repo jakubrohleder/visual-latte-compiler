@@ -9,9 +9,21 @@
   </a>
 </h5>
 <div class="ui attached segment" ng-show="showDebug">
+  <h4 class="ui header">tree</h4>
+  <hr>
+  <json-formatter json="data.tree" open="1"></json-formatter>
+
   <h4 class="ui header">rootScope</h4>
   <hr>
   <json-formatter json="data.rootScope" open="1"></json-formatter>
+
+  <h4 class="ui header">optimized</h4>
+  <hr>
+  <json-formatter json="data.optimized" open="1"></json-formatter>
+
+  <h4 class="ui header">compiled</h4>
+  <hr>
+  <json-formatter json="data.compiled" open="1"></json-formatter>
 
   <h4 class="ui header">Error</h4>
   <hr>

@@ -28,10 +28,10 @@ L?\"(\\.|[^\\"])*\"       return 'STRING_IDENT'
 "/"                       return '/'
 "-"                       return '-'
 "+"                       return '+'
-"<"                       return '<'
 "<="                      return '<='
-">"                       return '>'
+"<"                       return '<'
 ">="                      return '>='
+">"                       return '>'
 "=="                      return '=='
 "!="                      return '!='
 "="                       return '='
@@ -40,8 +40,8 @@ L?\"(\\.|[^\\"])*\"       return 'STRING_IDENT'
 ","                       return ','
 "."                       return '.'
 <<EOF>>                   return 'EOF'
-"!"                       return '!'
 "%"                       return '%'
+"!"                       return '!'
 "&&"                      return '&&'
 "||"                      return '||'
 "("                       return '('
@@ -53,7 +53,7 @@ L?\"(\\.|[^\\"])*\"       return 'STRING_IDENT'
 
 /lex
 
-%left '&&' '||'
+%left '&&' '||' LOGOP
 %left '<' '<=' '>' '>=' '==' '!=' RELOP
 %left '-' '+' ADDOP
 %left '*' '/' '%' MULOP
@@ -74,26 +74,21 @@ Program
   : EOF
     {}
   | TopDefs EOF
-    {return yy.state.rootScope;}
+    { return yy.Block.create($TopDefs); }
   ;
 
 TopDefs
   : TopDef
-    { yy.state.currentScope.addElement($TopDef) }
+    { $$ = [$TopDef]; }
   | TopDefs TopDef
-    { yy.state.currentScope.addElement($TopDef) }
+    { $$ = $TopDefs.concat([$TopDef]); }
   ;
 
 TopDef
-  : FunctionSignature Block
-    {
-      yy.state.currentFunction.loc = _$;
-      yy.state.popFunction();
-      yy.state.popScope(scope);
-
-      $$ = $FunctionSignature;
-    }
-  | ClassSignature ClassBlock
+  : FunctionDecl
+    { $$ = $FunctionDecl; }
+  | ClassDecl
+    { $$ = $ClassDecl; }
   ;
 
 
@@ -101,9 +96,9 @@ TopDef
  * CLASS
  */
 
-ClassSignature
-  : CLASS IDENT %prec CLASS_WITHOUT_EXTENDS
-  | CLASS IDENT EXTENDS IDENT
+ClassDecl
+  : CLASS IDENT ClassBlock %prec CLASS_WITHOUT_EXTENDS
+  | CLASS IDENT EXTENDS IDENT ClassBlock
   ;
 
 ClassBlock
@@ -120,60 +115,55 @@ ClassStms
 
 ClassStm
  : Type Items ';'
- | FunctionSignature Block
+ | FunctionDecl
  ;
 
 /**
  * FUNCTION
  */
 
-FunctionSignature
-  : Type IDENT '(' Args ')'
+FunctionDecl
+  : Type IDENT '(' Args ')' Block
     {
-      var scope = yy.Scope.create({
-        variables: $Args,
-        parent: yy.state.currentScope
-      });
-      var fun = yy.Function.create({
+      $$ = yy.Statement.DeclarationFunction.create({
+        args: $Args,
+        block: $Block,
         type: $Type,
         ident: $IDENT,
-        args: $Args,
-        scope: scope,
-        parent: yy.state.currentScope
+        loc: _$
       });
-
-      scope.function = fun;
-
-      yy.state.pushFunction(fun);
-      yy.state.pushScope(scope);
-
-      $$ = fun;
     }
   ;
 
 Args
   :
-    {$$ = []}
+    { $$ = []; }
   | Arg
-    {$$ = [$Arg]}
+    { $$ = [$Arg]; }
   | Args ',' Arg
-    {$Args.push($Arg); $$ = $Args;}
+    { $$ = $Args.concat([$Arg]); }
   ;
 
 Arg
   : Type IDENT
-    {$$ = yy.Argument.create({
-      type: $Type,
-      ident: $IDENT,
-      loc: _$
-    });}
+    {
+      $$ = yy.Argument.create({
+        type: $Type,
+        ident: $IDENT,
+        loc: _$
+      });
+    }
   ;
 
 Block
   : '{' '}'
-    {}
+    {
+      $$ = yy.Block.create();
+    }
   | '{' Stmts '}'
-    {}
+    {
+      $$ = yy.Block.create($Stmts);
+    }
   ;
 
 /**
@@ -182,33 +172,43 @@ Block
 
 Stmts
   : Stmt
-    {
-      yy.state.currentScope.addElement($Stmt);
-    }
+    { $$ = [$Stmt]; }
   | Stmts Stmt
-    {
-      yy.state.currentScope.addElement($Stmt);
-    }
+    { $$ = $Stmts.concat([$Stmt]); }
   ;
 
 Stmt
-  : BlockInit Block
+  : Block
     {
-      $$ = $BlockInit;
-      yy.state.currentScope.loc = _$;
-      yy.state.popScope(scope);
+      $$ = yy.Statement.Block.create({
+        block: $Block,
+        loc: _$
+      });
     }
+
+  //Due to bug in jison
   | IDENT Items ';'
     {
-      $$ = $Items;
+      var items = yy._.flattenDeep($Items);
+      items.map(function(item) {
+        item.type = item.type === undefined ? String($IDENT) : item.type;
+      });
+
+      $$ = items;
     }
   | IDENT ARRAY Items ';'
     {
+      $Items.map(function(item) {
+        item.type = String($IDENT);
+      });
+
       $$ = $Items;
     }
+
+
   | Ident '=' Expr ';'
     {
-      $$ = yy.Statement.create('VARIABLE_ASSIGNMENT', {
+      $$ = yy.Statement.Assignment.create({
         ident: $Ident,
         expr: $Expr,
         loc: _$
@@ -216,14 +216,14 @@ Stmt
     }
   | Ident INCR ';'
     {
-      $$ = yy.Statement.create('VARIABLE_INCR', {
+      $$ = yy.Statement.Incr.create({
         ident: $Ident,
         loc: _$
       });
     }
   | Ident DECR ';'
     {
-      $$ = yy.Statement.create('VARIABLE_DECR', {
+      $$ = yy.Statement.Decr.create({
         ident: $Ident,
         loc: _$
       });
@@ -231,7 +231,7 @@ Stmt
   | RETURN Expr ';'
     {
       {
-        $$ = yy.Statement.create('RETURN', {
+        $$ = yy.Statement.Return.create({
           expr: $Expr,
           loc: _$
         });
@@ -239,13 +239,13 @@ Stmt
     }
   | RETURN ';'
     {
-      $$ = yy.Statement.create('RETURN', {
+      $$ = yy.Statement.Return.create({
         loc: _$
       });
     }
   | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE
     {
-      $$ = yy.Statement.create('IF', {
+      $$ = yy.Statement.If.create({
         expr: $Expr,
         right: $Stmt,
         loc: _$
@@ -253,7 +253,7 @@ Stmt
     }
   | IF '(' Expr ')' Stmt ELSE Stmt
     {
-      $$ = yy.Statement.create('IF', {
+      $$ = yy.Statement.If.create({
         expr: $Expr,
         right: $Stmt1,
         wrong: $Stmt2,
@@ -262,9 +262,9 @@ Stmt
     }
   | WHILE '(' Expr ')' Stmt
     {
-      $$ = yy.Statement.create('WHILE', {
+      $$ = yy.Statement.While.create({
         expr: $Expr,
-        stmt: $Stmt,
+        loop: $Stmt,
         loc: _$
       });
     }
@@ -273,51 +273,31 @@ Stmt
   | Expr ';'
     { $$ = $Expr; }
   | ';'
-    {$$ = undefined;}
+    { $$ = undefined; }
   ;
 
-// For block statements to create a scope
-BlockInit
-  :
-    {
-      var scope = yy.Scope.create({
-        parent: yy.state.currentScope
-      });
-
-      yy.state.pushScope(scope);
-
-      $$ = scope;
-    }
-  ;
-
-// For function call
 Items
   : Item
-    {$$ = [$Item]}
+    { $$ = [$Item]; }
   | Items ',' Item
-    {
-      $Items.push($Item);
-      $$ = $Items;
-    }
+    { $$ = $Items.concat([$Item]); }
   ;
 
 Item
   : IDENT
     {
-      $$ = yy.Statement.create('VARIABLE_DECLARATION', {
-        type: yy.state.declarationType,
-        ident: $IDENT,
-        loc: _$
-      })
-    }
-  | IDENT '=' Expr
-    {
-      var decl = yy.Statement.create('VARIABLE_DECLARATION', {
-        type: yy.state.declarationType,
+      $$ = yy.Statement.DeclarationVariable.create({
         ident: $IDENT,
         loc: _$
       });
-      var ass = yy.Statement.create('VARIABLE_ASSIGNMENT', {
+    }
+  | IDENT '=' Expr
+    {
+      var decl = yy.Statement.DeclarationVariable.create({
+        ident: $IDENT,
+        loc: _$
+      });
+      var ass = yy.Statement.Assignment.create({
         ident: $IDENT,
         expr: $Expr,
         loc: _$
@@ -332,14 +312,11 @@ Item
 
 Exprs
   :
-    { $$ = [] }
+    { $$ = []; }
   | Expr
     { $$ = [$Expr]; }
   | Exprs ',' Expr
-    {
-      $Exprs.push($Expr);
-      $$ = $Exprs;
-    }
+    { $$ = $Exprs.concat([$Expr]); }
   ;
 
 Expr
@@ -348,43 +325,43 @@ Expr
   | String
     { $$ = $String; }
   | Logical
-    { $$ = $Logical }
+    { $$ = $Logical; }
   | Ident
     {
-      $$ = yy.Expression.create('VARIABLE', {
+      $$ = yy.Expression.Variable.create({
         ident: $Ident,
         loc: _$
       });
     }
   | Ident '(' Exprs ')'
     {
-      $$ = yy.Expression.create('FUNCALL', {
+      $$ = yy.Expression.Funcall.create({
         args: $Exprs,
         ident: $Ident,
         loc: _$
       });
     }
   | NEW IDENT '[' Expr ']'
-    { }
+    { console.log('undefined NEW IDENT [ Expr ]'); }
   | NEW IDENT
-    { }
+    { console.log('undefined NEW IDENT ');  }
   | '-' Expr %prec UMINUS
     {
-      $$ = yy.Expression.create('UMINUS', {
+      $$ = yy.Expression.Uminus.create({
         expr: $Expr,
         loc: _$
       });
     }
   | '!' Expr %prec NEGATION
     {
-      $$ = yy.Expression.create('NEGATION', {
+      $$ = yy.Expression.Negation.create({
         expr: $Expr,
         loc: _$
       });
     }
   | Expr MulOp Expr %prec MULOP
     {
-      $$ = yy.Expression.create('MULOP', {
+      $$ = yy.Expression.Operation.create({
         operator: $MulOp,
         left: $Expr1,
         right: $Expr2,
@@ -393,7 +370,7 @@ Expr
     }
   | Expr AddOp Expr %prec ADDOP
     {
-      $$ = yy.Expression.create('ADDOP', {
+      $$ = yy.Expression.Operation.create({
         operator: $AddOp,
         left: $Expr1,
         right: $Expr2,
@@ -402,38 +379,24 @@ Expr
     }
   | Expr RelOp Expr %prec RELOP
     {
-      $$ = yy.Expression.create('RELOP', {
+      $$ = yy.Expression.Comparison.create({
         operator: $RelOp,
         left: $Expr1,
         right: $Expr2,
         loc: _$
       });
     }
-  | Expr '&&' Expr
+  | Expr LogOp Expr %prec LOGOP
     {
-      $$ = yy.Expression.create('LOGAND', {
-        operator: '&&',
-        left: $Expr1,
-        right: $Expr2,
-        loc: _$
-      });
-    }
-  | Expr '||' Expr
-    {
-      $$ = yy.Expression.create('LOGOR', {
-        operator: '||',
+      $$ = yy.Expression.Operation.create({
+        operator: $LogOp,
         left: $Expr1,
         right: $Expr2,
         loc: _$
       });
     }
   | '(' Expr ')'
-    {$$ = $2}
-  //| Cast Expr %prec CAST
-  ;
-
-Cast
-  : '(' IDENT ')'
+    { $$ = $Expr; }
   ;
 
 /**
@@ -442,24 +405,24 @@ Cast
 
 Type
   : IDENT
-    { }
+    { $$ = String($IDENT); }
   | IDENT ARRAY
-    { }
+    { $$ = String($IDENT); }
   ;
 
 Ident
   : IDENT
-    {}
+    { $$ = $IDENT; }
   | Ident '.' IDENT
-    {}
+    { console.log('undefined Ident . IDENT'); }
   | Ident '[' Expr ']'
-    {}
+    { console.log('undefined Ident [ Expr ]'); }
   ;
 
 Number
   : NUMBER
     {
-      $$ = yy.Expression.create('OBJECT', {
+      $$ = yy.Expression.Object.create({
         type: 'int',
         value: Number(yytext),
         loc: _$
@@ -470,7 +433,7 @@ Number
 String
   : STRING_IDENT
     {
-      $$ = yy.Expression.create('OBJECT', {
+      $$ = yy.Expression.Object.create({
         type: 'string',
         value: String(yytext),
         loc: _$
@@ -479,51 +442,42 @@ String
   ;
 
 Logical
+  : LogVal
+    {
+      $$ = yy.Expression.Object.create({
+        type: 'boolean',
+        value: JSON.parse($LogVal),
+        loc: _$
+      });
+    }
+  ;
+
+LogVal
   : TRUE
-    {
-      $$ = yy.Expression.create('OBJECT', {
-        type: 'boolean',
-        value: JSON.parse(yytext),
-        loc: _$
-      });
-    }
   | FALSE
-    {
-      $$ = yy.Expression.create('OBJECT', {
-        type: 'boolean',
-        value: JSON.parse(yytext),
-        loc: _$
-      });
-    }
+  ;
+
+LogOp
+  : '&&'
+  | '||'
   ;
 
 AddOp
   : '+'
-    {}
   | '-'
-    {}
   ;
 
 MulOp
   : '*'
-    {}
   | '/'
-    {}
   | '%'
-    {}
   ;
 
 RelOp
   : '<'
-    {}
   | '<='
-    {}
   | '>'
-    {}
   | '>='
-    {}
   | '=='
-    {}
   | '!='
-    {}
   ;

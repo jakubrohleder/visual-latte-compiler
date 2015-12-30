@@ -1,7 +1,9 @@
-var Expression = require('./expression-prototype');
+var Expression = require('./expression');
 var parseError = require('../error').parseError;
 
-module.exports = ExpressionVariable;
+module.exports = {
+  create: create
+};
 
 ExpressionVariable.prototype = Object.create(Expression.prototype);
 ExpressionVariable.prototype.constructor = ExpressionVariable;
@@ -13,10 +15,10 @@ function ExpressionVariable(opts) {
   Expression.call(_this, opts);
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
 
-  if (_this.scope.getVariable(_this.ident) === undefined) {
+  if (state.scope.getVariable(_this.ident) === undefined) {
     parseError(
       'Undeclared variable in expression: ' + _this.ident,
       _this.loc,
@@ -24,5 +26,9 @@ function semanticCheck() {
     );
   }
 
-  _this.type = _this.scope.getVariable(_this.ident).type;
+  _this.type = state.scope.getVariable(_this.ident).type;
+}
+
+function create(opts) {
+  return new ExpressionVariable(opts);
 }

@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+var _ = require('lodash');
 var Parser = require('jison').Parser;
 var samples = require('./samples.json');
 var parseError = require('./core/error').parseError;
@@ -9,35 +10,39 @@ var grammar = fs.readFileSync(path.join(__dirname, '/syntax.jison'), 'utf8');
 var Expression = require('./core/expression');
 var Statement = require('./core/statement');
 var Scope = require('./core/scopes/scope');
-var Function = require('./core/function');
+var _Function = require('./core/function');
+var Argument = require('./core/argument');
+var Variable = require('./core/variable');
+var Block = require('./core/block');
+
 var State = require('./core/state');
-var Argument = require('./core/variables/argument');
-var Variable = require('./core/variables/variable-prototype');
-var VariableReference = require('./core/variables/variable-reference');
 
 var exports = module.exports = {};
 
 exports.parse = parse;
+exports.semanticCheck = semanticCheck;
+exports.optimize = optimize;
+exports.compile = compile;
+
 exports.samples = samples;
 
 function parse(code) {
   var parser = new Parser(grammar);
-  var state = State.create();
+  var result;
 
-  parser.yy.state = state;
-
-  parser.yy.Expression = Expression.init(state);
-  parser.yy.Statement = Statement.init(state);
+  parser.yy._ = _;
+  parser.yy.Expression = Expression;
+  parser.yy.Statement = Statement;
   parser.yy.Scope = Scope;
-  parser.yy.Function = Function;
+  parser.yy.Function = _Function;
   parser.yy.Argument = Argument;
   parser.yy.Variable = Variable;
-  parser.yy.VariableReference = VariableReference;
+  parser.yy.Block = Block;
 
   try {
-    parser.parse(code);
+    result = parser.parse(code);
   } catch (error) {
-    if(error. hash === undefined) {
+    if (error. hash === undefined) {
       throw error;
     }
 
@@ -60,5 +65,29 @@ function parse(code) {
     );
   }
 
-  return parser.yy.state.rootScope;
+  return result;
+}
+
+function semanticCheck(mainBlock) {
+  var state = State.create();
+
+  mainBlock.semanticCheck(state);
+
+  if (state.rootScope.functions.main === undefined) {
+    parseError(
+      'No \'main\' function defined'
+    );
+  }
+
+  return state.rootScope;
+}
+
+
+function optimize(rootScope) {
+  return rootScope.clone();
+}
+
+function compile(rootScope) {
+  console.log(rootScope);
+  return rootScope.compile();
 }

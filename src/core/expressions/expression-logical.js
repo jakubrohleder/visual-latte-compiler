@@ -1,7 +1,9 @@
-var Expression = require('./expression-prototype.js');
+var Expression = require('./expression');
 var parseError = require('../error').parseError;
 
-module.exports = ExpressionLogical;
+module.exports = {
+  create: create
+};
 
 ExpressionLogical.prototype = Object.create(Expression.prototype);
 ExpressionLogical.prototype.constructor = ExpressionLogical;
@@ -13,11 +15,11 @@ function ExpressionLogical(opts) {
   Expression.call(_this, opts);
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
 
-  _this.left.semanticCheck();
-  _this.right.semanticCheck();
+  _this.left.semanticCheck(state);
+  _this.right.semanticCheck(state);
 
   if (_this.left.type !== _this.right.type) {
     parseError(
@@ -28,4 +30,8 @@ function semanticCheck() {
   }
 
   _this.type = _this.left.type;
+}
+
+function create(opts) {
+  return new ExpressionLogical(opts);
 }

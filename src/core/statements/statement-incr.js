@@ -1,7 +1,9 @@
-var Statement = require('./statement-prototype.js');
+var Statement = require('./statement-prototype');
 var parseError = require('../error').parseError;
 
-module.exports = StatementIncr;
+module.exports = {
+  create: create
+};
 
 StatementIncr.prototype = Object.create(Statement.prototype);
 StatementIncr.prototype.constructor = StatementIncr;
@@ -15,9 +17,10 @@ function StatementIncr(opts) {
   _this.ident = opts.ident;
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
-  var variable = _this.scope.getVariable(_this.ident);
+  var variable = state.scope.getVariable(_this.ident);
+  var integer = state.scope.getType('int');
 
   if (variable === undefined) {
     parseError(
@@ -27,13 +30,15 @@ function semanticCheck() {
     );
   }
 
-  if (variable.type !== 'int') {
+  if (variable.type !== integer) {
     parseError(
-      'Can\'t increment \'' + variable.type + '\' works only for \'int\'',
+      'Can\'t increment \'' + variable.type + '\' works only for \'' + integer + '\'',
       _this.loc[_this.loc.length - 3],
       _this
     );
   }
+}
 
-  _this.type = variable.type;
+function create(opts) {
+  return new StatementIncr(opts);
 }

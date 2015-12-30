@@ -1,4 +1,5 @@
-var Element = require('../element.js');
+var Element = require('./element');
+var parseError = require('./error').parseError;
 
 var exports = module.exports = {};
 
@@ -18,6 +19,17 @@ function create(opts) {
   return new Argument(opts);
 }
 
-function semanticCheck() {
-  // Empty
+function semanticCheck(state) {
+  var _this = this;
+  var type = state.scope.getType(_this.type);
+
+  if (type === undefined) {
+    parseError(
+      'Undeclared variable type ' + _this.type,
+      _this.loc,
+      _this
+    );
+  }
+
+  _this.type = type;
 }

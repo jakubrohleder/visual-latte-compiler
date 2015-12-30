@@ -1,7 +1,9 @@
-var Expression = require('./expression-prototype.js');
+var Expression = require('./expression');
 var parseError = require('../error').parseError;
 
-module.exports = ExpressionComparison;
+module.exports = {
+  create: create
+};
 
 ExpressionComparison.prototype = Object.create(Expression.prototype);
 ExpressionComparison.prototype.constructor = ExpressionComparison;
@@ -13,11 +15,12 @@ function ExpressionComparison(opts) {
   Expression.call(_this, opts);
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
+  var bool = state.scope.getType('boolean');
 
-  _this.left.semanticCheck();
-  _this.right.semanticCheck();
+  _this.left.semanticCheck(state);
+  _this.right.semanticCheck(state);
 
   if (_this.left.type !== _this.right.type) {
     parseError(
@@ -27,5 +30,9 @@ function semanticCheck() {
     );
   }
 
-  _this.type = 'boolean';
+  _this.type = bool;
+}
+
+function create(opts) {
+  return new ExpressionComparison(opts);
 }

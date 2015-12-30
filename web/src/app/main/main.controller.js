@@ -14,8 +14,8 @@
       debounce: 500,
       parse: true,
       semantic: true,
-      optimize: false,
-      compile: false
+      optimize: true,
+      compile: true
     };
 
     $scope.data = {};
@@ -48,12 +48,16 @@
         parse();
       }
 
-      if ($scope.data.rootScope === undefined) {
+      if ($scope.data.tree === undefined) {
         return;
       }
 
       if ($scope.options.semantic === true) {
         semantic();
+      }
+
+      if ($scope.data.rootScope === undefined) {
+        return;
       }
 
       if ($scope.options.optimize === true) {
@@ -72,9 +76,11 @@
         fun();
         $scope.data.error = undefined;
       } catch (error) {
-        console.error(error);
+        // console.error(error);
         $scope.data.error = error;
-        $scope.data.rootScope = undefined;
+        // $scope.data.tree = undefined;
+        // $scope.data.rootScope = undefined;
+        throw error;
       }
     }
 
@@ -82,23 +88,32 @@
       processCode(parseCode);
 
       function parseCode() {
-        $scope.data.rootScope = latte.parse($scope.code);
+        $scope.data.tree = latte.parse($scope.code);
       }
     }
 
     function semantic() {
-      var obj = $scope.data.rootScope;
-      processCode(obj.semanticCheck.bind(obj));
+      processCode(semanticCheck);
+
+      function semanticCheck() {
+        $scope.data.rootScope = latte.semanticCheck($scope.data.tree);
+      }
     }
 
     function optimize() {
-      var obj = $scope.data.rootScope;
-      processCode(obj.optimize.bind(obj));
+      processCode(optimizeCode);
+
+      function optimizeCode() {
+        $scope.data.optimized = latte.optimize($scope.data.rootScope);
+      }
     }
 
     function compile() {
-      var obj = $scope.data.rootScope;
-      processCode(obj.compile.bind(obj));
+      processCode(compileCode);
+
+      function compileCode() {
+        $scope.data.compiled = latte.compile($scope.data.optimized);
+      }
     }
   }
 })();

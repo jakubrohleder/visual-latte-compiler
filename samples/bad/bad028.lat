@@ -2,6 +2,8 @@
 
 int main () {
  if(true)
+    1+1;
+  else
     int x;
  return 0 ;
 }

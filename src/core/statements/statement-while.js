@@ -1,8 +1,12 @@
-var Statement = require('./statement-prototype.js');
+var Statement = require('./statement-prototype');
+var StatementBlock = require('./statement-block');
+var Block = require('../block');
 var parseError = require('../error').parseError;
 var _ = require('lodash');
 
-module.exports = StatementWhile;
+module.exports = {
+  create: create
+};
 
 StatementWhile.prototype = Object.create(Statement.prototype);
 StatementWhile.prototype.constructor = StatementWhile;
@@ -14,12 +18,12 @@ function StatementWhile(opts) {
   Statement.call(_this, opts);
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
+  var bool = state.scope.getType('boolean');
+  _this.expr.semanticCheck(state);
 
-  _this.expr.semanticCheck();
-
-  if (_this.expr.type !== 'boolean') {
+  if (_this.expr.type !== bool) {
     parseError(
       'Wrong type of if condition: ' + _this.expr.type + ' instead of boolean',
       _this.loc,
@@ -27,13 +31,47 @@ function semanticCheck() {
     );
   }
 
-  if (!_.isArray(_this.stmt)) {
-    _this.stmt.semanticCheck();
-  } else {
+  if (_.isArray(_this.loop)) {
     parseError(
       'Declaration as only instruction in while',
-      _this.stmt[0].loc,
+      _this.loop[0].loc,
       _this
     );
   }
+
+  checkPath('loop');
+
+  state.scope.return = _this.loop.scope.return || state.scope.return;
+
+  function checkPath(pathName) {
+    var path = _this[pathName];
+
+    if (_.isArray(path)) {
+      parseError(
+        'Declaration as only instruction in while',
+        path[0].loc,
+        _this
+      );
+    }
+
+    if (path === undefined) {
+      _this[pathName] = StatementBlock.create({
+        block: Block.create()
+      });
+      path = _this[pathName];
+    }
+
+    if (path.block === undefined) {
+      _this[pathName] = StatementBlock.create({
+        block: Block.create([path])
+      });
+      path = _this[pathName];
+    }
+
+    path.semanticCheck(state);
+  }
+}
+
+function create(opts) {
+  return new StatementWhile(opts);
 }

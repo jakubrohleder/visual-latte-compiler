@@ -1,7 +1,9 @@
-var Statement = require('./statement-prototype.js');
+var Statement = require('./statement-prototype');
 var parseError = require('../error').parseError;
 
-module.exports = StatementAssignment;
+module.exports = {
+  create: create
+};
 
 StatementAssignment.prototype = Object.create(Statement.prototype);
 StatementAssignment.prototype.constructor = StatementAssignment;
@@ -13,11 +15,12 @@ function StatementAssignment(opts) {
   Statement.call(_this, opts);
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
-  var variable = _this.scope.getVariable(_this.ident);
+  var variable = state.scope.getVariable(_this.ident);
 
-  _this.expr.semanticCheck();
+  _this.variable = variable;
+  _this.expr.semanticCheck(state);
 
   if (variable === undefined) {
     parseError(
@@ -29,11 +32,13 @@ function semanticCheck() {
 
   if (_this.expr.type !== variable.type) {
     parseError(
-      'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type,
+      'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + variable.type,
       _this.loc[_this.loc.length - 2],
       _this
     );
   }
+}
 
-  _this.type = variable.type;
+function create(opts) {
+  return new StatementAssignment(opts);
 }

@@ -1,8 +1,12 @@
-var Statement = require('./statement-prototype.js');
+var Statement = require('./statement-prototype');
+var StatementBlock = require('./statement-block');
+var Block = require('../block');
 var parseError = require('../error').parseError;
 var _ = require('lodash');
 
-module.exports = StatementIf;
+module.exports = {
+  create: create
+};
 
 StatementIf.prototype = Object.create(Statement.prototype);
 StatementIf.prototype.constructor = StatementIf;
@@ -14,32 +18,52 @@ function StatementIf(opts) {
   Statement.call(_this, opts);
 }
 
-function semanticCheck() {
+function semanticCheck(state) {
   var _this = this;
+  var bool = state.scope.getType('boolean');
+  _this.expr.semanticCheck(state);
 
-  _this.expr.semanticCheck();
-
-  if (_this.expr.type !== 'boolean') {
+  if (_this.expr.type !== bool) {
     parseError(
-      'Wrong type of if condition: ' + _this.expr.type + ' instead of boolean',
+      'Wrong type of if condition: \'' + _this.expr.type + '\' instead of \'' + bool + '\'',
       _this.loc,
       _this
     );
   }
 
-  // Array only if it's declaration - can be ommited
-  if (!_.isArray(_this.right)) {
-    _this.right.semanticCheck();
-  } else {
-    parseError(
-      'Declaration as only instruction in if',
-      _this.right[0].loc,
-      _this
-    );
-  }
+  checkPath('right');
+  checkPath('wrong');
 
-  if (_this.wrong !== undefined) {
-    _this.wrong.semanticCheck();
+  state.scope.return = (_this.right.scope && _this.wrong.scope) || state.scope.return;
+
+  function checkPath(pathName) {
+    var path = _this[pathName];
+    if (_.isArray(path)) {
+      parseError(
+        'Declaration as only instruction in if',
+        path[0].loc,
+        _this
+      );
+    }
+
+    if (path === undefined) {
+      _this[pathName] = StatementBlock.create({
+        block: Block.create()
+      });
+      path = _this[pathName];
+    }
+
+    if (path.block === undefined) {
+      _this[pathName] = StatementBlock.create({
+        block: Block.create([path])
+      });
+      path = _this[pathName];
+    }
+
+    path.semanticCheck(state);
   }
 }
 
+function create(opts) {
+  return new StatementIf(opts);
+}

@@ -1,4 +1,4 @@
-var FunctionDecl = require('./functions/function-decl');
+var _Function = require('./functions/function');
 var FunctionMain = require('./functions/function-main');
 
 module.exports = new function() {
@@ -8,9 +8,9 @@ module.exports = new function() {
 };
 
 function create(opts) {
-  if (opts.ident === 'main') {
+  if (opts.ident === 'main' && opts.scope.root === true) {
     return FunctionMain.create(opts);
   }
 
-  return new FunctionDecl(opts);
+  return new _Function(opts);
 }

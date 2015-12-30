@@ -1,4 +1,4 @@
-var Element = require('../element.js');
+var Element = require('../element');
 
 module.exports = Statement;
 

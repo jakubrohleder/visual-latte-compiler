@@ -6,6 +6,11 @@ var FunctionPrintString = require('../functions/function-printString');
 var FunctionReadInt = require('../functions/function-readInt');
 var FunctionReadString = require('../functions/function-readString');
 
+var TypeInt = require('../types/type-int');
+var TypeString = require('../types/type-string');
+var TypeVoid = require('../types/type-void');
+var TypeBoolean = require('../types/type-boolean');
+
 var _ = require('lodash');
 
 var exports = module.exports = {};
@@ -14,13 +19,17 @@ exports.create = create;
 
 RootScope.prototype = Object.create(Scope.prototype);
 RootScope.prototype.constructor = RootScope;
-RootScope.prototype.semanticCheck = semanticCheck;
 RootScope.prototype.optimize = optimize;
 
 function RootScope(opts) {
   var _this = this;
 
   Scope.call(_this, opts);
+
+  _this.addType(new TypeInt(_this));
+  _this.addType(new TypeString(_this));
+  _this.addType(new TypeVoid(_this));
+  _this.addType(new TypeBoolean(_this));
 
   _this.addFunction(new FunctionError(_this));
   _this.addFunction(new FunctionPrintInt(_this));
@@ -33,20 +42,6 @@ function RootScope(opts) {
 
 function create(opts) {
   return new RootScope(opts);
-}
-
-function semanticCheck() {
-  var _this = this;
-
-  _.forEach(_this.elements, function(element) {
-    _this.addFunction(element);
-  });
-
-  if (_this.functions.main === undefined) {
-    parseError('Main function not declared', undefined, _this);
-  }
-
-  Scope.prototype.semanticCheck.call(_this);
 }
 
 function optimize() {

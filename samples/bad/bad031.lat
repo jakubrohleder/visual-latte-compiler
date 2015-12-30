@@ -1,0 +1,7 @@
+// Variable declaration as an only while instruction
+
+int main () {
+  while(true)
+    int x;
+ return 0 ;
+}
