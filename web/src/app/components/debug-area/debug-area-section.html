@@ -10,6 +10,18 @@
 </h4>
 <hr>
 <div ng-show="show">
-  <pre ng-if="string">{{data}}</pre>
-  <json-formatter ng-if="!string" json="data" open="3"></json-formatter>
+  <div class="code" ng-if="string">
+    <textarea
+      ng-if="string"
+      ui-codemirror="{}"
+      ng-model="data"
+      ui-codemirror-opts="editorOptions"
+    ></textarea>
+    <br>
+  </div>
+  <json-formatter
+    ng-if="!string"
+    json="data"
+    open="1"
+  ></json-formatter>
 </div>

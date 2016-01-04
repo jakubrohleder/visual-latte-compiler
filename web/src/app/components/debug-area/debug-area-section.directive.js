@@ -18,6 +18,13 @@
     };
 
     function controller($scope) {
+      $scope.editorOptions = {
+        lineWrapping: true,
+        lineNumbers: false,
+        readOnly: true,
+        mode: {name: 'gas', architecture: 'x86'},
+        tabSize: 2
+      };
     }
   }
 })();

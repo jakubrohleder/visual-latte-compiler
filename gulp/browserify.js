@@ -14,13 +14,13 @@ var $ = require('gulp-load-plugins')();
 
 gulp.task('browserify', function() {
   var bundle = browserify({
-    entries: path.join(conf.paths.lib.src, '/main.js')
+    entries: path.join(conf.paths.lib.src, '/compiler.js')
   });
-  bundle.require('./' + path.join(conf.paths.lib.src, '/main.js'), {expose: 'latte'});
+  bundle.require('./' + path.join(conf.paths.lib.src, '/compiler.js'), {expose: 'latte'});
 
   return bundle.transform('brfs')
     .bundle()
-    .pipe(source('main.js'))
+    .pipe(source('compiler.js'))
     .pipe(buffer())
     // .pipe($.uglify())
     .pipe($.rename('instant-bundle.js'))

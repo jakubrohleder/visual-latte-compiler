@@ -7,9 +7,13 @@
   padding-top: 5em;
 }
 
-.CodeMirror {
+.editor > .CodeMirror {
   border-radius: 0.28571429rem;
   border: #CCC 1px solid;
+}
+
+.code > .CodeMirror {
+  height: auto;
 }
 
 .error-text {
