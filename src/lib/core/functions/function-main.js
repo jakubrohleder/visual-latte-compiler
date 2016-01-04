@@ -9,6 +9,7 @@ exports.create = create;
 FunctionMain.prototype = Object.create(_Function.prototype);
 FunctionMain.prototype.constructor = FunctionMain;
 FunctionMain.prototype.semanticCheck = semanticCheck;
+FunctionMain.prototype.compile = compile;
 
 function FunctionMain(opts) {
   var _this = this;
@@ -16,6 +17,7 @@ function FunctionMain(opts) {
   _Function.call(_this, opts);
 
   _this.main = true;
+  _this.ident = '_main';
 }
 
 function create(opts) {
@@ -25,7 +27,7 @@ function create(opts) {
 function semanticCheck(state) {
   var _this = this;
 
-  _Function.prototype.semanticCheck.call(_this);
+  _Function.prototype.semanticCheck.call(_this, state);
 
   if (_this.args.length > 0) {
     parseError(
@@ -41,4 +43,10 @@ function semanticCheck(state) {
       _this
     );
   }
+}
+
+function compile(state) {
+  var _this = this;
+
+  return _Function.prototype.compile.call(_this, state, 80);
 }

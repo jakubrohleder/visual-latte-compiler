@@ -1,5 +1,6 @@
 var Statement = require('./statement-prototype');
 var _Function = require('../functions/function');
+var FunctionMain = require('../functions/function-main');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -24,6 +25,7 @@ function StatementDeclarationFunction(opts) {
 function semanticCheck(state) {
   var _this = this;
   var type = state.scope.getType(_this.type);
+  var constructor = _this.ident === 'main' ? FunctionMain : _Function;
 
   if (type === undefined) {
     parseError(
@@ -39,7 +41,7 @@ function semanticCheck(state) {
     arg.semanticCheck(state);
   });
 
-  _this.function = _Function.create({
+  _this.function = constructor.create({
     type: _this.type,
     ident: _this.ident,
     decl: _this,

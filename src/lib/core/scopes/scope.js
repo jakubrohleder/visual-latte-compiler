@@ -75,7 +75,7 @@ function addVariable(variable) {
   }
 
   if (defined !== undefined) {
-    console.warn('Warning: Redefining variable', variable.ident, 'from', defined, 'to', variable);
+    console.warn('Warning: Redefining variable', variable.ident, 'from', defined.toString(), 'to', variable.toString());
   }
 
   _this.variables[variable.ident] = variable;

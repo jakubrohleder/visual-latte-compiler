@@ -75,12 +75,12 @@ function compile(state) {
   _.forEach(_this.args, function(arg, index) {
     code
       .add(arg.compile(state))
-      .add('movl %eax, ' + ((index + 1) * 4) + '(%esp)')
+      .add('movl %eax, ' + (index * 4) + '(%esp)')
     ;
   });
 
   code
-    .add('call ' + _this.function.ident)
+    .add('calll ' + _this.function.ident)
     .comment('' + _this.ident + ' call end');
 
   return code;

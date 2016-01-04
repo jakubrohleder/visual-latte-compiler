@@ -27,15 +27,16 @@ function compile() {
 
   return CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
+    .add('.align 4, 0x90')
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'ReadInt function body', true)
       .add('pushl %ebp')
       .add('movl %esp, %ebp')
-      .add('leaq (%eax), %esi')
-      .add('movl .readIntFormat %edi')
+      .add('leal (%eax), %esi')
+      .add('movl .readIntFormat, %edi')
       .add('xorl %eax, %eax')
-      .add('call scanf')
-      .add('popl $ebp')
+      .add('calll _scanf')
+      .add('popl %ebp')
       .add('retl')
     );
 }

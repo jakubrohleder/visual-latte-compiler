@@ -30,18 +30,20 @@ function _Function(opts) {
 function semanticCheck(state) {
   var _this = this;
   var _void = state.scope.getType('void');
+  var variable;
 
   _this.scope = state.pushScope();
   state.pushFunction(_this);
 
-  _.forEach(_this.args, function(argument) {
-    _this.variable = Variable.create({
+  _.forEach(_this.args, function(argument, index) {
+    variable = Variable.create({
       type: argument.type,
       ident: argument.ident,
-      decl: argument
+      decl: argument,
+      stack: index * 4 + 8
     });
 
-    state.scope.addVariable(_this.variable);
+    state.scope.addVariable(variable);
   });
 
   _this.block.semanticCheck(state);
@@ -62,19 +64,24 @@ function create(opts) {
   return new _Function(opts);
 }
 
-function compile(state) {
+function compile(state, extraStack) {
   var _this = this;
   var code;
+
+  extraStack = extraStack || 0;
 
   state.pushStack();
   state.pushScope(_this.scope);
 
   state.stack.addArguments(_this.args);
 
+  state.stack.shift(extraStack);
+
   code = _this.block.compile(state);
 
   code = CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
+    .add('.align 4, 0x90')
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, _this.ident + ' function body', true)
       .add(_this.generateEnter(state))
@@ -89,11 +96,10 @@ function compile(state) {
 }
 
 function generateEnter(state) {
-  var _this = this;
   var code = CodeBlock.create()
     .comment('Stack size: ' + state.stack.size)
-    .comment('Arguments: ' + (_this.args.length * 4))
-    .comment('Local: ' + (state.stack.current - _this.args.length * 4))
+    .comment('Local: ' + (state.stack.vars))
+    .comment('Extra: ' + (state.stack.extra))
     .comment('Calls: ' + (state.stack.max * 4))
     .add('pushl %ebp')
     .add('movl %esp, %ebp')
@@ -120,6 +126,6 @@ function generateExit(state) {
   }
 
   return code
-    .add('popl $ebp')
+    .add('popl %ebp')
     .add('retl');
 }

@@ -57,7 +57,10 @@ function compile(state) {
   var code = CodeBlock.create(_this);
 
   if (_this.expr !== undefined) {
-    code.add(_this.expr.compile(state));
+    code
+      .add(_this.expr.compile(state))
+      .comment('return ' + _this.expr)
+    ;
   }
 
   return code;

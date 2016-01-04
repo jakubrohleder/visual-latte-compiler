@@ -9,13 +9,17 @@ Stack.prototype.constructor = Stack;
 Stack.prototype.addFunctionCall = addFunctionCall;
 Stack.prototype.addVariable = addVariable;
 Stack.prototype.addArguments = addArguments;
+Stack.prototype.shift = shift;
 
 function Stack() {
   var _this = this;
 
+  _this.args = 0;
+  _this.vars = 0;
+  _this.extra = 0;
   _this.size = 0;
   _this.max = 0;
-  _this.current = 0;
+  _this.last = 0;
 }
 
 function create(opts) {
@@ -35,16 +39,26 @@ function addVariable(variable) {
   var _this = this;
 
   _this.size += variable.type.size;
-  _this.current += variable.type.size;
+  _this.last += variable.type.size;
+  _this.vars += variable.type.size;
 
-  return _this.current;
+  return _this.last;
+}
+
+function shift(size) {
+  var _this = this;
+
+  _this.size += size;
+  _this.last += size;
+  _this.extra += size;
+
+  return _this.last;
 }
 
 function addArguments(args) {
   var _this = this;
 
-  _this.size += args.length * 4;
-  _this.current += args.length * 4;
+  _this.args += args.length * 4;
 
-  return _this.current;
+  return _this.last;
 }

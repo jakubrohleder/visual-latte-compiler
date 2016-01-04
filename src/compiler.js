@@ -75,7 +75,7 @@ function semanticCheck(mainBlock) {
 
   mainBlock.semanticCheck(state);
 
-  if (state.rootScope.functions.main === undefined) {
+  if (state.rootScope.functions._main === undefined) {
     parseError(
       'No \'main\' function defined'
     );

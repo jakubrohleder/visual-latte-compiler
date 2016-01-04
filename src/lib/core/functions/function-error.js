@@ -31,11 +31,11 @@ function compile() {
     .add(CodeBlock.create(undefined, 'Error function body', true)
       .add('pushl %ebp')
       .add('movl %esp, %ebp')
-      .add('movl .errorString %edi')
+      .add('movl .errorString, %edi')
       .add('xorl %eax, %eax')
-      .add('call printf')
+      .add('calll _printf')
       .add('nop')
-      .add('popl $ebp')
+      .add('popl %ebp')
       .add('retl')
     );
 }
