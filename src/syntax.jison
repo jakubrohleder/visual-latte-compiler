@@ -246,7 +246,7 @@ Stmt
   | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE
     {
       $$ = yy.Statement.If.create({
-        expr: $Expr,
+        cond: $Expr,
         right: $Stmt,
         loc: _$
       });
@@ -254,7 +254,7 @@ Stmt
   | IF '(' Expr ')' Stmt ELSE Stmt
     {
       $$ = yy.Statement.If.create({
-        expr: $Expr,
+        cond: $Expr,
         right: $Stmt1,
         wrong: $Stmt2,
         loc: _$
@@ -263,7 +263,7 @@ Stmt
   | WHILE '(' Expr ')' Stmt
     {
       $$ = yy.Statement.While.create({
-        expr: $Expr,
+        cond: $Expr,
         loop: $Stmt,
         loc: _$
       });

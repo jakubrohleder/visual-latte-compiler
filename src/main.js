@@ -3,19 +3,19 @@ var path = require('path');
 var _ = require('lodash');
 var Parser = require('jison').Parser;
 var samples = require('./samples.json');
-var parseError = require('./core/error').parseError;
+var parseError = require('latte/error').parseError;
 
 var grammar = fs.readFileSync(path.join(__dirname, '/syntax.jison'), 'utf8');
 
-var Expression = require('./core/expression');
-var Statement = require('./core/statement');
-var Scope = require('./core/scopes/scope');
-var _Function = require('./core/function');
-var Argument = require('./core/argument');
-var Variable = require('./core/variable');
-var Block = require('./core/block');
+var Expression = require('latte/core/expression');
+var Statement = require('latte/core/statement');
+var Scope = require('latte/core/scopes/scope');
+var _Function = require('latte/core/function');
+var Argument = require('latte/core/argument');
+var Variable = require('latte/core/variable');
+var Block = require('latte/core/block');
 
-var State = require('./core/state');
+var State = require('latte/core/state');
 
 var exports = module.exports = {};
 
@@ -69,7 +69,9 @@ function parse(code) {
 }
 
 function semanticCheck(mainBlock) {
-  var state = State.create();
+  var state = State.create({
+    debug: true
+  });
 
   mainBlock.semanticCheck(state);
 
@@ -79,15 +81,15 @@ function semanticCheck(mainBlock) {
     );
   }
 
-  return state.rootScope;
+  return state;
 }
 
 
-function optimize(rootScope) {
-  return rootScope.clone();
+function optimize(state) {
+  state.rootScope = state.rootScope.clone();
+  return state;
 }
 
-function compile(rootScope) {
-  console.log(rootScope);
-  return rootScope.compile();
+function compile(state) {
+  return state.rootScope.compile(state);
 }

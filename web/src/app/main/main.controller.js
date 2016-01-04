@@ -56,7 +56,7 @@
         semantic();
       }
 
-      if ($scope.data.rootScope === undefined) {
+      if ($scope.data.state === undefined) {
         return;
       }
 
@@ -96,7 +96,7 @@
       processCode(semanticCheck);
 
       function semanticCheck() {
-        $scope.data.rootScope = latte.semanticCheck($scope.data.tree);
+        $scope.data.state = latte.semanticCheck($scope.data.tree);
       }
     }
 
@@ -104,7 +104,7 @@
       processCode(optimizeCode);
 
       function optimizeCode() {
-        $scope.data.optimized = latte.optimize($scope.data.rootScope);
+        $scope.data.optimized = latte.optimize($scope.data.state);
       }
     }
 
