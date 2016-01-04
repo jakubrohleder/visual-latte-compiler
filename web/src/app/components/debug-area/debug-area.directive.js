@@ -15,7 +15,7 @@
     };
 
     function controller($scope) {
-      $scope.showDebug = true;
+      $scope.show = true;
     }
   }
 })();

@@ -79,9 +79,17 @@ function toString(debug, indentSize, indentLevel) {
     indentLevel++;
   }
 
+  if (debug === true && _this.commentText !== undefined) {
+    output += ';---' + _this.commentText + ' start\n';
+  }
+
   _.forEach(_this, function(element) {
     output += element.toString(debug, indentSize, indentLevel);
   });
+
+  if (debug === true && _this.commentText !== undefined) {
+    output += ';---' + _this.commentText + ' end\n';
+  }
 
   if (_this.indent === true) {
     output += '\n';

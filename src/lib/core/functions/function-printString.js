@@ -1,3 +1,5 @@
+var CodeBlock = require('latte/code/code-block');
+
 var _Function = require('./function').constructor;
 var Argument = require('../argument');
 

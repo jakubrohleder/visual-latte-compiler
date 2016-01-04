@@ -1,0 +1,15 @@
+<h4 class="ui header">
+  {{name}}
+  <a href="" style="float: right; font-weight: normal; color: #777;" ng-click="show = !show">
+    <i ng-show="show" class="chevron up icon"></i>
+    <i ng-hide="show" class="chevron down icon"></i>
+    <span>
+      toggle
+    </span>
+  </a>
+</h4>
+<hr>
+<div ng-show="show">
+  <pre ng-if="string">{{data}}</pre>
+  <json-formatter ng-if="!string" json="data" open="3"></json-formatter>
+</div>

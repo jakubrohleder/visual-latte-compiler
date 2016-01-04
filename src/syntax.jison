@@ -396,7 +396,11 @@ Expr
       });
     }
   | '(' Expr ')'
-    { $$ = $Expr; }
+    {
+      $$ = yy.Expression.Parenthesis.create({
+        expr: $Expr
+      });
+    }
   ;
 
 /**

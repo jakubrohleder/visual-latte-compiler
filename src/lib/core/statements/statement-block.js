@@ -1,5 +1,7 @@
 var Statement = require('./statement-prototype');
 
+var CodeBlock = require('latte/code/code-block');
+
 module.exports = {
   create: create
 };
@@ -30,5 +32,7 @@ function create(opts) {
 function compile(state) {
   var _this = this;
 
-  return  _this.block.compile(state);
+  return CodeBlock.create(_this, 'StatementBlock')
+    .add(_this.block.compile(state))
+  ;
 }

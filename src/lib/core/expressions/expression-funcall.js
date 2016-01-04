@@ -13,6 +13,7 @@ ExpressionFuncall.prototype = Object.create(Expression.prototype);
 ExpressionFuncall.prototype.constructor = ExpressionFuncall;
 ExpressionFuncall.prototype.semanticCheck = semanticCheck;
 ExpressionFuncall.prototype.compile = compile;
+ExpressionFuncall.prototype.toString = toString;
 
 function ExpressionFuncall(opts) {
   var _this = this;
@@ -66,7 +67,8 @@ function create(opts) {
 
 function compile(state) {
   var _this = this;
-  var code = CodeBlock.create(_this);
+  var code = CodeBlock.create(_this)
+    .comment('' + _this.ident + ' calling with ' + _this.args.join(', '));
 
   state.stack.addFunctionCall(_this);
 
@@ -77,11 +79,15 @@ function compile(state) {
     ;
   });
 
-  code.add('call ' + _this.function.ident);
-
-  if (_this.args.length > 0) {
-    code.add('subl $' + _this.args.length * 4 + ', %esp');
-  }
+  code
+    .add('call ' + _this.function.ident)
+    .comment('' + _this.ident + ' call end');
 
   return code;
+}
+
+function toString() {
+  var _this = this;
+
+  return '' + _this.ident + '(' + _this.args.join(', ') + ')';
 }

@@ -10,6 +10,7 @@ ExpressionObject.prototype = Object.create(Expression.prototype);
 ExpressionObject.prototype.constructor = ExpressionObject;
 ExpressionObject.prototype.semanticCheck = semanticCheck;
 ExpressionObject.prototype.compile = compile;
+ExpressionObject.prototype.toString = toString;
 
 function ExpressionObject(opts) {
   var _this = this;
@@ -34,4 +35,10 @@ function compile() {
   return CodeBlock.create(_this)
     .add('movl ' + _this.type.compile(_this.value) + ', %eax')
   ;
+}
+
+function toString() {
+  var _this = this;
+
+  return _this.value;
 }

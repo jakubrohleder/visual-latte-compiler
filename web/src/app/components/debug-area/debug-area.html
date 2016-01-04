@@ -1,31 +1,42 @@
 <h5 class="ui top attached header">
   Debug
-  <a href="" style="float: right; font-weight: normal; color: #777;" ng-click="showDebug = !showDebug">
-    <i ng-show="showDebug" class="chevron up icon"></i>
-    <i ng-hide="showDebug" class="chevron down icon"></i>
+  <a href="" style="float: right; font-weight: normal; color: #777;" ng-click="show = !show">
+    <i ng-show="show" class="chevron up icon"></i>
+    <i ng-hide="show" class="chevron down icon"></i>
     <span>
-      hide
+      toggle
     </span>
   </a>
 </h5>
-<div class="ui attached segment" ng-show="showDebug">
-  <h4 class="ui header">compiled</h4>
-  <hr>
-  <pre>{{data.compiled.toString()}}</pre>
+<div class="ui attached segment" ng-show="show">
+  <debug-area-section
+    data="data.compiled.toString(true)"
+    show="true"
+    name="'Code'"
+    string="true"
+  ></debug-area-section>
 
-  <h4 class="ui header">compiled</h4>
-  <hr>
-  <json-formatter json="data.compiled" open="3"></json-formatter>
+  <debug-area-section
+    data="data.compiled"
+    show="true"
+    name="'CodeBlock'"
+  ></debug-area-section>
 
-  <h4 class="ui header">tree</h4>
-  <hr>
-  <json-formatter json="data.tree" open="1"></json-formatter>
+  <debug-area-section
+    data="data.tree"
+    show="true"
+    name="'Tree'"
+  ></debug-area-section>
 
-  <h4 class="ui header">rootScope</h4>
-  <hr>
-  <json-formatter json="data.state.rootScope" open="1"></json-formatter>
+  <debug-area-section
+    data="data.state.rootScope"
+    show="true"
+    name="'RootScope'"
+  ></debug-area-section>
 
-  <h4 class="ui header">Error</h4>
-  <hr>
-  <json-formatter json="data.error" open="1"></json-formatter>
+  <debug-area-section
+    data="data.error"
+    show="true"
+    name="'Error'"
+  ></debug-area-section>
 </div>

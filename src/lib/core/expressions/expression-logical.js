@@ -11,6 +11,7 @@ ExpressionLogical.prototype = Object.create(Expression.prototype);
 ExpressionLogical.prototype.constructor = ExpressionLogical;
 ExpressionLogical.prototype.semanticCheck = semanticCheck;
 ExpressionLogical.prototype.compile = compile;
+ExpressionLogical.prototype.toString = toString;
 
 function ExpressionLogical(opts) {
   var _this = this;
@@ -48,4 +49,10 @@ function compile(state) {
     .add('movl %eax, %edx')
     .add(_this.right.compile(state))
     .add(operator.compile(_this.operator));
+}
+
+function toString() {
+  var _this = this;
+
+  return '' + _this.left + ' ' + _this.operator + ' ' + _this.right;
 }

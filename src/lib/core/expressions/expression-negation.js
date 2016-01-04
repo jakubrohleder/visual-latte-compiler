@@ -10,6 +10,7 @@ ExpressionNegation.prototype = Object.create(Expression.prototype);
 ExpressionNegation.prototype.constructor = ExpressionNegation;
 ExpressionNegation.prototype.semanticCheck = semanticCheck;
 ExpressionNegation.prototype.compile = compile;
+ExpressionNegation.prototype.toString = toString;
 
 function ExpressionNegation(opts) {
   var _this = this;
@@ -35,4 +36,10 @@ function compile() {
   return CodeBlock.create(_this)
     .add('negl %eax')
   ;
+}
+
+function toString() {
+  var _this = this;
+
+  return '!' + _this.expr;
 }

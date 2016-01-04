@@ -11,6 +11,7 @@ ExpressionComparison.prototype = Object.create(Expression.prototype);
 ExpressionComparison.prototype.constructor = ExpressionComparison;
 ExpressionComparison.prototype.semanticCheck = semanticCheck;
 ExpressionComparison.prototype.compile = compile;
+ExpressionComparison.prototype.toString = toString;
 
 function ExpressionComparison(opts) {
   var _this = this;
@@ -59,4 +60,10 @@ function compile(state) {
       .add(end + ':', 'end label', -1)
     )
   ;
+}
+
+function toString() {
+  var _this = this;
+
+  return '' + _this.left + ' ' + _this.operator + ' ' + _this.right;
 }

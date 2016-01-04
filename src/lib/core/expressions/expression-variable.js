@@ -11,6 +11,7 @@ ExpressionVariable.prototype = Object.create(Expression.prototype);
 ExpressionVariable.prototype.constructor = ExpressionVariable;
 ExpressionVariable.prototype.semanticCheck = semanticCheck;
 ExpressionVariable.prototype.compile = compile;
+ExpressionVariable.prototype.toString = toString;
 
 function ExpressionVariable(opts) {
   var _this = this;
@@ -44,4 +45,10 @@ function compile() {
   return CodeBlock.create(_this)
     .add('movl ' + _this.variable.stack + '(ebp), %eax')
   ;
+}
+
+function toString() {
+  var _this = this;
+
+  return _this.ident;
 }

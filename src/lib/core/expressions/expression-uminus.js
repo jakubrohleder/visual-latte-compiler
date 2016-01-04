@@ -11,6 +11,7 @@ ExpressionUminus.prototype = Object.create(Expression.prototype);
 ExpressionUminus.prototype.constructor = ExpressionUminus;
 ExpressionUminus.prototype.semanticCheck = semanticCheck;
 ExpressionUminus.prototype.compile = compile;
+ExpressionUminus.prototype.toString = toString;
 
 function ExpressionUminus(opts) {
   var _this = this;
@@ -45,4 +46,10 @@ function compile() {
   return CodeBlock.create(_this)
     .add('xorl $1, %eax')
   ;
+}
+
+function toString() {
+  var _this = this;
+
+  return '!' + _this.expr;
 }
