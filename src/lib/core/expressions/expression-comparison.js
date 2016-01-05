@@ -47,9 +47,9 @@ function compile(state) {
   var end = state.nextLabel();
 
   return CodeBlock.create(_this)
-    .add(_this.left.compile(state))
-    .add('movq %rax, %rdx')
     .add(_this.right.compile(state))
+    .add('movq %rax, %rdx')
+    .add(_this.left.compile(state))
     .add(CodeBlock.create(undefined, 'Comparison')
       .add('cmpq %rdx, %rax')
       .add(_this.left.type.operators.binary[_this.operator].compile(state) + ' ' + right)

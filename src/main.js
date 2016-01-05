@@ -23,6 +23,7 @@ if (args[0] === undefined) {
         if (err) {
           return console.log(err);
         }
+
         childProcess.exec('gcc-5 ' + filedir + '/' + filename + '.s -o ' + filedir + '/' + filename, function(compileError) {
           if (compileError) {
             return console.log(compileError);

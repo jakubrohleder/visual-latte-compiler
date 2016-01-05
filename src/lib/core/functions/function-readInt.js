@@ -22,23 +22,31 @@ function semanticCheck() {
   // NOTHING
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
+  var scanf = 'scanf';
+
+  if (state.os === 'osx') {
+    scanf = '_' + scanf;
+  }
 
   return CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
-    .add('.align 4, 0x90')
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'ReadInt function body', true)
-      // .add('pushq %rbp')
-      // .add('movq %rsp, %rbp')
-      // .add('leaq (%rax), %rsi')
-      // .add('leaq readIntFormat(%rip), %rax')
-      // .add('movq %rax, 0(%rsp)')
-      // .add('xorq %rax, %rax')
-      // .add('callq _scanf')
-      // .add('popq %rbp')
-      // .add('retq')
+      .add('pushq %rbp')
+      .add('movq %rsp, %rbp')
+      .add('subq  $16, %rsp')
+
+      .add('movq %rsp, %rsi')
+      .add('xorq %rax, %rax')
+      .add('leaq READ_INT_FORMAT(%rip), %rdi')
+      .add('call ' + scanf)
+      .add('movq (%rsp), %rax')
+
+      .add('addq  $16, %rsp')
+      .add('popq %rbp')
+      .add('retq')
     );
 }
 

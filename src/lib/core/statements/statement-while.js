@@ -89,8 +89,9 @@ function compile(state) {
     .add(start + ':', 'start label', -1)
     .add(_this.cond.compile(state))
     .add('cmpq  $0, %rax')
-    .add('jne ' + end)
+    .add('je ' + end)
     .add(_this.loop.compile(state))
+    .add('jmp ' + start)
     .add(end + ':', 'end label', -1)
   ;
 }

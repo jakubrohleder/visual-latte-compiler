@@ -51,7 +51,7 @@ function compile() {
 
   return CodeBlock.create(_this)
     .add('movq ' + _this.variable.stack + '(%rbp), %rax')
-    .add('decl %rax')
+    .add('decq %rax')
     .add('movq %rax, ' + _this.variable.stack + '(%rbp)')
   ;
 }

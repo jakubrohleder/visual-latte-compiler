@@ -75,7 +75,7 @@ function compile(state) {
   _.forEach(_this.args, function(arg, index) {
     code
       .add(arg.compile(state))
-      .add('movq %rax, ' + (index * 4) + '(%rsp)')
+      .add('movq %rax, ' + (index * 8) + '(%rsp)')
     ;
   });
 

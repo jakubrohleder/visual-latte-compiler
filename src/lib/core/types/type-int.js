@@ -20,7 +20,7 @@ function TypeInt(rootScope) {
   _this.builtin = true;
   _this.name = 'int';
   _this.rootScope = rootScope;
-  _this.size = 4;
+  _this.size = 8;
 
   _this.operators.binary = {
     '+': {
@@ -39,16 +39,16 @@ function TypeInt(rootScope) {
       compile: compileMod.bind(_this)
     },
     '>': {
-      compile: compileLt.bind(_this)
-    },
-    '<': {
       compile: compileGt.bind(_this)
     },
+    '<': {
+      compile: compileLt.bind(_this)
+    },
     '>=': {
-      compile: compileLeq.bind(_this)
+      compile: compileGeq.bind(_this)
     },
     '<=': {
-      compile: compileGeq.bind(_this)
+      compile: compileLeq.bind(_this)
     },
     '==': {
       compile: compileEq.bind(_this)

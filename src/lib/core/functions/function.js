@@ -40,7 +40,7 @@ function semanticCheck(state) {
       type: argument.type,
       ident: argument.ident,
       decl: argument,
-      stack: index * 4 + 8
+      stack: index * 8 + 16
     });
 
     state.scope.addVariable(variable);
@@ -81,7 +81,6 @@ function compile(state, extraStack) {
 
   code = CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
-    .add('.align 4, 0x90')
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, _this.ident + ' function body', true)
       .add(_this.generateEnter(state))
@@ -100,7 +99,7 @@ function generateEnter(state) {
     .comment('Stack size: ' + state.stack.size)
     .comment('Local: ' + (state.stack.vars))
     .comment('Extra: ' + (state.stack.extra))
-    .comment('Calls: ' + (state.stack.max * 4))
+    .comment('Calls: ' + (state.stack.max * 8))
     .add('pushq %rbp')
     .add('movq %rsp, %rbp')
   ;

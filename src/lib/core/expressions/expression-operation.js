@@ -45,9 +45,9 @@ function compile(state) {
   var operator = _this.left.type.operators.binary[_this.operator];
 
   return CodeBlock.create(_this)
-    .add(_this.left.compile(state))
-    .add('movq %rax, %rdx')
     .add(_this.right.compile(state))
+    .add('movq %rax, %rdx')
+    .add(_this.left.compile(state))
     .add(operator.compile(_this.operator));
 }
 

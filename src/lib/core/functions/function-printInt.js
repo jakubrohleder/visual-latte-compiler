@@ -38,7 +38,6 @@ function compile(state) {
 
   return CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
-    .add('.align 4')
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'PrintInt function body', true)
       .add('pushq %rbp')

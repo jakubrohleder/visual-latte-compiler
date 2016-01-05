@@ -32,7 +32,7 @@ function addFunctionCall(fun) {
   var _this = this;
 
   if (fun.args.length > _this.max) {
-    _this.size += (fun.args.length - _this.max) * 4;
+    _this.size += (fun.args.length - _this.max) * 8;
     _this.max = fun.args.length;
   }
 }
@@ -58,7 +58,7 @@ function shift(size) {
 function addArguments(args) {
   var _this = this;
 
-  _this.args += args.length * 4;
+  _this.args += args.length * 8;
 
   return _this.last;
 }

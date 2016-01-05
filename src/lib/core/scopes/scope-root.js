@@ -57,11 +57,11 @@ function compile(state) {
     .add('.cstring\n')
     .add(CodeBlock.create(undefined, 'Format strings', true)
       .add('PRINT_INT_FORMAT:', undefined, -1)
-      .add('.ascii "%d\12\0"')
+      .add('.ascii "%d\\12\\0"')
       .add('READ_INT_FORMAT:', undefined, -1)
       .add('.ascii "%d\\0"')
       .add('ERROR_STRING:', undefined, -1)
-      .add('.ascii "runtime error\\n\\12\\0"')
+      .add('.ascii "runtime error\\0"')
     )
     .add('\n.text\n')
     .add(Scope.prototype.compile.call(_this, state));
