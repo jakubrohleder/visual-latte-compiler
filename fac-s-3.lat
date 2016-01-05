@@ -1,0 +1,13 @@
+int main() {
+  printInt(nfac(10));
+  return 0 ;
+}
+
+int nfac(int n) {
+  if (n != 0) {
+    return nfac(n-1) * n;
+  }
+  else {
+    return  1;
+  }
+}

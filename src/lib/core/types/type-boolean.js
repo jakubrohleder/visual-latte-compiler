@@ -44,14 +44,14 @@ function TypeBoolean(rootScope) {
   };
 }
 
-function compileOr() {
+function compileOr(state) {
   return CodeBlock.create(this)
-    .add('orq %rdx, %rax');
+    .add('orq ' + state.popRegister() + ', %rax');
 }
 
-function compileAnd() {
+function compileAnd(state) {
   return CodeBlock.create(this)
-    .add('andq %rdx, %rax');
+    .add('andq ' + state.popRegister() + ', %rax');
 }
 
 function compileNeg() {

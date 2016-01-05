@@ -25,6 +25,9 @@ function _Function(opts) {
   Element.call(_this, opts);
 
   _this.main = false;
+  _this.registers = ['%r12', '%r13', '%r14', '%r15'];
+  _this.register = 0;
+  _this.lastRegister = 0;
 }
 
 function semanticCheck(state) {
@@ -42,6 +45,8 @@ function semanticCheck(state) {
       decl: argument,
       stack: index * 8 + 16
     });
+
+    argument.variable = variable;
 
     state.scope.addVariable(variable);
   });
@@ -64,30 +69,58 @@ function create(opts) {
   return new _Function(opts);
 }
 
-function compile(state, extraStack) {
+function compile(state, shift) {
   var _this = this;
   var code;
+  var argsBlock;
+  var pushRegsBlock;
+  var popRegsBlock;
+  var newPos;
+  var oldPos;
+  var pos;
 
-  extraStack = extraStack || 0;
+  shift = shift || 0;
 
   state.pushStack();
   state.pushScope(_this.scope);
+  state.pushFunction(_this);
 
-  state.stack.addArguments(_this.args);
+  state.stack.addShift(shift);
 
-  state.stack.shift(extraStack);
+  argsBlock = CodeBlock.create(undefined, 'Args to local memory');
+
+  _.forEach(_this.args, function(argument) {
+    newPos = -state.stack.addArgument(argument.variable);
+    oldPos = argument.variable.stack;
+    argument.variable.stack = newPos;
+    argsBlock.add('movq ' + oldPos + '(%rbp), %rax');
+    argsBlock.add('movq %rax, ' + newPos + '(%rbp)');
+  });
 
   code = _this.block.compile(state);
+
+  pushRegsBlock = CodeBlock.create(undefined, 'Registers to local memory');
+  popRegsBlock = CodeBlock.create(undefined, 'Registers from local memory');
+
+  for (var i = 0; i < _this.lastRegister && i < 3; i++) {
+    pos = -state.stack.addRegister();
+    pushRegsBlock.add('movq ' + _this.registers[i] + ', ' + pos + '(%rbp)');
+    popRegsBlock.add('movq ' + pos + '(%rbp), ' + _this.registers[i]);
+  }
 
   code = CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, _this.ident + ' function body', true)
       .add(_this.generateEnter(state))
+      .add(pushRegsBlock)
+      .add(argsBlock)
       .add(code)
+      .add(popRegsBlock)
       .add(_this.generateExit(state))
     );
 
+  state.popFunction();
   state.popScope();
   state.popStack();
 
@@ -98,8 +131,11 @@ function generateEnter(state) {
   var code = CodeBlock.create()
     .comment('Stack size: ' + state.stack.size)
     .comment('Local: ' + (state.stack.vars))
-    .comment('Extra: ' + (state.stack.extra))
+    .comment('Shift: ' + (state.stack.shift))
+    .comment('Spill: ' + (state.stack.spill))
+    .comment('Registers: ' + (state.stack.registers))
     .comment('Calls: ' + (state.stack.max * 8))
+    .comment('Args: ' + (state.stack.args))
     .add('pushq %rbp')
     .add('movq %rsp, %rbp')
   ;

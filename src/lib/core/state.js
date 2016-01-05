@@ -13,7 +13,11 @@ State.prototype.pushScope = pushScope;
 State.prototype.popScope = popScope;
 State.prototype.pushStack = pushStack;
 State.prototype.popStack = popStack;
+
 State.prototype.nextLabel = nextLabel;
+
+State.prototype.pushRegister = pushRegister;
+State.prototype.popRegister = popRegister;
 
 function State(opts) {
   var _this = this;
@@ -34,6 +38,7 @@ function State(opts) {
 
   _this.scopes = [rootScope];
   _this.scope = rootScope;
+  _this.register = 0;
 }
 
 function create(opts) {
@@ -91,4 +96,27 @@ function popScope() {
 
   _this.scopes.splice(-1, 1);
   _this.scope = _this.scopes.length > 0 ? _this.scopes[_this.scopes.length - 1] : undefined;
+}
+
+function pushRegister() {
+  var _this = this;
+  var register;
+
+  if (_this.function.register >= _this.function.registers.length) {
+    _this.function.registers.push('' + (-_this.stack.addSpill()) + '(%rbp)');
+  }
+
+  if (_this.function.register >= _this.function.lastRegister) {
+    _this.function.lastRegister = _this.function.register + 1;
+  }
+
+  register = _this.function.registers[_this.function.register++];
+
+  return register;
+}
+
+function popRegister() {
+  var _this = this;
+
+  return _this.function.registers[--_this.function.register];
 }

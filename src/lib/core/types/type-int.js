@@ -65,33 +65,33 @@ function TypeInt(rootScope) {
   };
 }
 
-function compileAdd() {
+function compileAdd(state) {
   return CodeBlock.create(this)
-    .add('addq %rdx, %rax')
+    .add('addq ' + state.popRegister() + ', %rax')
   ;
 }
 
-function compileSub() {
+function compileSub(state) {
   return CodeBlock.create(this)
-    .add('subq %rdx, %rax')
+    .add('subq ' + state.popRegister() + ', %rax')
   ;
 }
 
-function compileDiv() {
+function compileDiv(state) {
   return CodeBlock.create(this)
-    .add('idivq %rdx')
+    .add('idivq ' + state.popRegister() + '')
   ;
 }
 
-function compileMul() {
+function compileMul(state) {
   return CodeBlock.create(this)
-    .add('imulq %rdx, %rax')
+    .add('imulq ' + state.popRegister() + ', %rax')
   ;
 }
 
-function compileMod() {
+function compileMod(state) {
   return CodeBlock.create(this)
-    .add('idivq %rdx')
+    .add('idivq ' + state.popRegister() + '')
     .add('movq %rdx, %rax')
   ;
 }

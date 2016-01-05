@@ -45,14 +45,15 @@ function compile(state) {
   var _this = this;
   var right = state.nextLabel();
   var end = state.nextLabel();
+  var operator = _this.left.type.operators.binary[_this.operator];
 
   return CodeBlock.create(_this)
     .add(_this.right.compile(state))
-    .add('movq %rax, %rdx')
+    .add('movq %rax, ' + state.pushRegister())
     .add(_this.left.compile(state))
     .add(CodeBlock.create(undefined, 'Comparison')
-      .add('cmpq %rdx, %rax')
-      .add(_this.left.type.operators.binary[_this.operator].compile(state) + ' ' + right)
+      .add('cmpq ' + state.popRegister() + ', %rax')
+      .add(operator.compile(state) + ' ' + right)
       .add('movq $0, %rax')
       .add('jmp ' + end)
       .add(right + ':', 'right label', -1)

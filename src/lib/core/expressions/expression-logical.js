@@ -46,7 +46,7 @@ function compile(state) {
 
   return CodeBlock.create(_this)
     .add(_this.left.compile(state))
-    .add('movq %rax, %rdx')
+    .add('movq %rax, ' + state.pushRegister())
     .add(_this.right.compile(state))
     .add(operator.compile(_this.operator));
 }
