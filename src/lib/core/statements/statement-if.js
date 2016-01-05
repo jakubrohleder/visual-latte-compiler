@@ -79,7 +79,7 @@ function compile(state) {
 
   return CodeBlock.create(_this)
     .add(_this.cond.compile(state))
-    .add('cmpl  $0, %eax')
+    .add('cmpq  $0, %rax')
     .add('jne ' + right)
     .add(_this.wrong.compile(state))
     .add('jmp ' + end)

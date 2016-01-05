@@ -68,14 +68,17 @@ function parse(code) {
   return result;
 }
 
-function semanticCheck(mainBlock) {
+function semanticCheck(mainBlock, os) {
+  os = os || 'linux';
+
   var state = State.create({
-    debug: true
+    debug: true,
+    os: os
   });
 
   mainBlock.semanticCheck(state);
 
-  if (state.rootScope.functions._main === undefined) {
+  if (state.rootScope.functions.main === undefined) {
     parseError(
       'No \'main\' function defined'
     );

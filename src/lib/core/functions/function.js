@@ -101,12 +101,12 @@ function generateEnter(state) {
     .comment('Local: ' + (state.stack.vars))
     .comment('Extra: ' + (state.stack.extra))
     .comment('Calls: ' + (state.stack.max * 4))
-    .add('pushl %ebp')
-    .add('movl %esp, %ebp')
+    .add('pushq %rbp')
+    .add('movq %rsp, %rbp')
   ;
 
   if (state.stack.size > 0) {
-    code.add('subl $' + state.stack.size + ', %esp');
+    code.add('subq $' + state.stack.getOffset(16) + ', %rsp');
   }
 
   return code;
@@ -122,10 +122,10 @@ function generateExit(state) {
   }
 
   if (state.stack.size > 0) {
-    code.add('movl %ebp, %esp');
+    code.add('addq $' + state.stack.getOffset(16) + ', %rsp');
   }
 
   return code
-    .add('popl %ebp')
-    .add('retl');
+    .add('popq %rbp')
+    .add('retq');
 }

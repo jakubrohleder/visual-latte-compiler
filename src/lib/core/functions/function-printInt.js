@@ -27,25 +27,31 @@ function semanticCheck() {
   // NOTHING
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
+
+  var printf = 'printf';
+
+  if (state.os === 'osx') {
+    printf = '_' + printf;
+  }
 
   return CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
-    .add('.align 4, 0x90')
+    .add('.align 4')
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'PrintInt function body', true)
-      .add('pushl %ebp')
-      .add('movl %esp, %ebp')
-      .add('subl $20, %esp')
-      .add('movl $.printIntFormat, (%esp)')
-      .add('movl 8(%ebp), %eax')
-      .add('movl %eax, 4(%esp)')
-      .add('calll _printf')
-      .add('addl  $20, %esp')
-      .add('nop')
-      .add('popl %ebp')
-      .add('retl')
+      .add('pushq %rbp')
+      .add('movq %rsp, %rbp')
+
+      .add('movq  16(%rbp), %rsi')
+      .add('xorq %rax, %rax')
+      .add('leaq PRINT_INT_FORMAT(%rip), %rdi')
+      .add('call ' + printf)
+      .add('xorq %rax, %rax')
+
+      .add('popq %rbp')
+      .add('retq')
     );
 }
 

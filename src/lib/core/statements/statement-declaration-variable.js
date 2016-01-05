@@ -52,6 +52,6 @@ function compile(state) {
   _this.variable.stack = -state.stack.addVariable(_this.variable);
 
   return CodeBlock.create(_this)
-    .comment('Declaring variable ' + _this.ident + ' on ' + _this.variable.stack + '(%ebp)')
+    .comment('Declaring variable ' + _this.ident + ' on ' + _this.variable.stack + '(%rbp)')
   ;
 }

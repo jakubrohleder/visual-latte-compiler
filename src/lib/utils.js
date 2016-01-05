@@ -24,3 +24,7 @@ exports.repeatString = function(string, times) {
 
   return output;
 };
+
+exports.nextMul = function(argument, base) {
+  return Math.ceil((argument - 1) / base) * base;
+};

@@ -52,8 +52,8 @@ function compile() {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('movl ' + _this.variable.stack + '(%ebp), %eax')
-    .add('decl %eax')
-    .add('movl %eax, ' + _this.variable.stack + '(%ebp)')
+    .add('movq ' + _this.variable.stack + '(%rbp), %rax')
+    .add('decl %rax')
+    .add('movq %rax, ' + _this.variable.stack + '(%rbp)')
   ;
 }

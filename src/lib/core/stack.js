@@ -1,4 +1,5 @@
 var Element = require('./element');
+var nextMul = require('latte/utils').nextMul;
 
 var exports = module.exports = {};
 
@@ -10,6 +11,7 @@ Stack.prototype.addFunctionCall = addFunctionCall;
 Stack.prototype.addVariable = addVariable;
 Stack.prototype.addArguments = addArguments;
 Stack.prototype.shift = shift;
+Stack.prototype.getOffset = getOffset;
 
 function Stack() {
   var _this = this;
@@ -48,11 +50,9 @@ function addVariable(variable) {
 function shift(size) {
   var _this = this;
 
-  _this.size += size;
-  _this.last += size;
   _this.extra += size;
 
-  return _this.last;
+  return _this.extra;
 }
 
 function addArguments(args) {
@@ -61,4 +61,11 @@ function addArguments(args) {
   _this.args += args.length * 4;
 
   return _this.last;
+}
+
+function getOffset(base) {
+  var _this = this;
+  base = base || 16;
+
+  return nextMul(_this.size, base) + _this.extra;
 }

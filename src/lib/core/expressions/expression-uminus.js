@@ -44,7 +44,7 @@ function compile() {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('xorl $1, %eax')
+    .add('xorq $1, %rax')
   ;
 }
 

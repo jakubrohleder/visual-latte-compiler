@@ -17,7 +17,6 @@ function FunctionMain(opts) {
   _Function.call(_this, opts);
 
   _this.main = true;
-  _this.ident = '_main';
 }
 
 function create(opts) {
@@ -48,5 +47,9 @@ function semanticCheck(state) {
 function compile(state) {
   var _this = this;
 
-  return _Function.prototype.compile.call(_this, state, 80);
+  if (state.os === 'osx') {
+    _this.ident = '_' + _this.ident;
+  }
+
+  return _Function.prototype.compile.call(_this, state, 16);
 }

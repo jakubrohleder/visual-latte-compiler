@@ -20,7 +20,10 @@ function create(line, comment, shift) {
 
 function toString(debug, indentSize, indentLevel) {
   var _this = this;
-  var line = repeatString(' ', indentSize * (indentLevel + _this.shift)) + _this.line;
+  var shift = indentLevel + _this.shift;
+  shift = shift < 0 ? 0 : shift;
+
+  var line = repeatString(' ', indentSize * shift) + _this.line;
 
   if (debug === true && _this.comment !== undefined) {
     line += ' ;' + _this.comment;

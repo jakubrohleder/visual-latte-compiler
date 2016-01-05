@@ -30,14 +30,15 @@ function compile() {
     .add('.align 4, 0x90')
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'ReadInt function body', true)
-      .add('pushl %ebp')
-      .add('movl %esp, %ebp')
-      .add('leal (%eax), %esi')
-      .add('movl .readIntFormat, %edi')
-      .add('xorl %eax, %eax')
-      .add('calll _scanf')
-      .add('popl %ebp')
-      .add('retl')
+      // .add('pushq %rbp')
+      // .add('movq %rsp, %rbp')
+      // .add('leaq (%rax), %rsi')
+      // .add('leaq readIntFormat(%rip), %rax')
+      // .add('movq %rax, 0(%rsp)')
+      // .add('xorq %rax, %rax')
+      // .add('callq _scanf')
+      // .add('popq %rbp')
+      // .add('retq')
     );
 }
 

@@ -33,7 +33,7 @@ function compile() {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('movl ' + _this.type.compile(_this.value) + ', %eax')
+    .add('movq ' + _this.type.compile(_this.value) + ', %rax')
   ;
 }
 

@@ -29,14 +29,15 @@ function compile() {
     .add('.globl ' + _this.ident)
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'Error function body', true)
-      .add('pushl %ebp')
-      .add('movl %esp, %ebp')
-      .add('movl .errorString, %edi')
-      .add('xorl %eax, %eax')
-      .add('calll _printf')
-      .add('nop')
-      .add('popl %ebp')
-      .add('retl')
+      // .add('pushq %rbp')
+      // .add('movq %rsp, %rbp')
+      // .add('leaq errorString(%rip), %rax')
+      // .add('movq %rax, 0(%rsp)')
+      // .add('xorq %rax, %rax')
+      // .add('callq _printf')
+      // .add('nop')
+      // .add('popq %rbp')
+      // .add('retq')
     );
 }
 

@@ -47,7 +47,7 @@ function compile(state) {
 
   return CodeBlock.create(_this)
     .add(_this.expr.compile(state))
-    .add('movl %eax, ' + _this.variable.stack + '(%ebp)', 'save ' + _this.expr + ' on ' + _this.variable)
+    .add('movq %rax, ' + _this.variable.stack + '(%rbp)', 'save ' + _this.expr + ' on ' + _this.variable)
   ;
 }
 

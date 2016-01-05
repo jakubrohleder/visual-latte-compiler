@@ -67,38 +67,38 @@ function TypeInt(rootScope) {
 
 function compileAdd() {
   return CodeBlock.create(this)
-    .add('addl %edx, %eax')
+    .add('addq %rdx, %rax')
   ;
 }
 
 function compileSub() {
   return CodeBlock.create(this)
-    .add('subl %edx, %eax')
+    .add('subq %rdx, %rax')
   ;
 }
 
 function compileDiv() {
   return CodeBlock.create(this)
-    .add('idivl %edx')
+    .add('idivq %rdx')
   ;
 }
 
 function compileMul() {
   return CodeBlock.create(this)
-    .add('imull %edx, %eax')
+    .add('imulq %rdx, %rax')
   ;
 }
 
 function compileMod() {
   return CodeBlock.create(this)
-    .add('idivl %edx')
-    .add('movl %edx, %eax')
+    .add('idivq %rdx')
+    .add('movq %rdx, %rax')
   ;
 }
 
 function compileNeg() {
   return CodeBlock.create(this)
-    .add('negl %eax')
+    .add('negl %rax')
   ;
 }
 

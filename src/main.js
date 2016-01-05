@@ -14,7 +14,7 @@ if (args[0] === undefined) {
       var compiledCode = compiler.compile(
         compiler.optimize(
           compiler.semanticCheck(
-            compiler.parse(code)
+            compiler.parse(code), 'osx'
           )
         )
       ).toString();
@@ -23,7 +23,7 @@ if (args[0] === undefined) {
         if (err) {
           return console.log(err);
         }
-        childProcess.exec('gcc-5 -m32 ' + filedir + '/' + filename + '.s -o ' + filedir + '/' + filename, function(compileError) {
+        childProcess.exec('gcc-5 ' + filedir + '/' + filename + '.s -o ' + filedir + '/' + filename, function(compileError) {
           if (compileError) {
             return console.log(compileError);
           }

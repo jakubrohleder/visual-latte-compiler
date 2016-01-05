@@ -34,7 +34,7 @@ function compile() {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('negl %eax')
+    .add('negl %rax')
   ;
 }
 

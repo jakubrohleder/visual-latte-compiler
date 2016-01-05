@@ -46,17 +46,17 @@ function TypeBoolean(rootScope) {
 
 function compileOr() {
   return CodeBlock.create(this)
-    .add('orl %edx, %eax');
+    .add('orq %rdx, %rax');
 }
 
 function compileAnd() {
   return CodeBlock.create(this)
-    .add('andl %edx, %eax');
+    .add('andq %rdx, %rax');
 }
 
 function compileNeg() {
   return CodeBlock.create(this)
-    .add('notl %eax');
+    .add('notq %rax');
 }
 
 function compile(value) {

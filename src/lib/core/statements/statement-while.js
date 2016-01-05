@@ -88,7 +88,7 @@ function compile(state) {
   return CodeBlock.create(_this)
     .add(start + ':', 'start label', -1)
     .add(_this.cond.compile(state))
-    .add('cmpl  $0, %eax')
+    .add('cmpq  $0, %rax')
     .add('jne ' + end)
     .add(_this.loop.compile(state))
     .add(end + ':', 'end label', -1)
