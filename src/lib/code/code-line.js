@@ -26,7 +26,7 @@ function toString(debug, indentSize, indentLevel) {
   var line = repeatString(' ', indentSize * shift) + _this.line;
 
   if (debug === true && _this.comment !== undefined) {
-    line += ' ;' + _this.comment;
+    line += ' #' + _this.comment;
   }
 
   return line + '\n';

@@ -2,7 +2,8 @@ int main() {
   printInt(fac(10));
   printInt(rfac(10));
   printInt(mfac(10));
-  printInt(ifac(10));
+        printInt(ifac(10));
+        string r ; // just to test blocks
   {
     int n = 10;
     int r = 1;
@@ -12,7 +13,8 @@ int main() {
     }
     printInt(r);
   }
-  return 0 ;
+  printString (repStr("=",60));
+        return 0 ;
 }
 
 int fac(int a) {
@@ -59,4 +61,14 @@ int ifac2f(int l, int h) {
         int m;
         m = (l + h) / 2;
         return ifac2f(l,m) * ifac2f(m+1,h);
+}
+
+string repStr(string s, int n) {
+  string r = "";
+  int i = 0;
+  while(i<n) {
+    r = r + s;
+    i++;
+  }
+ return r;
 }

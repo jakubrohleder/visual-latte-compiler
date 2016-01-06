@@ -4,6 +4,7 @@ var FunctionPrintInt = require('../functions/function-printInt');
 var FunctionPrintString = require('../functions/function-printString');
 var FunctionReadInt = require('../functions/function-readInt');
 var FunctionReadString = require('../functions/function-readString');
+var FunctionStrlen = require('../functions/function-strlen');
 
 var TypeInt = require('../types/type-int');
 var TypeString = require('../types/type-string');
@@ -36,6 +37,7 @@ function RootScope(opts) {
   _this.addFunction(new FunctionPrintString(_this));
   _this.addFunction(new FunctionReadInt(_this));
   _this.addFunction(new FunctionReadString(_this));
+  _this.addFunction(new FunctionStrlen(_this));
 
   _this.root = true;
 }
@@ -57,9 +59,9 @@ function compile(state) {
     .add('.cstring\n')
     .add(CodeBlock.create(undefined, 'Format strings', true)
       .add('PRINT_INT_FORMAT:', undefined, -1)
-      .add('.ascii "%d\\12\\0"')
+      .add('.ascii "%ld\\12\\0"')
       .add('READ_INT_FORMAT:', undefined, -1)
-      .add('.ascii "%d\\0"')
+      .add('.ascii "%ld\\0"')
       .add('ERROR_STRING:', undefined, -1)
       .add('.ascii "runtime error\\0"')
     )

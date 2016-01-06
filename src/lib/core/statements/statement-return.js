@@ -59,6 +59,7 @@ function compile(state) {
   if (_this.expr !== undefined) {
     code
       .add(_this.expr.compile(state))
+      .add('jmp ' + state.function.exitLabel)
       .comment('return ' + _this.expr)
     ;
   }

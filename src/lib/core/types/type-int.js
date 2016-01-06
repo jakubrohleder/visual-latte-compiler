@@ -65,6 +65,10 @@ function TypeInt(rootScope) {
   };
 }
 
+function compile(state, value) {
+  return 'movq $' + value + ', %rax';
+}
+
 function compileAdd(state) {
   return CodeBlock.create(this)
     .add('addq ' + state.popRegister() + ', %rax')
@@ -79,6 +83,7 @@ function compileSub(state) {
 
 function compileDiv(state) {
   return CodeBlock.create(this)
+    .add('cqto')
     .add('idivq ' + state.popRegister() + '')
   ;
 }
@@ -91,6 +96,7 @@ function compileMul(state) {
 
 function compileMod(state) {
   return CodeBlock.create(this)
+    .add('cqto')
     .add('idivq ' + state.popRegister() + '')
     .add('movq %rdx, %rax')
   ;
@@ -100,10 +106,6 @@ function compileNeg() {
   return CodeBlock.create(this)
     .add('negl %rax')
   ;
-}
-
-function compile(value) {
-  return '$' + value;
 }
 
 function compileGt() {

@@ -23,5 +23,5 @@ function toString(debug, indentSize, indentLevel) {
     return '';
   }
 
-  return repeatString(' ', (indentSize + 1) * indentLevel) + ';' + _this.text + '\n';
+  return repeatString(' ', (indentSize + 1) * indentLevel) + '#' + _this.text + '\n';
 }

@@ -87,6 +87,8 @@ function compile(state, shift) {
 
   state.stack.addShift(shift);
 
+  _this.exitLabel = state.nextLabel();
+
   argsBlock = CodeBlock.create(undefined, 'Args to local memory');
 
   _.forEach(_this.args, function(argument) {
@@ -102,7 +104,7 @@ function compile(state, shift) {
   pushRegsBlock = CodeBlock.create(undefined, 'Registers to local memory');
   popRegsBlock = CodeBlock.create(undefined, 'Registers from local memory');
 
-  for (var i = 0; i < _this.lastRegister && i < 3; i++) {
+  for (var i = 0; i < _this.lastRegister && i < 4; i++) {
     pos = -state.stack.addRegister();
     pushRegsBlock.add('movq ' + _this.registers[i] + ', ' + pos + '(%rbp)');
     popRegsBlock.add('movq ' + pos + '(%rbp), ' + _this.registers[i]);
@@ -116,6 +118,7 @@ function compile(state, shift) {
       .add(pushRegsBlock)
       .add(argsBlock)
       .add(code)
+      .add(_this.exitLabel + ':')
       .add(popRegsBlock)
       .add(_this.generateExit(state))
     );

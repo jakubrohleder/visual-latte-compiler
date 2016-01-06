@@ -29,11 +29,11 @@ function semanticCheck(state) {
   _this.type = type;
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('movq ' + _this.type.compile(_this.value) + ', %rax')
+    .add(_this.type.compile(state, _this.value))
   ;
 }
 

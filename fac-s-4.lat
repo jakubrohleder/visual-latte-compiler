@@ -1,0 +1,9 @@
+int main() {
+  ifac2f(10);
+  return 0;
+}
+
+int ifac2f(int l) {
+  int a = ifac2f(1);
+  return a;
+}

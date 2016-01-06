@@ -3,22 +3,22 @@ var CodeBlock = require('latte/code/code-block');
 var _Function = require('./function').constructor;
 var Argument = require('../argument');
 
-module.exports = FunctionPrintString;
+module.exports = FunctionPrintInt;
 
-FunctionPrintString.prototype = Object.create(_Function.prototype);
-FunctionPrintString.prototype.constructor = FunctionPrintString;
-FunctionPrintString.prototype.semanticCheck = semanticCheck;
-FunctionPrintString.prototype.compile = compile;
+FunctionPrintInt.prototype = Object.create(_Function.prototype);
+FunctionPrintInt.prototype.constructor = FunctionPrintInt;
+FunctionPrintInt.prototype.semanticCheck = semanticCheck;
+FunctionPrintInt.prototype.compile = compile;
 
-function FunctionPrintString(rootScope) {
+function FunctionPrintInt(rootScope) {
   var _this = this;
   var arg = Argument.create({
     type: rootScope.getType('string'),
     ident: 'arg'
   });
 
-  _this.ident = 'printString';
-  _this.type = rootScope.getType('void');
+  _this.ident = 'strlen';
+  _this.type = rootScope.getType('int');
   _this.args = [arg];
   _this.parent = rootScope;
 }
@@ -30,22 +30,21 @@ function semanticCheck() {
 function compile(state) {
   var _this = this;
 
-  var puts = 'puts';
+  var strlen = 'strlen';
 
   if (state.os === 'osx') {
-    puts = '_' + puts;
+    strlen = '_' + strlen;
   }
 
   return CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
     .add(_this.ident + ':')
-    .add(CodeBlock.create(undefined, 'PrintString function body', true)
+    .add(CodeBlock.create(undefined, 'Strlen function body', true)
       .add('pushq %rbp')
       .add('movq %rsp, %rbp')
 
       .add('movq  16(%rbp), %rdi')
-      .add('xorq %rax, %rax')
-      .add('call ' + puts)
+      .add('call ' + strlen)
 
       .add('popq %rbp')
       .add('retq')

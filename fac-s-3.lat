@@ -4,10 +4,8 @@ int main() {
 }
 
 int nfac(int n) {
-  if (n != 0) {
-    return nfac(n-1) * n;
-  }
-  else {
+  if (n == 0) {
     return  1;
   }
+  return nfac(n-1) * n;
 }

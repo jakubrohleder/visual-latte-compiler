@@ -80,7 +80,7 @@ function toString(debug, indentSize, indentLevel) {
   }
 
   if (debug === true && _this.commentText !== undefined) {
-    output += ';---' + _this.commentText + ' start\n';
+    output += '#---' + _this.commentText + ' start\n';
   }
 
   _.forEach(_this, function(element) {
@@ -88,7 +88,7 @@ function toString(debug, indentSize, indentLevel) {
   });
 
   if (debug === true && _this.commentText !== undefined) {
-    output += ';---' + _this.commentText + ' end\n';
+    output += '#---' + _this.commentText + ' end\n';
   }
 
   if (_this.indent === true) {

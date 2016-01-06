@@ -17,7 +17,7 @@ if (args[0] === undefined) {
             compiler.parse(code), 'osx'
           )
         )
-      ).toString();
+      ).toString(true);
 
       fs.writeFile(filedir + '/' + filename + '.s', compiledCode, function(err) {
         if (err) {

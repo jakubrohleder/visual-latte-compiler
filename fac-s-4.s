@@ -46,9 +46,7 @@ _main:
   subq $32, %rsp
   movq $10, %rax
   movq %rax, 0(%rsp)
-  callq nfac
-  movq %rax, 0(%rsp)
-  callq printInt
+  callq ifac2f
   movq $0, %rax
   jmp .L0
   .L0:
@@ -56,45 +54,20 @@ _main:
   popq %rbp
   retq
 
-.globl nfac
-nfac:
+.globl ifac2f
+ifac2f:
   pushq %rbp
   movq %rsp, %rbp
   subq $32, %rsp
-  movq %r12, -16(%rbp)
-  movq %r13, -24(%rbp)
   movq 16(%rbp), %rax
   movq %rax, -8(%rbp)
-  movq $0, %rax
-  movq %rax, %r12
-  movq -8(%rbp), %rax
-  cmpq %r12, %rax
-  je .L4
-  movq $0, %rax
-  jmp .L5
-.L4:
   movq $1, %rax
-.L5:
-  cmpq  $0, %rax
-  jne .L2
-  jmp .L3
-.L2:
-  movq $1, %rax
-  jmp .L1
-.L3:
-  movq -8(%rbp), %rax
-  movq %rax, %r12
-  movq $1, %rax
-  movq %rax, %r13
-  movq -8(%rbp), %rax
-  subq %r13, %rax
   movq %rax, 0(%rsp)
-  callq nfac
-  imulq %r12, %rax
+  callq ifac2f
+  movq %rax, -16(%rbp)
+  movq -16(%rbp), %rax
   jmp .L1
   .L1:
-  movq -16(%rbp), %r12
-  movq -24(%rbp), %r13
   addq $32, %rsp
   popq %rbp
   retq
