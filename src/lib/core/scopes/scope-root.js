@@ -54,9 +54,16 @@ function optimize() {
 
 function compile(state) {
   var _this = this;
+  var stringSection;
+
+  if (state.os === 'osx') {
+    stringSection = '.cstring\n';
+  } else {
+    stringSection = '.section .rodata\n';
+  }
 
   return CodeBlock.create(_this)
-    .add('.cstring\n')
+    .add(stringSection)
     .add(CodeBlock.create(undefined, 'Format strings', true)
       .add('PRINT_INT_FORMAT:', undefined, -1)
       .add('.ascii "%ld\\12\\0"')
