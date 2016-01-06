@@ -7,6 +7,8 @@ var filename = path.basename(filepath, '.lat');
 var filedir = path.dirname(filepath);
 var childProcess = require('child_process');
 
+var gcc = process.platform === 'darwin' ? 'gcc-5' : 'gcc';
+
 if (filepath === undefined) {
   console.error('Need file with instant sourcecode *.lat');
 } else {
@@ -15,7 +17,7 @@ if (filepath === undefined) {
       var compiledCode = compiler.compile(
         compiler.optimize(
           compiler.semanticCheck(
-            compiler.parse(code), 'osx'
+            compiler.parse(code), process.platform
           )
         )
       ).toString(true);
@@ -25,7 +27,7 @@ if (filepath === undefined) {
           return console.log(err);
         }
 
-        childProcess.exec('gcc-5 "' + path.join(filedir, filename + '.s') + '" -o "' + path.join(filedir, filename) + '"', function(compileError) {
+        childProcess.exec(gcc + ' "' + path.join(filedir, filename + '.s') + '" -o "' + path.join(filedir, filename) + '"', function(compileError) {
           if (compileError) {
             console.error('ERROR');
             console.error('error compiling file');

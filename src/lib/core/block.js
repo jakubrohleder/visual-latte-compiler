@@ -49,6 +49,22 @@ function semanticCheck(state) {
     }
 
     if (getFunctionName(element) === 'StatementIf') {
+      if (_.isArray(element.wrong)) {
+        parseError(
+          'Declaration as only instruction in if',
+          element.wrong.loc,
+          _this
+        );
+      }
+
+      if (_.isArray(element.right)) {
+        parseError(
+          'Declaration as only instruction in if',
+          element.right.loc,
+          _this
+        );
+      }
+
       if (element.cond.value === false) {
         if (element.wrong === undefined) {
           _this[index] = noop;

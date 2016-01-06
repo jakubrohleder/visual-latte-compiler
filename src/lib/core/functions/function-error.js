@@ -35,7 +35,7 @@ function compile(state) {
 
   var puts = 'puts';
 
-  if (state.os === 'osx') {
+  if (state.os === 'darwin') {
     puts = '_' + puts;
   }
 

@@ -46,13 +46,6 @@ function semanticCheck(state) {
 
   function checkPath(pathName) {
     var path = _this[pathName];
-    if (_.isArray(path)) {
-      parseError(
-        'Declaration as only instruction in if',
-        path[0].loc,
-        _this
-      );
-    }
 
     if (path === undefined) {
       _this[pathName] = StatementBlock.create({

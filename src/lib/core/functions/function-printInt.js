@@ -40,7 +40,7 @@ function compile(state) {
 
   var printf = 'printf';
 
-  if (state.os === 'osx') {
+  if (state.os === 'darwin') {
     printf = '_' + printf;
   }
 

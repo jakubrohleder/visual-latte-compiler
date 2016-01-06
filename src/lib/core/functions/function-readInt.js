@@ -34,7 +34,7 @@ function compile(state) {
   var _this = this;
   var scanf = 'scanf';
 
-  if (state.os === 'osx') {
+  if (state.os === 'darwin') {
     scanf = '_' + scanf;
   }
 

@@ -4,7 +4,6 @@ var FunctionPrintInt = require('../functions/function-printInt');
 var FunctionPrintString = require('../functions/function-printString');
 var FunctionReadInt = require('../functions/function-readInt');
 var FunctionReadString = require('../functions/function-readString');
-var FunctionStrlen = require('../functions/function-strlen');
 
 var TypeInt = require('../types/type-int');
 var TypeString = require('../types/type-string');
@@ -37,7 +36,6 @@ function RootScope(opts) {
   _this.addFunction(new FunctionPrintString(_this));
   _this.addFunction(new FunctionReadInt(_this));
   _this.addFunction(new FunctionReadString(_this));
-  _this.addFunction(new FunctionStrlen(_this));
 
   _this.root = true;
 }
@@ -56,7 +54,7 @@ function compile(state) {
   var _this = this;
   var stringSection;
 
-  if (state.os === 'osx') {
+  if (state.os === 'darwin') {
     stringSection = '.cstring\n';
   } else {
     stringSection = '.section .rodata\n';

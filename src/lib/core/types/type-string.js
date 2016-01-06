@@ -49,7 +49,7 @@ function compileAdd(state) {
   var malloc = 'malloc';
   var memcpy = 'memcpy';
 
-  if (state.os === 'osx') {
+  if (state.os === 'darwin') {
     strlen = '_' + strlen;
     malloc = '_' + malloc;
     memcpy = '_' + memcpy;
@@ -102,7 +102,7 @@ function compile(state, value) {
   var code;
   var malloc = 'malloc';
 
-  if (state.os === 'osx') {
+  if (state.os === 'darwin') {
     malloc = '_' + malloc;
   }
 

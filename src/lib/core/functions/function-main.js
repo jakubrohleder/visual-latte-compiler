@@ -47,7 +47,7 @@ function semanticCheck(state) {
 function compile(state) {
   var _this = this;
 
-  if (state.os === 'osx') {
+  if (state.os === 'darwin') {
     _this.ident = '_' + _this.ident;
   }
 
