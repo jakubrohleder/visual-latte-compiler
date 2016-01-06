@@ -1,4 +1,7 @@
-node_modules/
+node_modules/*
+!node_modules/latte
+!node_modules/jison
+!node_modules/lodash
 .tmp/
 bower_components/
 coverage/
