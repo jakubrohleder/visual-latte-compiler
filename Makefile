@@ -1,13 +1,13 @@
-all: jvm llvm chmod
+all: latc latc_x86_64 chmod
 
-jvm:
-		@echo 'node "`echo "$$( cd "$$( dirname "$$0" )" && pwd )"`"/dist/jvm.js $$1' > insc_jvm
+latc:
+		@echo 'node "`echo "$$( cd "$$( dirname "$$0" )" && pwd )"`"/src/main.js $$1' > latc
 
-llvm:
-		@echo 'node "`echo "$$( cd "$$( dirname "$$0" )" && pwd )"`"/dist/llvm.js $$1' > insc_llvm
+latc_x86_64:
+		@echo 'node "`echo "$$( cd "$$( dirname "$$0" )" && pwd )"`"/src/main.js $$1' > latc_x86_64
 
 chmod:
-		bash -c "chmod +x insc_*"
+		bash -c "chmod +x latc*"
 
 clean:
-		rm -f *.j *.ll *.class *.bc insc_jvm insc_llvm
+		rm -f *.s latc latc_x86_64

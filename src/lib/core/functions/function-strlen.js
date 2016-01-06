@@ -21,6 +21,14 @@ function FunctionPrintInt(rootScope) {
   _this.type = rootScope.getType('int');
   _this.args = [arg];
   _this.parent = rootScope;
+  _this.decl = {
+    loc: {
+      first_line: 1,
+      last_line: 1,
+      first_column: 1,
+      last_column: 1
+    }
+  };
 }
 
 function semanticCheck() {

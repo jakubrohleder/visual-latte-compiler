@@ -46,17 +46,18 @@ function create(opts) {
 
 function addFunction(fun) {
   var _this = this;
+  var loc = fun.decl.loc[fun.decl.loc.length - 2];
 
   if (_this.functions[fun.ident] !== undefined) {
     parseError(
       'Function \'' + fun.ident + '\' already defined',
-      fun.decl.loc[fun.decl.loc.length - 2],
+      loc,
       _this
     );
   }
 
   if (_this.getFunction(fun.ident) !== undefined) {
-    console.warn('Warning: Redefining function', fun.ident);
+    console.log('Warning: Redefining parent scope function', fun.ident, 'on line', loc.first_line);
   }
 
   _this.functions[fun.ident] = fun;
@@ -64,18 +65,18 @@ function addFunction(fun) {
 
 function addVariable(variable) {
   var _this = this;
-  var defined = _this.getVariable(variable.ident);
+  var loc = variable.decl.loc[variable.decl.loc.length - 1];
 
   if (_this.variables[variable.ident] !== undefined) {
     parseError(
       'Variable ' + variable.ident + ' already defined',
-      variable.decl.loc,
+      loc,
       _this
     );
   }
 
-  if (defined !== undefined) {
-    console.warn('Warning: Redefining variable', variable.ident, 'from', defined.toString(), 'to', variable.toString());
+  if (_this.getVariable(variable.ident) !== undefined) {
+    console.log('Warning: Redefining parent scope variable', variable.ident, 'on line', loc.first_line);
   }
 
   _this.variables[variable.ident] = variable;
@@ -83,17 +84,18 @@ function addVariable(variable) {
 
 function addType(type) {
   var _this = this;
+  var loc = type.loc[type.loc.length - 2];
 
   if (_this.functions[type.name] !== undefined) {
     parseError(
       'Type \'' + type.name + '\' already defined',
-      type.loc[type.loc.length - 2],
+      loc,
       _this
     );
   }
 
   if (_this.getType(type.name) !== undefined) {
-    console.log('Redefining type', type.name);
+    console.log('Warning: Redefining parent scope type', type.name, 'on line', loc);
   }
 
   _this.types[type.name] = type;

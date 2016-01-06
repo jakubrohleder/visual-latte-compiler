@@ -16,28 +16,36 @@ function FunctionError(rootScope) {
   _this.type = rootScope.getType('void');
   _this.args = [];
   _this.parent = rootScope;
+  _this.decl = {
+    loc: {
+      first_line: 1,
+      last_line: 1,
+      first_column: 1,
+      last_column: 1
+    }
+  };
 }
 
 function semanticCheck() {
   // NOTHING
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
+
+  var puts = 'puts';
+
+  if (state.os === 'osx') {
+    puts = '_' + puts;
+  }
 
   return CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'Error function body', true)
-      // .add('pushq %rbp')
-      // .add('movq %rsp, %rbp')
-      // .add('leaq errorString(%rip), %rax')
-      // .add('movq %rax, 0(%rsp)')
-      // .add('xorq %rax, %rax')
-      // .add('callq _printf')
-      // .add('nop')
-      // .add('popq %rbp')
-      // .add('retq')
+      .add('leaq ERROR_STRING(%rip), %rdi')
+      .add('call ' + puts)
+      .add('ret')
     );
 }
 

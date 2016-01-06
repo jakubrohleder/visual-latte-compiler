@@ -26,13 +26,19 @@ if (args[0] === undefined) {
 
         childProcess.exec('gcc-5 ' + filedir + '/' + filename + '.s -o ' + filedir + '/' + filename, function(compileError) {
           if (compileError) {
-            return console.log(compileError);
+            console.error('ERROR');
+            console.error('error compiling file');
+            console.error(compileError);
+          } else {
+            console.error('OK');
           }
         });
       });
     } catch (error) {
       if (error && error.message) {
-        console.log(error.message);
+        console.error('ERROR');
+        console.error('error reading file');
+        console.error(error.message);
       } else {
         throw error;
       }
