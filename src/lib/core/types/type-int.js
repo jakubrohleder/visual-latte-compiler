@@ -1,6 +1,7 @@
 var Type = require('./type');
 
 var CodeBlock = require('latte/code/code-block');
+var ExpressionObject = require('latte/core/expressions/expression-object');
 
 var _ = require('lodash');
 
@@ -9,6 +10,7 @@ module.exports = TypeInt;
 TypeInt.prototype = Object.create(Type.prototype);
 TypeInt.prototype.constructor = TypeInt;
 TypeInt.prototype.checkeValue = _.isNumber;
+TypeInt.prototype.defaultValueExpr = defaultValueExpr;
 
 TypeInt.prototype.compile = compile;
 
@@ -132,3 +134,10 @@ function compileNeq() {
   return 'jne';
 }
 
+function defaultValueExpr(loc) {
+  return ExpressionObject.create({
+    type: 'int',
+    value: 0,
+    loc: loc
+  });
+}

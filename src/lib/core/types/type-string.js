@@ -1,5 +1,7 @@
 var _ = require('lodash');
+
 var CodeBlock = require('latte/code/code-block');
+var ExpressionObject = require('latte/core/expressions/expression-object');
 
 var Type = require('./type');
 
@@ -9,6 +11,7 @@ TypeString.prototype = Object.create(Type.prototype);
 TypeString.prototype.constructor = TypeString;
 TypeString.prototype.checkeValue = _.isString;
 TypeString.prototype.compile = compile;
+TypeString.prototype.defaultValueExpr = defaultValueExpr;
 
 function TypeString(rootScope) {
   var _this = this;
@@ -115,4 +118,12 @@ function compile(state, value) {
   code.add('movb $0, ' + length + '(%rax)');
 
   return code;
+}
+
+function defaultValueExpr(loc) {
+  return ExpressionObject.create({
+    type: 'string',
+    value: '""',
+    loc: loc
+  });
 }

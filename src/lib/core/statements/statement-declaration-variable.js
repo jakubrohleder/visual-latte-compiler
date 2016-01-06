@@ -37,11 +37,24 @@ function semanticCheck(state) {
 
   _this.type = type;
 
+  if (_this.expr === undefined) {
+    _this.expr = type.defaultValueExpr(_this.loc[_this.loc.length - 2]);
+  }
+  _this.expr.semanticCheck(state);
+
   _this.variable = Variable.create({
     type: _this.type,
     ident: _this.ident,
     decl: _this
   });
+
+  if (_this.expr.type !== type) {
+    parseError(
+      'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + type,
+      _this.loc[_this.loc.length - 2],
+      _this
+    );
+  }
 
   state.scope.addVariable(_this.variable);
 }
@@ -53,5 +66,7 @@ function compile(state) {
 
   return CodeBlock.create(_this)
     .comment('Declaring variable ' + _this.ident + ' on ' + _this.variable.stack + '(%rbp)')
+    .add(_this.expr.compile(state))
+    .add('movq %rax, ' + _this.variable.stack + '(%rbp)')
   ;
 }

@@ -1,6 +1,7 @@
 var parseError = require('latte/error').parseError;
 var getFunctionName = require('latte/utils').getFunctionName;
 var CodeBlock = require('latte/code/code-block');
+var StatementNoop = require('latte/core/statements/statement-noop');
 
 var _ = require('lodash');
 
@@ -35,6 +36,7 @@ function create(elements) {
 function semanticCheck(state) {
   var _this = this;
   var skip;
+  var noop = StatementNoop.create({loc: _this.loc});
 
   _.forEach(_this, function(element, index) {
     skip = false;
@@ -49,8 +51,8 @@ function semanticCheck(state) {
     if (getFunctionName(element) === 'StatementIf') {
       if (element.cond.value === false) {
         if (element.wrong === undefined) {
-          _this.splice(index, 1);
-          skip = true;
+          _this[index] = noop;
+          element = noop;
         } else {
           _this[index] = element.wrong;
           element = element.wrong;
@@ -61,12 +63,12 @@ function semanticCheck(state) {
       }
     }
 
-    if (getFunctionName(element) === 'Statementwhile') {
+    if (getFunctionName(element) === 'StatementWhile') {
       if (element.cond.value === false) {
-        _this.splice(index, 1);
-        skip = true;
+        _this[index] = noop;
+        element = noop;
       } else if (element.cond.value === true) {
-        console.warn('Warning: possible endless loop', element.loc);
+        // console.warn('Warning: possible endless loop', element.loc);
       }
     }
 

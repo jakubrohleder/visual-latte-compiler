@@ -19,9 +19,11 @@ function StatementBlock(opts) {
 
 function semanticCheck(state) {
   var _this = this;
+  var scope = state.scope;
 
   _this.scope = state.pushScope();
   _this.block.semanticCheck(state);
+  scope.return = _this.scope.return;
   state.popScope();
 }
 

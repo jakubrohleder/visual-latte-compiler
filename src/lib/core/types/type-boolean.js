@@ -1,6 +1,7 @@
 var Type = require('./type');
 
 var CodeBlock = require('latte/code/code-block');
+var ExpressionObject = require('latte/core/expressions/expression-object');
 
 var _ = require('lodash');
 
@@ -9,6 +10,7 @@ module.exports = TypeBoolean;
 TypeBoolean.prototype = Object.create(Type.prototype);
 TypeBoolean.prototype.constructor = TypeBoolean;
 TypeBoolean.prototype.checkeValue = _.isBoolean;
+TypeBoolean.prototype.defaultValueExpr = defaultValueExpr;
 
 TypeBoolean.prototype.compile = compile;
 
@@ -75,4 +77,12 @@ function compileEq() {
 
 function compileNeq() {
   return 'jne';
+}
+
+function defaultValueExpr(loc) {
+  return ExpressionObject.create({
+    type: 'boolean',
+    value: false,
+    loc: loc
+  });
 }

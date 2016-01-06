@@ -33,6 +33,8 @@ function add(lineOrBlock, commentText, shift) {
 
   if (_.isString(lineOrBlock)) {
     line = CodeLine.create(lineOrBlock, commentText, shift);
+  } else if (lineOrBlock === undefined) {
+    return _this;
   } else {
     line = lineOrBlock;
   }

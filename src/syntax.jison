@@ -174,7 +174,9 @@ Stmts
   : Stmt
     { $$ = [$Stmt]; }
   | Stmts Stmt
-    { $$ = $Stmts.concat([$Stmt]); }
+    {
+      $$ = $Stmts.concat([$Stmt]);
+    }
   ;
 
 Stmt
@@ -273,7 +275,9 @@ Stmt
   | Expr ';'
     { $$ = $Expr; }
   | ';'
-    { $$ = undefined; }
+    { $$ = yy.Statement.Noop.create({
+      loc: _$
+    }); }
   ;
 
 Items
@@ -293,16 +297,11 @@ Item
     }
   | IDENT '=' Expr
     {
-      var decl = yy.Statement.DeclarationVariable.create({
-        ident: $IDENT,
-        loc: _$
-      });
-      var ass = yy.Statement.Assignment.create({
+      $$ = yy.Statement.DeclarationVariable.create({
         ident: $IDENT,
         expr: $Expr,
         loc: _$
       });
-      $$ = [decl, ass];
     }
   ;
 
