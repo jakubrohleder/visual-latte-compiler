@@ -2,14 +2,15 @@ var compiler = require('./compiler');
 var fs = require('fs');
 var args = process.argv.slice(2);
 var path = require('path');
-var filename = path.basename(args[0], '.lat');
-var filedir = path.dirname(args[0]);
+var filepath = process.cwd() + '/' + args[0];
+var filename = path.basename(filepath, '.lat');
+var filedir = path.dirname(filepath);
 var childProcess = require('child_process');
 
-if (args[0] === undefined) {
+if (filepath === undefined) {
   console.error('Need file with instant sourcecode *.lat');
 } else {
-  fs.readFile(args[0], 'utf8', function(fileReadError, code) {
+  fs.readFile(filepath, 'utf8', function(fileReadError, code) {
     try {
       var compiledCode = compiler.compile(
         compiler.optimize(
@@ -19,12 +20,12 @@ if (args[0] === undefined) {
         )
       ).toString(true);
 
-      fs.writeFile(filedir + '/' + filename + '.s', compiledCode, function(err) {
+      fs.writeFile(path.join(filedir, filename + '.s'), compiledCode, function(err) {
         if (err) {
           return console.log(err);
         }
 
-        childProcess.exec('gcc-5 ' + filedir + '/' + filename + '.s -o ' + filedir + '/' + filename, function(compileError) {
+        childProcess.exec('gcc-5 "' + path.join(filedir, filename + '.s') + '" -o "' + path.join(filedir, filename) + '"', function(compileError) {
           if (compileError) {
             console.error('ERROR');
             console.error('error compiling file');
