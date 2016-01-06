@@ -30,11 +30,12 @@ function create(opts) {
   return new ExpressionNegation(opts);
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('negl %rax')
+    .add(_this.expr.compile(state))
+    .add('xorq  $1, %rax')
   ;
 }
 

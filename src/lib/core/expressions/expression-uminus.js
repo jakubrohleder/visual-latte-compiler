@@ -40,16 +40,17 @@ function create(opts) {
   return new ExpressionUminus(opts);
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('xorq $1, %rax')
+    .add(_this.expr.compile(state))
+    .add('negq %rax')
   ;
 }
 
 function toString() {
   var _this = this;
 
-  return '!' + _this.expr;
+  return '-' + _this.expr;
 }

@@ -44,14 +44,19 @@ function TypeBoolean(rootScope) {
   };
 }
 
-function compileOr(state) {
+function compileOr(state, label) {
+  // console.log(state);
   return CodeBlock.create(this)
-    .add('orq ' + state.popRegister() + ', %rax');
+    .add('cmpq $1, %rax')
+    .add('je ' + label)
+  ;
 }
 
-function compileAnd(state) {
+function compileAnd(state, label) {
   return CodeBlock.create(this)
-    .add('andq ' + state.popRegister() + ', %rax');
+    .add('cmpq $0, %rax')
+    .add('je ' + label)
+  ;
 }
 
 function compileNeg() {
@@ -59,8 +64,9 @@ function compileNeg() {
     .add('notq %rax');
 }
 
-function compile(value) {
-  return '$' + value ? 1 : 0;
+function compile(state, value) {
+  value = value ? 1 : 0;
+  return 'movq $' + value + ', %rax';
 }
 
 function compileEq() {

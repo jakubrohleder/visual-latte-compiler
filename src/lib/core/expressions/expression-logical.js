@@ -43,12 +43,14 @@ function create(opts) {
 function compile(state) {
   var _this = this;
   var operator = _this.left.type.operators.binary[_this.operator];
+  var label = state.nextLabel();
 
   return CodeBlock.create(_this)
     .add(_this.left.compile(state))
-    .add('movq %rax, ' + state.pushRegister())
+    .add(operator.compile(state, label))
     .add(_this.right.compile(state))
-    .add(operator.compile(_this.operator));
+    .add(label + ':', 'Skip second condition label', -1)
+  ;
 }
 
 function toString() {

@@ -57,7 +57,7 @@ function addFunction(fun) {
   }
 
   if (_this.getFunction(fun.ident) !== undefined) {
-    console.log('Warning: Redefining parent scope function', fun.ident, 'on line', loc.first_line);
+    // console.info('Warning: Redefining parent scope function', fun.ident, 'on line', loc.first_line);
   }
 
   _this.functions[fun.ident] = fun;
@@ -76,7 +76,7 @@ function addVariable(variable) {
   }
 
   if (_this.getVariable(variable.ident) !== undefined) {
-    console.log('Warning: Redefining parent scope variable', variable.ident, 'on line', loc.first_line);
+    // console.info('Warning: Redefining parent scope variable', variable.ident, 'on line', loc.first_line);
   }
 
   _this.variables[variable.ident] = variable;
@@ -95,7 +95,7 @@ function addType(type) {
   }
 
   if (_this.getType(type.name) !== undefined) {
-    console.log('Warning: Redefining parent scope type', type.name, 'on line', loc);
+    // console.info('Warning: Redefining parent scope type', type.name, 'on line', loc);
   }
 
   _this.types[type.name] = type;

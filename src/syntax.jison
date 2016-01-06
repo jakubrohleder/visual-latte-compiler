@@ -388,7 +388,7 @@ Expr
     }
   | Expr LogOp Expr %prec LOGOP
     {
-      $$ = yy.Expression.Operation.create({
+      $$ = yy.Expression.Logical.create({
         operator: $LogOp,
         left: $Expr1,
         right: $Expr2,
