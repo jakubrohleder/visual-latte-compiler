@@ -1,4 +1,6 @@
-# Visual Compiler
+# Latte Visual Compiler
+
+Visual and command line compiler of [latte language](http://www.mimuw.edu.pl/~ben/Zajecia/Mrj2015/Latte/) to x86_64 GAS assembly.
 
 ## Installation
 
@@ -40,13 +42,10 @@ Exec Makefile:
 $ make
 ~~~
 
-Generate llvm or jvm code for .ins file:
-
 ~~~bash
 #From project root
 
-$ ./insc_jvm codefile.ins #generates codefile.j and code Codefile.class
-$ ./insc_llvm codefile.ins #generates codefile.ll and code codefile.bc
+$ ./latc_x86_64 codefile.lat #generates codefile.s and executable codefile
 ~~~
 
 ### Self hosted web version
