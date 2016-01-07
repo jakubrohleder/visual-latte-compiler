@@ -36,6 +36,7 @@ function compile(state) {
   var puts = 'puts';
   var malloc = 'malloc';
   var memcpy = 'memcpy';
+  var scanf = 'scanf';
   var begin = state.nextLabel();
   var end = state.nextLabel();
   var save = state.nextLabel();
@@ -45,6 +46,7 @@ function compile(state) {
     puts = '_' + puts;
     malloc = '_' + malloc;
     memcpy = '_' + memcpy;
+    scanf = '_' + scanf;
   }
 
   return CodeBlock.create(_this)
@@ -59,6 +61,10 @@ function compile(state) {
 
       .add('leaq -24(%rbp), %rbx')
       .add('movq $0, %r15')
+
+      .add('xorq %rax, %rax')
+      .add('leaq NEW_LINE_FORMAT(%rip), %rdi')
+      .add('call ' + scanf)
 
       .add(begin + ':')
       .add('callq ' + getchar)
