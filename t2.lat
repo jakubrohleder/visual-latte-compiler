@@ -1,5 +1,0 @@
-int main() {
-  string s = readString();
-  printString(s + "!!!!");
-  return 0;
-}
