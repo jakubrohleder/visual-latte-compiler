@@ -6,6 +6,7 @@
 %%
 \s+                       /* skip whitespace */
 "//".*                    /* skip line comments */
+"#".*                    /* skip hash line comments */
 "/*"((\*+[^/*])|([^*]))*\**"*/" /* skip block comments */
 
 true                      return 'TRUE'
