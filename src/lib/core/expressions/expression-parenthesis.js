@@ -32,10 +32,13 @@ function semanticCheck(state) {
 
 function compile(state) {
   var _this = this;
-
-  return CodeBlock.create(_this)
+  var code = CodeBlock.create(_this)
     .add(_this.expr.compile(state))
   ;
+
+  _this.value = _this.expr.value;
+
+  return code;
 }
 
 function toString() {

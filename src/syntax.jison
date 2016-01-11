@@ -274,7 +274,11 @@ Stmt
   | FOR '(' IDENT IDENT ':' IDENT ')' Stmt
   | FOR '(' IDENT ':' IDENT ')' Stmt
   | Expr ';'
-    { $$ = $Expr; }
+    {
+      $$ = yy.Statement.Expression.create({
+        expr: $Expr
+      });
+    }
   | ';'
     { $$ = yy.Statement.Noop.create({
       loc: _$
@@ -428,7 +432,7 @@ Number
     {
       $$ = yy.Expression.Object.create({
         type: 'int',
-        value: Number(yytext),
+        text: Number(yytext),
         loc: _$
       });
     }
@@ -439,7 +443,7 @@ String
     {
       $$ = yy.Expression.Object.create({
         type: 'string',
-        value: String(yytext),
+        text: String(yytext),
         loc: _$
       });
     }
@@ -450,7 +454,7 @@ Logical
     {
       $$ = yy.Expression.Object.create({
         type: 'boolean',
-        value: JSON.parse($LogVal),
+        text: JSON.parse($LogVal),
         loc: _$
       });
     }

@@ -1,4 +1,4 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -59,10 +59,12 @@ function compile(state) {
   if (_this.expr !== undefined) {
     code
       .add(_this.expr.compile(state))
-      .add('jmp ' + state.function.exitLabel)
-      .comment('return ' + _this.expr)
     ;
   }
+
+  code
+    .add('jmp ' + state.function.exitLabel)
+    .comment('return ' + _this.expr)
 
   return code;
 }

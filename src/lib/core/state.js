@@ -38,7 +38,7 @@ function State(opts) {
 
   _this.scopes = [rootScope];
   _this.scope = rootScope;
-  _this.register = 0;
+  _this.register;
 }
 
 function create(opts) {
@@ -100,7 +100,6 @@ function popScope() {
 
 function pushRegister() {
   var _this = this;
-  var register;
 
   if (_this.function.register >= _this.function.registers.length) {
     _this.function.registers.push('' + (-_this.stack.addSpill()) + '(%rbp)');
@@ -110,13 +109,17 @@ function pushRegister() {
     _this.function.lastRegister = _this.function.register + 1;
   }
 
-  register = _this.function.registers[_this.function.register++];
+  _this.register = _this.function.registers[_this.function.register++];
 
-  return register;
+  return _this.register;
 }
 
 function popRegister() {
   var _this = this;
+
+  if (_this.function.register === 0) {
+    throw('WRONG', popRegister.caller);
+  }
 
   return _this.function.registers[--_this.function.register];
 }

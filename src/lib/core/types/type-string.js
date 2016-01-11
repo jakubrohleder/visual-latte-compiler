@@ -2,6 +2,7 @@ var _ = require('lodash');
 
 var CodeBlock = require('latte/code/code-block');
 var ExpressionObject = require('latte/core/expressions/expression-object');
+var Value = require('latte/core/value');
 
 var Type = require('./type');
 
@@ -30,17 +31,13 @@ function TypeString(rootScope) {
   };
 }
 
-function compileAdd(state) {
-  var oldRightPointer = state.popRegister();
-
-  var leftPointer = state.pushRegister();
-  var rightPointer = state.pushRegister();
+function compileAdd(state, left, right) {
+  var leftPointer = left;
+  var rightPointer = right;
   var resultPointer = state.pushRegister();
   var leftLength = state.pushRegister();
   var rightLength = state.pushRegister();
 
-  state.popRegister();
-  state.popRegister();
   state.popRegister();
   state.popRegister();
   state.popRegister();
@@ -56,11 +53,6 @@ function compileAdd(state) {
   }
 
   return CodeBlock.create(this)
-    .add(CodeBlock.create(undefined, 'Save pointers')
-      .add('movq ' + oldRightPointer + ', ' + rightPointer, 'right')
-      .add('movq %rax, ' + leftPointer, 'left')
-    )
-
     .add('movq ' + leftPointer + ', %rdi')
     .add('call ' + strlen)
     .add('movq %rax, ' + leftLength, 'Save left string len')
@@ -96,11 +88,17 @@ function compileAdd(state) {
   ;
 }
 
-function compile(state, value) {
-  value = _.trim(value, '"');
+function compile(state, expr) {
+  var _this = this;
+  var value = _.trim(expr.text, '"');
   var length = value.length;
   var code;
   var malloc = 'malloc';
+
+  expr.value = Value.create({
+    type: _this,
+    register: '%rax'
+  });
 
   if (state.os === 'darwin') {
     malloc = '_' + malloc;
@@ -123,7 +121,7 @@ function compile(state, value) {
 function defaultValueExpr(loc) {
   return ExpressionObject.create({
     type: 'string',
-    value: '""',
+    text: '""',
     loc: loc
   });
 }

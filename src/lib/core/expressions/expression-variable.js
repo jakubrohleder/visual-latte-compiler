@@ -41,9 +41,10 @@ function semanticCheck(state) {
 
 function compile() {
   var _this = this;
+  _this.value = _this.variable.value;
 
   return CodeBlock.create(_this)
-    .add('movq ' + _this.variable.stack + '(%rbp), %rax')
+    .add('movq ' + _this.variable.address + ', %rax')
   ;
 }
 

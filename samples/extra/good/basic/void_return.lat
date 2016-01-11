@@ -8,5 +8,4 @@ void run() {
     printInt(0);
     if(true)
         return;
-    printInt(1);
 }

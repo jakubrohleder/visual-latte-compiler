@@ -10,6 +10,9 @@ module.exports = {
 CodeBlock.prototype = Object.create(Array.prototype);
 CodeBlock.prototype.add = add;
 CodeBlock.prototype.comment = comment;
+CodeBlock.prototype.exec = exec;
+CodeBlock.prototype.if = _if;
+CodeBlock.prototype.set = set;
 CodeBlock.prototype.concat = concat;
 CodeBlock.prototype.toString = toString;
 
@@ -98,4 +101,22 @@ function toString(debug, indentSize, indentLevel) {
   }
 
   return output;
+}
+
+function exec() {
+  return this;
+}
+
+function _if(condition, right, wrong) {
+  var _this = this;
+
+  if (condition === true) {
+    return _this.add(right);
+  }
+
+  return _this.add(wrong);
+}
+
+function set(attr, value) {
+  this[attr] = value;
 }

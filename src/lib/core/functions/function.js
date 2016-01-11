@@ -1,5 +1,6 @@
-var Element = require('../element');
-var Variable = require('../variable');
+var Element = require('latte/core/element');
+var Variable = require('latte/core/variable');
+var Value = require('latte/core/value');
 
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
@@ -43,7 +44,7 @@ function semanticCheck(state) {
       type: argument.type,
       ident: argument.ident,
       decl: argument,
-      stack: index * 8 + 16
+      address: index * 8 + 16 + '(%rbp)'
     });
 
     argument.variable = variable;
@@ -92,11 +93,18 @@ function compile(state, shift) {
   argsBlock = CodeBlock.create(undefined, 'Args to local memory');
 
   _.forEach(_this.args, function(argument) {
-    newPos = -state.stack.addArgument(argument.variable);
-    oldPos = argument.variable.stack;
-    argument.variable.stack = newPos;
-    argsBlock.add('movq ' + oldPos + '(%rbp), %rax');
-    argsBlock.add('movq %rax, ' + newPos + '(%rbp)');
+    newPos = '' + -state.stack.addArgument(argument.variable) + '(%rbp)';
+    oldPos = argument.variable.address;
+    argument.variable.address = newPos;
+    argsBlock.add('movq ' + oldPos + ', %rax');
+    argsBlock.add('movq %rax, ' + newPos);
+
+    argument.variable.value = Value.create({
+      register: newPos,
+      type: argument.variable.type
+    });
+
+    argument.variable.value.addReference(argument.variable);
   });
 
   code = _this.block.compile(state);

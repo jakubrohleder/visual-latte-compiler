@@ -9,6 +9,7 @@ var StatementDeclarationClass = require('./statements/statement-declaration-clas
 var StatementDeclarationFunction = require('./statements/statement-declaration-function');
 var StatementWhile = require('./statements/statement-while');
 var StatementNoop = require('./statements/statement-noop');
+var StatementExpression = require('./statements/statement-expression');
 
 module.exports = {
   If: StatementIf,
@@ -21,5 +22,6 @@ module.exports = {
   DeclarationClass: StatementDeclarationClass,
   DeclarationFunction: StatementDeclarationFunction,
   Noop: StatementNoop,
+  Expression: StatementExpression,
   While: StatementWhile
 };

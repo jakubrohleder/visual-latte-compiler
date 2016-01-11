@@ -1,5 +1,6 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
+var Value = require('latte/core/value');
 
 var Expression = require('./expression');
 
@@ -67,21 +68,40 @@ function create(opts) {
 
 function compile(state) {
   var _this = this;
+  var register;
   var code = CodeBlock.create(_this)
     .comment('' + _this.ident + ' calling with ' + _this.args.join(', '));
+
+  _this.value = Value.create({
+    type: _this.type,
+    expr: _this,
+    register: '%rax'
+  });
 
   state.stack.addFunctionCall(_this);
 
   _.forEach(_this.args, function(arg, index) {
+    register = (index * 8) + '(%rsp)';
     code
       .add(arg.compile(state))
-      .add('movq %rax, ' + (index * 8) + '(%rsp)')
+      .add('movq %rax, ' + register)
     ;
+    arg.value.register = register;
   });
 
   code
     .add('callq ' + _this.function.ident)
+    .add('movq %rax, ' + state.pushRegister())
     .comment('' + _this.ident + ' call end');
+
+  _.forEach(_this.args, function(arg) {
+    code
+      .add(arg.value.free(state))
+    ;
+  });
+
+  code
+    .add('movq ' + state.popRegister() + ', %rax');
 
   return code;
 }

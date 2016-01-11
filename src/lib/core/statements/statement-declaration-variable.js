@@ -1,4 +1,4 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 var Variable = require('../variable');
 
 var parseError = require('latte/error').parseError;
@@ -61,12 +61,18 @@ function semanticCheck(state) {
 
 function compile(state) {
   var _this = this;
+  var code;
 
-  _this.variable.stack = -state.stack.addVariable(_this.variable);
+  _this.variable.address = '' + -state.stack.addVariable(_this.variable) + '(%rbp)';
 
-  return CodeBlock.create(_this)
-    .comment('Declaring variable ' + _this.ident + ' on ' + _this.variable.stack + '(%rbp)')
+  code = CodeBlock.create(_this)
+    .comment('Declaring variable ' + _this.ident + ' on ' + _this.variable.address)
     .add(_this.expr.compile(state))
-    .add('movq %rax, ' + _this.variable.stack + '(%rbp)')
+    .add('movq %rax, ' + _this.variable.address)
   ;
+
+  _this.variable.value = _this.expr.value;
+  _this.variable.value.addReference(_this.variable);
+
+  return code;
 }

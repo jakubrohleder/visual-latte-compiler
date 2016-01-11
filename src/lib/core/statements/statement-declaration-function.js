@@ -1,4 +1,4 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 var _Function = require('../functions/function');
 var FunctionMain = require('../functions/function-main');
 

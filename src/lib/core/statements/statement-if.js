@@ -1,11 +1,9 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 var StatementBlock = require('./statement-block');
 var Block = require('../block');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
-
-var _ = require('lodash');
 
 module.exports = {
   create: create
@@ -69,8 +67,7 @@ function compile(state) {
   var _this = this;
   var right = state.nextLabel();
   var end = state.nextLabel();
-
-  return CodeBlock.create(_this)
+  var code = CodeBlock.create(_this)
     .add(_this.cond.compile(state))
     .add('cmpq  $1, %rax')
     .add('je ' + right)
@@ -80,4 +77,8 @@ function compile(state) {
     .add(_this.right.compile(state))
     .add(end + ':', 'end label', -1)
   ;
+
+  _this.cond.value.free(state);
+
+  return code;
 }

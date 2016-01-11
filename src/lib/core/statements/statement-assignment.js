@@ -1,4 +1,4 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -44,11 +44,19 @@ function semanticCheck(state) {
 
 function compile(state) {
   var _this = this;
+  var code;
 
-  return CodeBlock.create(_this)
+  code = CodeBlock.create(_this)
     .add(_this.expr.compile(state))
-    .add('movq %rax, ' + _this.variable.stack + '(%rbp)', 'save ' + _this.expr + ' on ' + _this.variable)
+    .add('movq %rax, ' + state.pushRegister())
+    .add(_this.variable.value.removeReference(_this.variable, state))
+    .add('movq ' + state.popRegister() + ', ' + _this.variable.address, 'save ' + _this.expr + ' on ' + _this.variable)
   ;
+
+  _this.expr.value.addReference(_this.variable);
+  _this.variable.value = _this.expr.value;
+
+  return code;
 }
 
 function create(opts) {

@@ -1,5 +1,6 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
+var Value = require('latte/core/value');
 
 var Expression = require('./expression');
 
@@ -22,6 +23,7 @@ function ExpressionComparison(opts) {
 function semanticCheck(state) {
   var _this = this;
   var bool = state.scope.getType('boolean');
+  var operator;
 
   _this.left.semanticCheck(state);
   _this.right.semanticCheck(state);
@@ -29,6 +31,16 @@ function semanticCheck(state) {
   if (_this.left.type !== _this.right.type) {
     parseError(
       'Can\'t compare diferent type variables: ' + _this.left.type + ' and ' + _this.right.type,
+      _this.loc,
+      _this
+    );
+  }
+
+  operator = _this.left.type.operators.binary[_this.operator];
+
+  if (operator === undefined) {
+    parseError(
+      'No operator ' + _this.operator + ' for type ' + _this.left.type,
       _this.loc,
       _this
     );
@@ -46,6 +58,11 @@ function compile(state) {
   var right = state.nextLabel();
   var end = state.nextLabel();
   var operator = _this.left.type.operators.binary[_this.operator];
+  _this.value = Value.create({
+    type: _this.type,
+    expr: _this,
+    register: '%rax'
+  });
 
   return CodeBlock.create(_this)
     .add(_this.right.compile(state))
@@ -60,6 +77,10 @@ function compile(state) {
       .add('movq $1, %rax')
       .add(end + ':', 'end label', -1)
     )
+    .add('movq %rax, ' + state.pushRegister())
+    .add(_this.left.value.free(state))
+    .add(_this.right.value.free(state))
+    .add('movq ' + state.popRegister() + ', %rax')
   ;
 }
 

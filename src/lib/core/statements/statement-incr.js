@@ -1,4 +1,4 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -52,8 +52,8 @@ function compile() {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('movq ' + _this.variable.stack + '(%rbp), %rax')
+    .add('movq ' + _this.variable.address + ', %rax')
     .add('incq %rax')
-    .add('movq %rax, ' + _this.variable.stack + '(%rbp)')
+    .add('movq %rax, ' + _this.variable.address)
   ;
 }

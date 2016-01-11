@@ -1,5 +1,4 @@
 var CodeBlock = require('latte/code/code-block');
-
 var Expression = require('./expression');
 
 module.exports = {
@@ -31,14 +30,17 @@ function semanticCheck(state) {
 
 function compile(state) {
   var _this = this;
-
-  return CodeBlock.create(_this)
-    .add(_this.type.compile(state, _this.value))
+  var code = CodeBlock.create(_this)
+    .add(_this.type.compile(state, _this))
   ;
+
+  _this.value.expr = _this;
+
+  return code;
 }
 
 function toString() {
   var _this = this;
 
-  return _this.value;
+  return _this.text;
 }

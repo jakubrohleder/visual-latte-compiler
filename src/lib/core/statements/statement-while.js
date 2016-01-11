@@ -1,4 +1,4 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 var StatementBlock = require('./statement-block');
 var Block = require('../block');
 
@@ -84,8 +84,7 @@ function compile(state) {
   var _this = this;
   var start = state.nextLabel();
   var end = state.nextLabel();
-
-  return CodeBlock.create(_this)
+  var code = CodeBlock.create(_this)
     .add(start + ':', 'start label', -1)
     .add(_this.cond.compile(state))
     .add('cmpq  $0, %rax')
@@ -94,4 +93,8 @@ function compile(state) {
     .add('jmp ' + start)
     .add(end + ':', 'end label', -1)
   ;
+
+  _this.cond.value.free(state);
+
+  return code;
 }

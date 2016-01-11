@@ -1,4 +1,4 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 var Variable = require('../variable');
 
 var parseError = require('latte/error').parseError;

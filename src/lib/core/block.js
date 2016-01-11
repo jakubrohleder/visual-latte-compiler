@@ -65,7 +65,7 @@ function semanticCheck(state) {
         );
       }
 
-      if (element.cond.value === false) {
+      if (element.cond.text === false) {
         if (element.wrong === undefined) {
           _this[index] = noop;
           element = noop;
@@ -73,17 +73,17 @@ function semanticCheck(state) {
           _this[index] = element.wrong;
           element = element.wrong;
         }
-      } else if (element.cond.value === true) {
+      } else if (element.cond.text === true) {
         _this[index] = element.right;
         element = element.right;
       }
     }
 
     if (getFunctionName(element) === 'StatementWhile') {
-      if (element.cond.value === false) {
+      if (element.cond.text === false) {
         _this[index] = noop;
         element = noop;
-      } else if (element.cond.value === true) {
+      } else if (element.cond.text === true) {
         // console.warn('Warning: possible endless loop', element.loc);
       }
     }

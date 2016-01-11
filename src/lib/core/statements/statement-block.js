@@ -1,4 +1,4 @@
-var Statement = require('./statement-prototype');
+var Statement = require('./statement');
 
 var CodeBlock = require('latte/code/code-block');
 

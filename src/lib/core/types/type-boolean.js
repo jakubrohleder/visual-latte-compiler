@@ -2,6 +2,7 @@ var Type = require('./type');
 
 var CodeBlock = require('latte/code/code-block');
 var ExpressionObject = require('latte/core/expressions/expression-object');
+var Value = require('latte/core/value');
 
 var _ = require('lodash');
 
@@ -47,7 +48,6 @@ function TypeBoolean(rootScope) {
 }
 
 function compileOr(state, label) {
-  // console.log(state);
   return CodeBlock.create(this)
     .add('cmpq $1, %rax')
     .add('je ' + label)
@@ -66,8 +66,15 @@ function compileNeg() {
     .add('notq %rax');
 }
 
-function compile(state, value) {
-  value = value ? 1 : 0;
+function compile(state, expr) {
+  var _this = this;
+  var value = expr.text ? 1 : 0;
+
+  expr.value = Value.create({
+    type: _this,
+    register: '%rax'
+  });
+
   return 'movq $' + value + ', %rax';
 }
 
@@ -82,7 +89,7 @@ function compileNeq() {
 function defaultValueExpr(loc) {
   return ExpressionObject.create({
     type: 'boolean',
-    value: false,
+    text: false,
     loc: loc
   });
 }

@@ -2,6 +2,7 @@ var Type = require('./type');
 
 var CodeBlock = require('latte/code/code-block');
 var ExpressionObject = require('latte/core/expressions/expression-object');
+var Value = require('latte/core/value');
 
 var _ = require('lodash');
 
@@ -67,39 +68,52 @@ function TypeInt(rootScope) {
   };
 }
 
-function compile(state, value) {
+function compile(state, expr) {
+  var _this = this;
+  var value = expr.text;
+
+  expr.value = Value.create({
+    type: _this,
+    register: '%rax'
+  });
+
   return 'movq $' + value + ', %rax';
 }
 
-function compileAdd(state) {
+function compileAdd(state, left, right) {
   return CodeBlock.create(this)
-    .add('addq ' + state.popRegister() + ', %rax')
+    .add('movq ' + left + ', %rax')
+    .add('addq ' + right + ', %rax')
   ;
 }
 
-function compileSub(state) {
+function compileSub(state, left, right) {
   return CodeBlock.create(this)
-    .add('subq ' + state.popRegister() + ', %rax')
+    .add('movq ' + left + ', %rax')
+    .add('subq ' + right + ', %rax')
   ;
 }
 
-function compileDiv(state) {
+function compileDiv(state, left, right) {
   return CodeBlock.create(this)
     .add('cqto')
-    .add('idivq ' + state.popRegister() + '')
+    .add('movq ' + left + ', %rax')
+    .add('idivq ' + right)
   ;
 }
 
-function compileMul(state) {
+function compileMul(state, left, right) {
   return CodeBlock.create(this)
-    .add('imulq ' + state.popRegister() + ', %rax')
+    .add('movq ' + left + ', %rax')
+    .add('imulq ' + right + ', %rax')
   ;
 }
 
-function compileMod(state) {
+function compileMod(state, left, right) {
   return CodeBlock.create(this)
+    .add('movq ' + left + ', %rax')
     .add('cqto')
-    .add('idivq ' + state.popRegister() + '')
+    .add('idivq ' + right)
     .add('movq %rdx, %rax')
   ;
 }
@@ -137,7 +151,7 @@ function compileNeq() {
 function defaultValueExpr(loc) {
   return ExpressionObject.create({
     type: 'int',
-    value: 0,
+    text: 0,
     loc: loc
   });
 }
