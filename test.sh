@@ -63,7 +63,7 @@ function testBad {
     done
 }
 
-# testGood "samples/good/*"
+testGood "samples/good/*"
 
 testGood "samples/extra/good/basic/*"
 
