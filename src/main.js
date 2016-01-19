@@ -2,9 +2,10 @@ var compiler = require('./compiler');
 var fs = require('fs');
 var args = process.argv.slice(2);
 var path = require('path');
+var location = args[1];
 var filepath = process.cwd() + '/' + args[0];
 var filename = path.basename(filepath, '.lat');
-var filedir = path.dirname(filepath);
+var filedir = location === undefined ? path.dirname(filepath) : location;
 var childProcess = require('child_process');
 
 var gcc = process.platform === 'darwin' ? 'gcc-5' : 'gcc';
@@ -40,8 +41,8 @@ if (filepath === undefined) {
     } catch (error) {
       if (error && error.message) {
         console.error('ERROR');
-        console.error('error reading file');
-        console.error(error.message);
+        console.error('error generating assembly code');
+        console.error(error.toString());
       } else {
         throw error;
       }
