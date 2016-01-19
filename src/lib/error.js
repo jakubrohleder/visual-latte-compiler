@@ -4,6 +4,7 @@ var _ = require('lodash');
 exports.parseError = parseError;
 
 _parseError.prototype = new Error();
+_parseError.prototype.toString = toString;
 
 function _parseError(msg, hash) {
   this.message = msg;
@@ -29,4 +30,9 @@ function parseError(str, loc, object) {
   }
 
   throw new _parseError(str, hash);
+}
+
+function toString() {
+  var _this = this;
+  return _this.message + '\n' + 'Location: ' + _this.hash.loc.first_line + ':' + _this.hash.loc.first_column + ' to ' + _this.hash.loc.last_line + ':' + _this.hash.loc.last_column;
 }

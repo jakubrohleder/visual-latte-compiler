@@ -34,10 +34,6 @@
     }
 
     function watchCode(code) {
-      if (code === undefined || code === '') {
-        return;
-      }
-
       localStorage.setItem('code', code);
 
       auto();

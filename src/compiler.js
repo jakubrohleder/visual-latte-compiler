@@ -42,7 +42,7 @@ function parse(code) {
   try {
     result = parser.parse(code);
   } catch (error) {
-    if (error. hash === undefined) {
+    if (error.hash === undefined) {
       throw error;
     }
 
@@ -75,6 +75,12 @@ function semanticCheck(mainBlock, os) {
     debug: true,
     os: os
   });
+
+  if (mainBlock === true) {
+    parseError(
+      'No \'main\' function defined'
+    );
+  }
 
   mainBlock.semanticCheck(state);
 
