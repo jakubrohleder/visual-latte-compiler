@@ -32,19 +32,27 @@ function semanticCheck() {
 
 function compile(state) {
   var _this = this;
-
   var puts = 'puts';
+  var exit = 'exit';
 
   if (state.os === 'darwin') {
     puts = '_' + puts;
+    exit = '_' + exit;
   }
 
   return CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'Error function body', true)
+      .add('pushq %rbp')
+      .add('movq %rsp, %rbp')
+
       .add('leaq ERROR_STRING(%rip), %rdi')
       .add('call ' + puts)
+      .add('movl $-1, %edi')
+      .add('callq _exit')
+
+      .add('popq %rbp')
       .add('ret')
     );
 }
