@@ -28,3 +28,14 @@ exports.repeatString = function(string, times) {
 exports.nextMul = function(argument, base) {
   return Math.ceil((argument - 1) / base) * base;
 };
+
+exports.unescape = function(string) {
+  return string
+    .replace(/^\"/, '')
+    .replace(/\"$/, '')
+    .replace(/([^\\])\\n/g, '$1\n')
+    .replace(/([^\\])\\t/g, '$1\t')
+    .replace(/\\\"/g, '\"')
+    .replace(/\\\'/g, '\'')
+    .replace(/\\\\/g, '\\');
+};

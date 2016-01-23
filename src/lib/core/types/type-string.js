@@ -3,6 +3,7 @@ var _ = require('lodash');
 var CodeBlock = require('latte/code/code-block');
 var ExpressionObject = require('latte/core/expressions/expression-object');
 var Value = require('latte/core/value');
+var unescape = require('latte/utils').unescape;
 
 var Type = require('./type');
 
@@ -90,7 +91,7 @@ function compileAdd(state, left, right) {
 
 function compile(state, expr) {
   var _this = this;
-  var value = _.trim(expr.text, '"');
+  var value = unescape(expr.text);
   var length = value.length;
   var code;
   var malloc = 'malloc';
