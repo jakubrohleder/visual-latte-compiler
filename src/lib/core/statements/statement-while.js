@@ -28,7 +28,7 @@ function create(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var bool = state.scope.getType('boolean');
+  var bool = state.rootScope.getType('boolean');
   _this.cond.semanticCheck(state);
 
   if (_this.cond.type !== bool) {

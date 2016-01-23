@@ -22,7 +22,7 @@ function ExpressionUminus(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var integer = state.scope.getType('int');
+  var integer = state.rootScope.getType('int');
 
   _this.expr.semanticCheck(state);
 

@@ -33,7 +33,7 @@ function _Function(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var _void = state.scope.getType('void');
+  var _void = state.rootScope.getType('void');
   var variable;
 
   _this.scope = state.pushScope();
@@ -160,7 +160,7 @@ function generateEnter(state) {
 
 function generateExit(state) {
   var _this = this;
-  var _void = state.scope.getType('void');
+  var _void = state.rootScope.getType('void');
   var code = CodeBlock.create();
 
   if (_this.type === _void) {

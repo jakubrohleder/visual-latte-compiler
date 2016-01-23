@@ -24,7 +24,7 @@ function create(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var _void = state.scope.getType('void');
+  var _void = state.rootScope.getType('void');
 
   if (_this.expr !== undefined) {
     _this.expr.semanticCheck(state);
@@ -64,7 +64,7 @@ function compile(state) {
 
   code
     .add('jmp ' + state.function.exitLabel)
-    .comment('return ' + _this.expr)
+    .comment('return ' + _this.expr);
 
   return code;
 }

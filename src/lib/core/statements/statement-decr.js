@@ -21,7 +21,7 @@ function StatementDecr(opts) {
 function semanticCheck(state) {
   var _this = this;
   var variable = state.scope.getVariable(_this.ident);
-  var integer = state.scope.getType('int');
+  var integer = state.rootScope.getType('int');
 
   if (variable === undefined) {
     parseError(

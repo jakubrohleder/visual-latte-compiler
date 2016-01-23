@@ -34,8 +34,7 @@ function semanticCheck(state) {
       _this.loc[_this.loc.length - 2],
       _this
     );
-  } else if (_this.type !== state.scope.getType('int')) {
-    // TODO change to be sure that rootscope int is used
+  } else if (_this.type !== state.rootScope.getType('int')) {
     parseError(
       'Main must have type \'int\'',
       _this.loc[_this.loc.length - 2],

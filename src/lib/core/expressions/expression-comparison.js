@@ -22,7 +22,7 @@ function ExpressionComparison(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var bool = state.scope.getType('boolean');
+  var bool = state.rootScope.getType('boolean');
   var operator;
 
   _this.left.semanticCheck(state);
