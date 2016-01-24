@@ -1,20 +1,26 @@
 var parseError = require('latte/error').parseError;
 var Element = require('../element');
 
-module.exports = Type;
+module.exports = {
+  constr: Type,
+  create: create
+};
 
 Type.prototype = Object.create(Element.prototype);
 Type.prototype.constructor = Type;
 Type.prototype.toString = toString;
 
-Type.prototype.checkValue = checkValue;
 Type.prototype.unaryOperationCheck = unaryOperationCheck;
 Type.prototype.binaryOperationCheck = binaryOperationCheck;
 
+Type.prototype.semanticCheckValue = semanticCheckValue;
+Type.prototype.compileValue = compileValue;
+
+Type.prototype.semanticCheck = semanticCheck;
+Type.prototype.compile = compile;
+
 function Type(opts) {
   var _this = this;
-
-  Element.call(_this, opts);
 
   _this.operators = {
     binary: {},
@@ -30,7 +36,27 @@ function Type(opts) {
     last_column: 1
   };
 
-  _this.name = '$VARIABLE+PROTO';
+  Element.call(_this, opts);
+}
+
+function create(opts) {
+  return new Type(opts);
+}
+
+function semanticCheck() {
+  //
+}
+
+function compile() {
+  //
+}
+
+function semanticCheckValue() {
+  //
+}
+
+function compileValue() {
+  //
 }
 
 function unaryOperationCheck(operator) {
@@ -63,10 +89,7 @@ function binaryOperationCheck(operator, rightType) {
   }
 }
 
-function checkValue() {
-  return false;
-}
-
 function toString() {
   return 't:' + this.name;
 }
+

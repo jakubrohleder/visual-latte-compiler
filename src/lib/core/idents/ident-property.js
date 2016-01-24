@@ -1,4 +1,5 @@
 var CodeBlock = require('latte/code/code-block');
+var parseError = require('latte/error').parseError;
 var Element = require('latte/core/element');
 var Value = require('latte/core/value');
 
@@ -20,11 +21,22 @@ function IdentProperty(opts) {
 
 function semanticCheck(state) {
   var _this = this;
+  var property;
 
   _this.source.semanticCheck(state);
 
-  _this.type = _this.source.type.properties[_this.ident].type;
-  _this.index = _this.source.type.properties[_this.ident].index;
+  property = _this.source.type.properties[_this.ident];
+
+  if (property === undefined) {
+    parseError(
+      'Undeclared property ' + _this,
+      _this.loc,
+      _this
+    );
+  }
+
+  _this.type = property.type;
+  _this.index = property.index;
 }
 
 function create(opts) {

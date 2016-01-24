@@ -35,11 +35,9 @@ function create(elements) {
 
 function semanticCheck(state) {
   var _this = this;
-  var skip;
   var noop = StatementNoop.create({loc: _this.loc});
 
   _.forEach(_this, function(element, index) {
-    skip = false;
     if (state.scope.return === true) {
       parseError(
         'Code after return',
@@ -88,9 +86,7 @@ function semanticCheck(state) {
       }
     }
 
-    if (!skip) {
-      element.semanticCheck(state);
-    }
+    element.semanticCheck(state);
   });
 
   _.forEach(state.scope.functions, function(element) {

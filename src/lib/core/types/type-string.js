@@ -1,15 +1,14 @@
-var _ = require('lodash');
-
 var CodeBlock = require('latte/code/code-block');
 var ExpressionObject = require('latte/core/expressions/expression-object');
 var Value = require('latte/core/value');
 var unescape = require('latte/utils').unescape;
 
-var Type = require('./type');
+var Type = require('./type').constr;
 
 TypeString.prototype = Object.create(Type.prototype);
 TypeString.prototype.constructor = TypeString;
-TypeString.prototype.checkeValue = _.isString;
+TypeString.prototype.semanticCheck = semanticCheck;
+TypeString.prototype.compileValue = compileValue;
 TypeString.prototype.compile = compile;
 TypeString.prototype.defaultValueExpr = defaultValueExpr;
 
@@ -89,7 +88,7 @@ function compileAdd(state, left, right) {
   ;
 }
 
-function compile(state, expr) {
+function compileValue(state, expr) {
   var _this = this;
   var value = unescape(expr.text);
   var length = value.length;
@@ -125,4 +124,12 @@ function defaultValueExpr(loc) {
     text: '""',
     loc: loc
   });
+}
+
+function semanticCheck() {
+  // empty
+}
+
+function compile() {
+  // empty
 }

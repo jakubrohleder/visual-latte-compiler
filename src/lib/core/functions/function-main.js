@@ -1,6 +1,6 @@
 var parseError = require('latte/error').parseError;
 
-var _Function = require('./function').constructor;
+var _Function = require('./function').constr;
 
 var exports = module.exports = {};
 

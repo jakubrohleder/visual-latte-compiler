@@ -9,6 +9,7 @@
 "#".*                    /* skip hash line comments */
 "/*"((\*+[^/*])|([^*]))*\**"*/" /* skip block comments */
 
+null                      return 'NULL'
 true                      return 'TRUE'
 false                     return 'FALSE'
 if                        return 'IF'
@@ -99,7 +100,22 @@ TopDef
 
 ClassDecl
   : CLASS IDENT ClassBlock %prec CLASS_WITHOUT_EXTENDS
+    {
+      $$ = yy.Statements.DeclarationClass.create({
+        block: $ClassBlock,
+        name: $IDENT,
+        loc: _$
+      });
+    }
   | CLASS IDENT EXTENDS IDENT ClassBlock
+    {
+      $$ = yy.Statements.DeclarationClass.create({
+        block: $ClassBlock,
+        name: $IDENT1,
+        extends: $IDENT2,
+        loc: _$
+      });
+    }
   ;
 
 ClassBlock
@@ -375,6 +391,8 @@ Expr
     { $$ = $Array; }
   | Class
     { $$ = $Class  }
+  | NULL
+    { $$ = yy.Expressions.Null.create(); }
   | Ident
     {
       $$ = yy.Expressions.Variable.create({

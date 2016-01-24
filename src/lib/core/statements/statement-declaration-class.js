@@ -1,8 +1,8 @@
 var Statement = require('./statement');
-var Variable = require('../variable');
+var Type = require('latte/core/types/type');
 
-var parseError = require('latte/error').parseError;
-var CodeBlock = require('latte/code/code-block');
+// var parseError = require('latte/error').parseError;
+// var CodeBlock = require('latte/code/code-block');
 
 module.exports = {
   create: create
@@ -21,25 +21,12 @@ function StatementDeclarationClass(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var type = state.scope.getType(_this.type);
 
-  if (type === undefined) {
-    parseError(
-      'Undeclared type ' + _this.type,
-      _this.loc,
-      _this
-    );
-  }
-
-  _this.type = type;
-
-  _this.variable = Variable.create({
-    type: _this.type,
-    ident: _this.ident,
-    decl: _this
+  _this.type = Type.create({
+    name: _this.name
   });
 
-  state.scope.addVariable(_this.variable);
+  state.scope.addType(_this.type);
 }
 
 function create(opts) {

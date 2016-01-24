@@ -1,7 +1,7 @@
 var CodeBlock = require('latte/code/code-block');
 var TypeVoid = require('latte/core/types/type-void');
 
-var _Function = require('./function').constructor;
+var _Function = require('./function').constr;
 
 FunctionError.prototype = Object.create(_Function.prototype);
 FunctionError.prototype.constructor = FunctionError;

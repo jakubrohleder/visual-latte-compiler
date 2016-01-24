@@ -1,7 +1,7 @@
 var CodeBlock = require('latte/code/code-block');
 var TypeInt = require('latte/core/types/type-int');
 
-var _Function = require('./function').constructor;
+var _Function = require('./function').constr;
 
 FunctionReadInt.prototype = Object.create(_Function.prototype);
 FunctionReadInt.prototype.constructor = FunctionReadInt;

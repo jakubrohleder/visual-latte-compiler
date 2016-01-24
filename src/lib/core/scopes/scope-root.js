@@ -1,4 +1,4 @@
-var Scope = require('./scope').Scope;
+var Scope = require('./scope').constr;
 var FunctionError = require('../functions/function-error');
 var FunctionPrintInt = require('../functions/function-printInt');
 var FunctionPrintString = require('../functions/function-printString');

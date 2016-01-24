@@ -1,16 +1,15 @@
-var Type = require('./type');
+var Type = require('./type').constr;
 
 var CodeBlock = require('latte/code/code-block');
 var ExpressionObject = require('latte/core/expressions/expression-object');
 var Value = require('latte/core/value');
 
-var _ = require('lodash');
-
 TypeBoolean.prototype = Object.create(Type.prototype);
 TypeBoolean.prototype.constructor = TypeBoolean;
-TypeBoolean.prototype.checkeValue = _.isBoolean;
 TypeBoolean.prototype.defaultValueExpr = defaultValueExpr;
+TypeBoolean.prototype.compileValue = compileValue;
 TypeBoolean.prototype.compile = compile;
+TypeBoolean.prototype.semanticCheck = semanticCheck;
 
 var typeBoolean = module.exports = new TypeBoolean();
 
@@ -64,7 +63,7 @@ function compileNeg() {
     .add('notq %rax');
 }
 
-function compile(state, expr) {
+function compileValue(state, expr) {
   var _this = this;
   var value = expr.text ? 1 : 0;
 
@@ -90,4 +89,12 @@ function defaultValueExpr(loc) {
     text: false,
     loc: loc
   });
+}
+
+function semanticCheck() {
+  // empty
+}
+
+function compile() {
+  // empty
 }

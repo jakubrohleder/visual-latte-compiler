@@ -47,6 +47,7 @@ function semanticCheck(state) {
   }
 
   _this.expr.semanticCheck(state);
+  _this.type.semanticCheckValue(state, _this.expr.text);
 
   _this.variable = Variable.create({
     type: _this.type,

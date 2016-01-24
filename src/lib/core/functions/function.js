@@ -9,7 +9,7 @@ var parseError = require('latte/error').parseError;
 var _ = require('lodash');
 
 module.exports = {
-  constructor: _Function,
+  constr: _Function,
   create: create
 };
 
@@ -40,6 +40,14 @@ function semanticCheck(state) {
   state.pushFunction(_this);
 
   _.forEach(_this.args, function(argument, index) {
+    if (argument.type === TypeVoid) {
+      parseError(
+        'Void argument ' + argument.ident + ' in function ' + _this.ident,
+        argument.loc,
+        _this
+      );
+    }
+
     variable = Variable.create({
       type: argument.type,
       ident: argument.ident,

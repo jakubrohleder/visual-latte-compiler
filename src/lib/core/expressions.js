@@ -7,6 +7,7 @@ var ExpressionFuncall = require('./expressions/expression-funcall');
 var ExpressionObject = require('./expressions/expression-object');
 var ExpressionVariable = require('./expressions/expression-variable');
 var ExpressionParenthesis = require('./expressions/expression-parenthesis');
+var ExpressionNull = require('./expressions/expression-null');
 
 module.exports = {
   Comparison: ExpressionComparison,
@@ -17,5 +18,6 @@ module.exports = {
   Funcall: ExpressionFuncall,
   Object: ExpressionObject,
   Variable: ExpressionVariable,
+  Null: ExpressionNull,
   Parenthesis: ExpressionParenthesis
 };

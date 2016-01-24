@@ -32,10 +32,6 @@ function semanticCheck(state) {
     return;
   }
 
-  if (_this.expr !== undefined) {
-    _this.expr.semanticCheck(state);
-  }
-
   type = state.scope.getType(_this.type);
 
   if (_this.array === true) {
@@ -43,15 +39,21 @@ function semanticCheck(state) {
   } else {
     _this.type = type;
   }
+
+  if (_this.expr !== undefined) {
+    _this.expr.semanticCheck(state);
+  } else {
+    _this.type.semanticCheckValue(state, _this.text);
+  }
 }
 
 function compile(state) {
   var _this = this;
   var code = CodeBlock.create(_this)
-    .add(_this.type.compile(state, _this))
+    .add(_this.type.compileValue(state, _this))
   ;
 
-  _this.value.expr = _this;
+  // _this.value.expr = _this;
 
   return code;
 }

@@ -2,7 +2,7 @@ var CodeBlock = require('latte/code/code-block');
 var TypeVoid = require('latte/core/types/type-void');
 var TypeString = require('latte/core/types/type-string');
 
-var _Function = require('./function').constructor;
+var _Function = require('./function').constr;
 var Argument = require('../argument');
 
 FunctionPrintString.prototype = Object.create(_Function.prototype);

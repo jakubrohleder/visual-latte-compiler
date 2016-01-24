@@ -3,10 +3,10 @@ var CodeBlock = require('latte/code/code-block');
 
 var _ = require('lodash');
 
-var exports = module.exports = {};
-
-exports.create = create;
-exports.Scope = Scope;
+module.exports = {
+  create: create,
+  constr: Scope
+};
 
 Scope.prototype.addFunction = addFunction;
 Scope.prototype.addVariable = addVariable;

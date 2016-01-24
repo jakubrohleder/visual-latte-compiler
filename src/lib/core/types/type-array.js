@@ -1,10 +1,8 @@
-var Type = require('./type');
+var Type = require('./type').constr;
 
 var CodeBlock = require('latte/code/code-block');
 var TypeInt = require('latte/core/types/type-int');
 var Value = require('latte/core/value');
-
-var _ = require('lodash');
 
 var arrayType = {};
 
@@ -14,11 +12,14 @@ module.exports = {
 
 TypeArray.prototype = Object.create(Type.prototype);
 TypeArray.prototype.constructor = TypeArray;
-TypeArray.prototype.checkeValue = _.isNumber;
 TypeArray.prototype.defaultValueExpr = defaultValueExpr;
 TypeArray.prototype.toString = toString;
 
+TypeArray.prototype.semanticCheck = semanticCheck;
 TypeArray.prototype.compile = compile;
+TypeArray.prototype.semanticCheckValue = semanticCheckValue;
+TypeArray.prototype.compileValue = compileValue;
+
 
 function TypeArray(elementType) {
   var _this = this;
@@ -33,6 +34,7 @@ function TypeArray(elementType) {
 
   _this.properties = {
     length: {
+      function: false,
       type: TypeInt,
       index: 0
     }
@@ -47,7 +49,7 @@ function create(elementType) {
   return arrayType[elementType];
 }
 
-function compile(state, expr) {
+function compileValue(state, expr) {
   var _this = this;
   var malloc = 'malloc';
   var lengthPointer = state.pushRegister();
@@ -92,4 +94,16 @@ function toString() {
   var _this = this;
 
   return 'array:' + _this.elementType;
+}
+
+function compile() {
+  //
+}
+
+function semanticCheck() {
+  //
+}
+
+function semanticCheckValue() {
+  //
 }

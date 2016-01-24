@@ -32,7 +32,12 @@ function testGood {
                 echo "${basename}: OK"
                 rm "${basename}.out"
             else
-                echo "${KATALOG}/latc_x86_64 ${filename}.lat . && \"./${basename}\""
+                if [ -f "${filename}.input" ]
+                then
+                    echo "${KATALOG}/latc_x86_64 ${filename}.lat . && \"./${basename}\" < \"${filename}.input\""
+                else
+                    echo "${KATALOG}/latc_x86_64 ${filename}.lat . && \"./${basename}\""
+                fi
                 echo "${basename}: ERROR"
                 rm "${basename}.out"
             fi

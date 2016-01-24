@@ -1,18 +1,18 @@
-var Type = require('./type');
+var Type = require('./type').constr;
 
 var CodeBlock = require('latte/code/code-block');
 var Value = require('latte/core/value');
-
-var _ = require('lodash');
+var parseError = require('latte/error').parseError;
 
 TypeInt.prototype = Object.create(Type.prototype);
 TypeInt.prototype.constructor = TypeInt;
-TypeInt.prototype.checkeValue = _.isNumber;
+TypeInt.prototype.compileValue = compileValue;
+TypeInt.prototype.compile = compile;
+TypeInt.prototype.semanticCheck = semanticCheck;
+TypeInt.prototype.semanticCheckValue = semanticCheckValue;
 TypeInt.prototype.defaultValueExpr = defaultValueExpr;
 
 var typeInt = module.exports = new TypeInt();
-
-TypeInt.prototype.compile = compile;
 
 function TypeInt() {
   var _this = this;
@@ -66,7 +66,7 @@ function TypeInt() {
   };
 }
 
-function compile(state, expr) {
+function compileValue(state, expr) {
   var _this = this;
   var value = expr.text;
 
@@ -76,6 +76,18 @@ function compile(state, expr) {
   });
 
   return 'movq $' + value + ', %rax';
+}
+
+function semanticCheckValue(state, value) {
+  var _this = this;
+
+  if (value >= Number.MAX_SAFE_INTEGER) {
+    parseError(
+      'Integer over the limit ' + value,
+      _this.loc,
+      _this
+    );
+  }
 }
 
 function compileAdd(state, left, right) {
@@ -154,4 +166,12 @@ function defaultValueExpr(loc) {
     text: 0,
     loc: loc
   });
+}
+
+function semanticCheck() {
+  // empty
+}
+
+function compile() {
+  // empty
 }
