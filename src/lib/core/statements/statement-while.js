@@ -39,14 +39,6 @@ function semanticCheck(state) {
     );
   }
 
-  if (_.isArray(_this.loop)) {
-    parseError(
-      'Declaration as only instruction in while',
-      _this.loop[0].loc,
-      _this
-    );
-  }
-
   checkPath('loop');
 
   state.scope.return = _this.loop.scope.return || state.scope.return;
@@ -94,7 +86,7 @@ function compile(state) {
     .add(end + ':', 'end label', -1)
   ;
 
-  _this.cond.value.free(state);
+  // _this.cond.value.free(state);
 
   return code;
 }

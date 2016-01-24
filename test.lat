@@ -7,6 +7,9 @@ int main() {
      j++;
   }
 
+  printInt(a[0]);
+  printInt(a[1]);
+  printInt(a[2]);
   for (int x : a)
      printInt(x);
 

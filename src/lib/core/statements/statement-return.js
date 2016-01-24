@@ -25,25 +25,27 @@ function create(opts) {
 function semanticCheck(state) {
   var _this = this;
   var _void = state.rootScope.getType('void');
+  var type = state.function.type;
 
   if (_this.expr !== undefined) {
     _this.expr.semanticCheck(state);
-    if (state.function.type !== _this.expr.type) {
+
+    if (type !== _this.expr.type) {
       parseError(
-        'Wrong type of return: \'' + _this.expr.type + '\' instead of \'' + state.function.type + '\'',
+        'Wrong type of return: \'' + _this.expr.type + '\' instead of \'' + type + '\'',
         _this.loc[_this.loc.length - 2],
         _this
       );
-    } else if (state.function.type === _void) {
+    } else if (type === _void) {
       parseError(
         'Void function can\'t return any value',
         _this.loc[_this.loc.length - 2],
         _this
       );
     }
-  } else if (state.function.type !== _void) {
+  } else if (type !== _void) {
     parseError(
-      'Wrong type of return: \'' + _void + '\' instead of \'' + state.function.type + '\'',
+      'Wrong type of return: \'' + _void + '\' instead of \'' + type + '\'',
       _this.loc,
       _this
     );

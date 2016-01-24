@@ -1,6 +1,4 @@
 var CodeBlock = require('latte/code/code-block');
-var parseError = require('latte/error').parseError;
-
 var Expression = require('./expression');
 
 module.exports = {
@@ -26,30 +24,25 @@ function create(opts) {
 function semanticCheck(state) {
   var _this = this;
 
-  _this.variable = state.scope.getVariable(_this.ident);
+  _this.ident.semanticCheck(state);
 
-  if (_this.variable === undefined) {
-    parseError(
-      'Undeclared variable in expression: ' + _this.ident,
-      _this.loc,
-      _this
-    );
-  }
-
-  _this.type = _this.variable.type;
+  _this.type = _this.ident.type;
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
-  _this.value = _this.variable.value;
+  var code = _this.ident.compile(state);
+
+  _this.value = _this.ident.value;
 
   return CodeBlock.create(_this)
-    .add('movq ' + _this.variable.address + ', %rax')
+    .add(code)
+    .add('movq (%rax), %rax')
   ;
 }
 
 function toString() {
   var _this = this;
 
-  return _this.ident;
+  return '' + _this.ident;
 }

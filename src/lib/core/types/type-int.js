@@ -1,28 +1,26 @@
 var Type = require('./type');
 
 var CodeBlock = require('latte/code/code-block');
-var ExpressionObject = require('latte/core/expressions/expression-object');
 var Value = require('latte/core/value');
 
 var _ = require('lodash');
-
-module.exports = TypeInt;
 
 TypeInt.prototype = Object.create(Type.prototype);
 TypeInt.prototype.constructor = TypeInt;
 TypeInt.prototype.checkeValue = _.isNumber;
 TypeInt.prototype.defaultValueExpr = defaultValueExpr;
 
+var typeInt = module.exports = new TypeInt();
+
 TypeInt.prototype.compile = compile;
 
-function TypeInt(rootScope) {
+function TypeInt() {
   var _this = this;
 
   Type.call(_this);
 
   _this.builtin = true;
   _this.name = 'int';
-  _this.rootScope = rootScope;
   _this.size = 8;
 
   _this.operators.binary = {
@@ -149,8 +147,10 @@ function compileNeq() {
 }
 
 function defaultValueExpr(loc) {
+  var ExpressionObject = require('latte/core/expressions/expression-object');
+
   return ExpressionObject.create({
-    type: 'int',
+    type: typeInt,
     text: 0,
     loc: loc
   });

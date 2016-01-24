@@ -1,5 +1,8 @@
+var TypeArray = require('../types/type-array');
 var CodeBlock = require('latte/code/code-block');
 var Expression = require('./expression');
+
+var _ = require('lodash');
 
 module.exports = {
   create: create
@@ -23,9 +26,23 @@ function create(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var type = state.scope.getType(_this.type);
+  var type;
 
-  _this.type = type;
+  if (!_.isString(_this.type)) {
+    return;
+  }
+
+  if (_this.expr !== undefined) {
+    _this.expr.semanticCheck(state);
+  }
+
+  type = state.scope.getType(_this.type);
+
+  if (_this.array === true) {
+    _this.type = TypeArray.create(type);
+  } else {
+    _this.type = type;
+  }
 }
 
 function compile(state) {

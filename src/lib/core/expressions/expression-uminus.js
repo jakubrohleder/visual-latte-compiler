@@ -1,6 +1,7 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
 var Value = require('latte/core/value');
+var TypeInt = require('latte/core/types/type-int');
 
 var Expression = require('./expression');
 
@@ -22,11 +23,10 @@ function ExpressionUminus(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var integer = state.rootScope.getType('int');
 
   _this.expr.semanticCheck(state);
 
-  if (_this.expr.type !== integer) {
+  if (_this.expr.type !== TypeInt) {
     parseError(
       'Wrong type for integer negation \'' + _this.expr.type + '\' instead of \'int\'',
       _this.loc,

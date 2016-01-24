@@ -86,7 +86,7 @@ function compile(state) {
       .add(arg.compile(state))
       .add('movq %rax, ' + register)
     ;
-    arg.value.register = register;
+    // arg.value.register = register;
   });
 
   code
@@ -96,7 +96,7 @@ function compile(state) {
 
   _.forEach(_this.args, function(arg) {
     code
-      .add(arg.value.free(state))
+      // .add(arg.value.free(state))
     ;
   });
 

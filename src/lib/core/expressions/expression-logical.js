@@ -68,8 +68,8 @@ function compile(state) {
     .add(_this.right.compile(state))
     .add(label + ':', 'Skip second condition label', -1)
     .add('movq %rax, ' + state.pushRegister())
-    .add(_this.left.value.free(state))
-    .add(_this.right.value.free(state))
+    // .add(_this.left.value.free(state))
+    // .add(_this.right.value.free(state))
     .add('movq ' + state.popRegister() + ', %rax')
   ;
 }

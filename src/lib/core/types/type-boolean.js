@@ -6,23 +6,21 @@ var Value = require('latte/core/value');
 
 var _ = require('lodash');
 
-module.exports = TypeBoolean;
-
 TypeBoolean.prototype = Object.create(Type.prototype);
 TypeBoolean.prototype.constructor = TypeBoolean;
 TypeBoolean.prototype.checkeValue = _.isBoolean;
 TypeBoolean.prototype.defaultValueExpr = defaultValueExpr;
-
 TypeBoolean.prototype.compile = compile;
 
-function TypeBoolean(rootScope) {
+var typeBoolean = module.exports = new TypeBoolean();
+
+function TypeBoolean() {
   var _this = this;
 
   Type.call(_this);
 
   _this.builtin = true;
   _this.name = 'boolean';
-  _this.rootScope = rootScope;
   _this.size = 4;
 
   _this.operators.binary = {
@@ -88,7 +86,7 @@ function compileNeq() {
 
 function defaultValueExpr(loc) {
   return ExpressionObject.create({
-    type: 'boolean',
+    type: typeBoolean,
     text: false,
     loc: loc
   });

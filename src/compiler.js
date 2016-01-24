@@ -7,8 +7,9 @@ var parseError = require('latte/error').parseError;
 
 var grammar = fs.readFileSync(path.join(__dirname, '/syntax.jison'), 'utf8');
 
-var Expression = require('latte/core/expression');
-var Statement = require('latte/core/statement');
+var Expressions = require('latte/core/expressions');
+var Statements = require('latte/core/statements');
+var Idents = require('latte/core/idents');
 var Scope = require('latte/core/scopes/scope');
 var _Function = require('latte/core/function');
 var Argument = require('latte/core/argument');
@@ -31,8 +32,9 @@ function parse(code) {
   var result;
 
   parser.yy._ = _;
-  parser.yy.Expression = Expression;
-  parser.yy.Statement = Statement;
+  parser.yy.Expressions = Expressions;
+  parser.yy.Statements = Statements;
+  parser.yy.Idents = Idents;
   parser.yy.Scope = Scope;
   parser.yy.Function = _Function;
   parser.yy.Argument = Argument;

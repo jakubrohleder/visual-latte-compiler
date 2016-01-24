@@ -1,21 +1,21 @@
 var CodeBlock = require('latte/code/code-block');
+var TypeString = require('latte/core/types/type-string');
 
 var _Function = require('./function').constructor;
-
-module.exports = FunctionReadString;
 
 FunctionReadString.prototype = Object.create(_Function.prototype);
 FunctionReadString.prototype.constructor = FunctionReadString;
 FunctionReadString.prototype.semanticCheck = semanticCheck;
 FunctionReadString.prototype.compile = compile;
 
-function FunctionReadString(rootScope) {
+module.exports = new FunctionReadString();
+
+function FunctionReadString() {
   var _this = this;
 
   _this.ident = 'readString';
-  _this.type = rootScope.getType('string');
+  _this.type = TypeString;
   _this.args = [];
-  _this.parent = rootScope;
   _this.decl = {
     loc: {
       first_line: 1,

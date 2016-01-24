@@ -1,6 +1,7 @@
 var Statement = require('./statement');
 var _Function = require('../functions/function');
 var FunctionMain = require('../functions/function-main');
+var TypeArray = require('latte/core/types/type-array');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -33,6 +34,10 @@ function semanticCheck(state) {
       _this.loc,
       _this
     );
+  }
+
+  if (_this.array === true) {
+    type = TypeArray.create(type);
   }
 
   _this.type = type;

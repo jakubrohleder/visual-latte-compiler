@@ -17,7 +17,7 @@ function Value(opts) {
 
   Element.call(_this, opts);
 
-  _this.pointer = _this.type.name === 'string';
+  _this.pointer = _this.type.pointer;
   _this.references = _this.references || [];
 }
 

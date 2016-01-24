@@ -1,5 +1,7 @@
 var CodeBlock = require('latte/code/code-block');
+var parseError = require('latte/error').parseError;
 var Value = require('latte/core/value');
+var TypeBoolean = require('latte/core/types/type-boolean');
 
 var Expression = require('./expression');
 
@@ -23,6 +25,14 @@ function semanticCheck(state) {
   var _this = this;
 
   _this.expr.semanticCheck(state);
+
+  if (_this.expr.type !== TypeBoolean) {
+    parseError(
+      'Wrong type for boolean negation \'' + _this.expr.type + '\' instead of \'boolean\'',
+      _this.loc,
+      _this
+    );
+  }
 
   _this.type = _this.expr.type;
 }

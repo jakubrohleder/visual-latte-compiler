@@ -17,11 +17,16 @@ function StatementBlock(opts) {
   Statement.call(_this, opts);
 }
 
-function semanticCheck(state) {
+function semanticCheck(state, variable) {
   var _this = this;
   var scope = state.scope;
 
   _this.scope = state.pushScope();
+
+  if (variable !== undefined) {
+    _this.scope.addVariable(variable);
+  }
+
   _this.block.semanticCheck(state);
   scope.return = _this.scope.return;
   state.popScope();

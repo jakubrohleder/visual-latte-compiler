@@ -20,22 +20,15 @@ function StatementAssignment(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var variable = state.scope.getVariable(_this.ident);
 
-  _this.variable = variable;
+  _this.ident.semanticCheck(state);
   _this.expr.semanticCheck(state);
 
-  if (variable === undefined) {
-    parseError(
-      'Undeclared variable in assigment: ' + _this.ident,
-      _this.loc[_this.loc.length - 4],
-      _this
-    );
-  }
+  _this.type = _this.ident.type;
 
-  if (_this.expr.type !== variable.type) {
+  if (_this.expr.type !== _this.type) {
     parseError(
-      'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + variable.type,
+      'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type,
       _this.loc[_this.loc.length - 2],
       _this
     );
@@ -49,12 +42,13 @@ function compile(state) {
   code = CodeBlock.create(_this)
     .add(_this.expr.compile(state))
     .add('movq %rax, ' + state.pushRegister())
-    .add(_this.variable.value.removeReference(_this.variable, state))
-    .add('movq ' + state.popRegister() + ', ' + _this.variable.address, 'save ' + _this.expr + ' on ' + _this.variable)
+    // .add(_this.ident.value.removeReference(_this.variable, _this.ident, state))
+    .add(_this.ident.compile(state))
+    .add('movq ' + state.popRegister() + ', (%rax)', 'save ' + _this.expr + ' on ' + _this.ident)
   ;
 
-  _this.expr.value.addReference(_this.variable);
-  _this.variable.value = _this.expr.value;
+  // _this.expr.value.addReference(_this.variable);
+  // _this.variable.value = _this.expr.value;
 
   return code;
 }

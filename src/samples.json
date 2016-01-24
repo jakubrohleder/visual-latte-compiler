@@ -84,10 +84,16 @@
   },
   "extensions": {
     "arrays1": {
-      "array001.lat": "int main() {\n\n  int[] a = new int[10];\n  int j=0;\n  while (j<a.length) {\n     a[j] = j;\n     j++;\n  }\n\n  for (int x : a) \n     printInt(x);\n\n  int x = 45;\n  printInt(x);\n  return 0;\n}",
+      "array000.lat": "int main() {\n  int[] a = new int[20];\n  a[10] = 1;\n  a[11] = 2;\n  printInt(a[10]);\n  printInt(a[11]);\n\n  return 0;\n}",
+      "array000.output": "1\n2\n",
+      "array001.lat": "int main() {\n\n  int[] a = new int[10];\n  int j=0;\n  while (j<a.length) {\n     a[j] = j;\n     j++;\n  }\n\n  for (int x : a)\n     printInt(x);\n\n  int x = 45;\n  printInt(x);\n  return 0;\n}",
       "array001.output": "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n45\n",
       "array002.lat": "int [] doubleArray (int [] a){\n  int [] res = new int [a . length];\n  int i = 0 ;\n  for (int n : a){\n    res [i] = 2 * n ;\n    i ++ ;\n  }\n  return res ;\n}\n\nvoid shiftLeft (int [] a){\n  int x = a [0];\n  int i = 0 ;\n  while (i < a.length - 1){\n    a [i] = a [i + 1];\n    i ++ ;\n  }\n  a[a.length - 1]= x ;\n  return;\n }\n\nint scalProd(int[] a, int[] b) {\n  int res = 0;\n  int i = 0;\n  while (i < a.length) {\n    res = res + a[i] * b[i];\n    i++;\n  }\n  return res;\n}\n\nint main () {\n  int [] a = new int [5];\n  int i = 0 ;\n  while (i < a.length){\n    a [i]= i ;\n    i ++ ;\n    }\n  shiftLeft (a);\n  int [] b = doubleArray (a);\n  for (int x : a)printInt (x);\n  for (int x : b)printInt (x);\n  printInt(scalProd(a,b));\n  return 0 ;\n}\n ",
       "array002.output": "1\n2\n3\n4\n0\n2\n4\n6\n8\n0\n60\n"
+    },
+    "objects2": {
+      "shapes.lat": "class Node {\n  Shape elem;\n  Node next;\n\n  void setElem(Shape c) { elem = c; }\n\n  void setNext(Node n) { next = n; }\n\n  Shape getElem() { return elem; }\n\n  Node getNext() { return next; }\n}\n\nclass Stack {\n  Node head;\n\n  void push(Shape c) {\n    Node newHead = new Node;\n    newHead.setElem(c);\n    newHead.setNext(head);\n    head = newHead;\n  }\n\n  boolean isEmpty() {\n    return head==(Node)null;\n  }\n\n  Shape top() {\n    return head.getElem();\n  }\n\n  void pop() {\n    head = head.getNext();\n  }\n}\n\nclass Shape {\n  void tell () {\n    printString(\"I'm a shape\");\n  }\n\n  void tellAgain() {\n     printString(\"I'm just a shape\");\n  }\n}\n\nclass Rectangle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a rectangle\");\n  }\n}\n\nclass Circle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a circle\");\n  }\n}\n\nclass Square extends Rectangle {\n  void tellAgain() {\n    printString(\"I'm really a square\");\n  }\n}\n\nint main() {\n  Stack stk = new Stack;\n  Shape s = new Shape;\n  stk.push(s);\n  s = new Rectangle;\n  stk.push(s);\n  s = new Square;\n  stk.push(s);\n  s = new Circle;\n  stk.push(s);\n  while (!stk.isEmpty()) {\n    s = stk.top();\n    s.tell();\n    s.tellAgain();\n    stk.pop();\n  }\n  return 0;\n}\n",
+      "shapes.output": "I'm a shape\nI'm really a circle\nI'm a shape\nI'm really a square\nI'm a shape\nI'm really a rectangle\nI'm a shape\nI'm just a shape\n"
     },
     "objects1": {
       "counter.lat": "int main () {\n  Counter c;\n  c = new Counter;\n  c.incr();\n  c.incr();\n  c.incr();\n  int x = c.value();\n  printInt(x);\n  return 0;\n}\n\nclass Counter {\n  int val;\n\n  void incr () {val++; return;}\n\n  int value () {return val;}\n\n}\n",
@@ -98,10 +104,6 @@
       "points.output": "5\n9\n7\n2\n",
       "queue.lat": "class Node {\n  int elem;\n  Node next;\n\n  void setElem (int e)  { elem = e; }\n  void setNext (Node n) { next = n; }\n\n  int  getElem () { return elem; }\n  Node getNext () { return next; }\n\n}\n\nclass IntQueue {\n  Node front;\n  Node rear;\n\n  boolean isEmpty () { return front == (Node)null; }\n\n  void insert (int x) {\n    Node last = new Node;\n    last.setElem(x);\n    if (self.isEmpty())\n      front = last;\n    else \n      rear.setNext(last);\n    rear = last;\n  }\n\n  int first () { return front.getElem(); }\n\n  void rmFirst () {\n    front = front.getNext();\n  }\n\n  int size () {\n      Node n = front;\n      int res = 0;\n      while (n != (Node)null) {\n        n = n.getNext();\n        res++;\n      }\n     return res;\n  }\n}\n\nint f (int x) {\n  return x*x + 3;\n}\n\nint main () {\n  IntQueue q = new IntQueue;\n  q.insert(f(3));\n  q.insert(5);\n  q.insert(7);\n  printInt(q.first());\n  q.rmFirst();\n  printInt(q.size());\n  return 0;\n}\n\n     ",
       "queue.output": "12\n2\n"
-    },
-    "objects2": {
-      "shapes.lat": "class Node {\n  Shape elem;\n  Node next;\n\n  void setElem(Shape c) { elem = c; }\n\n  void setNext(Node n) { next = n; }\n\n  Shape getElem() { return elem; }\n\n  Node getNext() { return next; }\n}\n\nclass Stack {\n  Node head;\n\n  void push(Shape c) {\n    Node newHead = new Node;\n    newHead.setElem(c);\n    newHead.setNext(head);\n    head = newHead;\n  }\n\n  boolean isEmpty() {\n    return head==(Node)null;\n  }\n\n  Shape top() {\n    return head.getElem();\n  }\n\n  void pop() {\n    head = head.getNext();\n  }\n}\n\nclass Shape {\n  void tell () {\n    printString(\"I'm a shape\");\n  }\n\n  void tellAgain() {\n     printString(\"I'm just a shape\");\n  }\n}\n\nclass Rectangle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a rectangle\");\n  }\n}\n\nclass Circle extends Shape {\n  void tellAgain() {\n    printString(\"I'm really a circle\");\n  }\n}\n\nclass Square extends Rectangle {\n  void tellAgain() {\n    printString(\"I'm really a square\");\n  }\n}\n\nint main() {\n  Stack stk = new Stack;\n  Shape s = new Shape;\n  stk.push(s);\n  s = new Rectangle;\n  stk.push(s);\n  s = new Square;\n  stk.push(s);\n  s = new Circle;\n  stk.push(s);\n  while (!stk.isEmpty()) {\n    s = stk.top();\n    s.tell();\n    s.tellAgain();\n    stk.pop();\n  }\n  return 0;\n}\n",
-      "shapes.output": "I'm a shape\nI'm really a circle\nI'm a shape\nI'm really a square\nI'm a shape\nI'm really a rectangle\nI'm a shape\nI'm just a shape\n"
     },
     "struct": {
       "list.lat": "class list {\n  int elem;\n  list next;\n}\n\nint main() {\n  printInt(length(fromTo(1,50)));\n  printInt(length2(fromTo(1,100)));\n  return 0;\n}\n\nint head (list xs) {\n  return xs . elem;\n}\n \nlist cons (int x, list xs) {\n  list n;\n  n = new list;\n  n.elem = x;\n  n.next = xs;\n  return n;\n}\n\nint length (list xs) {\n  if (xs==(list)null)\n    return 0;\n  else\n    return 1 + length (xs.next);\n}\n\nlist fromTo (int m, int n) {\n  if (m>n)\n    return (list)null;\n  else \n    return cons (m,fromTo (m+1,n));\n}\n\nint length2 (list xs) {\n  int res = 0;\n  while (xs != (list)null) {\n    res++;\n    xs = xs.next;\n  }\n  return res;\n}\n",
@@ -130,7 +132,8 @@
         "infinite_while.lat": "// Author: Tomasz Wysocki 277696\nint main() {\n    while(true) {\n    }\n}\n"
       },
       "runtime": {
-        "error.lat": "// Author: Tomasz Wysocki 277696\nint main() {\n    error();\n    return 0;\n}\n"
+        "error.lat": "// Author: Tomasz Wysocki 277696\nint main() {\n    error();\n    return 0;\n}\n",
+        "error.output": "runtime error\n"
       },
       "semantic": {
         "big_number.lat": "// Author: Tomasz Wysocki 277696\nint main() {\n    int i = 999999999999999999999999999999999999999999999999999999999999;\n    return 0;\n}\n",

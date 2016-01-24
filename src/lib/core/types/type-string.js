@@ -7,23 +7,23 @@ var unescape = require('latte/utils').unescape;
 
 var Type = require('./type');
 
-module.exports = TypeString;
-
 TypeString.prototype = Object.create(Type.prototype);
 TypeString.prototype.constructor = TypeString;
 TypeString.prototype.checkeValue = _.isString;
 TypeString.prototype.compile = compile;
 TypeString.prototype.defaultValueExpr = defaultValueExpr;
 
-function TypeString(rootScope) {
+var typeString = module.exports = new TypeString();
+
+function TypeString() {
   var _this = this;
 
   Type.call(_this);
 
   _this.builtin = true;
   _this.name = 'string';
-  _this.rootScope = rootScope;
   _this.size = 8;
+  _this.pointer = true;
 
   _this.operators.binary = {
     '+': {
@@ -121,7 +121,7 @@ function compile(state, expr) {
 
 function defaultValueExpr(loc) {
   return ExpressionObject.create({
-    type: 'string',
+    type: typeString,
     text: '""',
     loc: loc
   });

@@ -1,26 +1,27 @@
 var CodeBlock = require('latte/code/code-block');
+var TypeVoid = require('latte/core/types/type-void');
+var TypeInt = require('latte/core/types/type-int');
 
 var _Function = require('./function').constructor;
 var Argument = require('../argument');
-
-module.exports = FunctionPrintInt;
 
 FunctionPrintInt.prototype = Object.create(_Function.prototype);
 FunctionPrintInt.prototype.constructor = FunctionPrintInt;
 FunctionPrintInt.prototype.semanticCheck = semanticCheck;
 FunctionPrintInt.prototype.compile = compile;
 
-function FunctionPrintInt(rootScope) {
+module.exports = new FunctionPrintInt();
+
+function FunctionPrintInt() {
   var _this = this;
   var arg = Argument.create({
-    type: rootScope.getType('int'),
+    type: TypeInt,
     ident: 'arg'
   });
 
   _this.ident = 'printInt';
-  _this.type = rootScope.getType('void');
+  _this.type = TypeVoid;
   _this.args = [arg];
-  _this.parent = rootScope;
   _this.decl = {
     loc: {
       first_line: 1,

@@ -1,6 +1,7 @@
 var Element = require('latte/core/element');
 var Variable = require('latte/core/variable');
 var Value = require('latte/core/value');
+var TypeVoid = require('latte/core/types/type-void');
 
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
@@ -33,7 +34,6 @@ function _Function(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var _void = state.rootScope.getType('void');
   var variable;
 
   _this.scope = state.pushScope();
@@ -54,7 +54,7 @@ function semanticCheck(state) {
 
   _this.block.semanticCheck(state);
 
-  if (_this.type !== _void && state.scope.return === false) {
+  if (_this.type !== TypeVoid && state.scope.return === false) {
     parseError(
       'No return in function \'' + _this.ident + '\'',
       _this.decl.loc[_this.decl.loc.length - 2],
@@ -104,7 +104,7 @@ function compile(state, shift) {
       type: argument.variable.type
     });
 
-    argument.variable.value.addReference(argument.variable);
+    // argument.variable.value.addReference(argument.variable);
   });
 
   code = _this.block.compile(state);

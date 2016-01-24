@@ -1,21 +1,21 @@
 var CodeBlock = require('latte/code/code-block');
+var TypeVoid = require('latte/core/types/type-void');
 
 var _Function = require('./function').constructor;
-
-module.exports = FunctionError;
 
 FunctionError.prototype = Object.create(_Function.prototype);
 FunctionError.prototype.constructor = FunctionError;
 FunctionError.prototype.semanticCheck = semanticCheck;
 FunctionError.prototype.compile = compile;
 
-function FunctionError(rootScope) {
+module.exports = new FunctionError();
+
+function FunctionError() {
   var _this = this;
 
   _this.ident = 'error';
-  _this.type = rootScope.getType('void');
+  _this.type = TypeVoid;
   _this.args = [];
-  _this.parent = rootScope;
   _this.decl = {
     loc: {
       first_line: 1,

@@ -3,6 +3,7 @@ var Variable = require('../variable');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
+var TypeArray = require('latte/core/types/type-array');
 
 module.exports = {
   create: create
@@ -35,11 +36,16 @@ function semanticCheck(state) {
     );
   }
 
-  _this.type = type;
+  if (_this.array === true) {
+    _this.type = TypeArray.create(type);
+  } else {
+    _this.type = type;
+  }
 
   if (_this.expr === undefined) {
-    _this.expr = type.defaultValueExpr(_this.loc[_this.loc.length - 2]);
+    _this.expr = _this.type.defaultValueExpr(_this.loc[_this.loc.length - 2], type);
   }
+
   _this.expr.semanticCheck(state);
 
   _this.variable = Variable.create({
@@ -48,9 +54,17 @@ function semanticCheck(state) {
     decl: _this
   });
 
-  if (_this.expr.type !== type) {
+  if (_this.array === true) {
+    if (_this.expr.type.elementType !== type) {
+      parseError(
+        'Wrong type for assigment to array: ' + _this.expr.type + ' instead of ' + _this.type,
+        _this.loc[_this.loc.length - 2],
+        _this
+      );
+    }
+  } else if (_this.expr.type !== _this.type) {
     parseError(
-      'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + type,
+      'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type,
       _this.loc[_this.loc.length - 2],
       _this
     );
@@ -72,7 +86,7 @@ function compile(state) {
   ;
 
   _this.variable.value = _this.expr.value;
-  _this.variable.value.addReference(_this.variable);
+  // _this.variable.value.addReference(_this.variable);
 
   return code;
 }

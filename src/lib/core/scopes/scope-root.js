@@ -26,16 +26,16 @@ function RootScope(opts) {
 
   Scope.call(_this, opts);
 
-  _this.addType(new TypeInt(_this));
-  _this.addType(new TypeString(_this));
-  _this.addType(new TypeVoid(_this));
-  _this.addType(new TypeBoolean(_this));
+  _this.addType(TypeInt);
+  _this.addType(TypeString);
+  _this.addType(TypeVoid);
+  _this.addType(TypeBoolean);
 
-  _this.addFunction(new FunctionError(_this));
-  _this.addFunction(new FunctionPrintInt(_this));
-  _this.addFunction(new FunctionPrintString(_this));
-  _this.addFunction(new FunctionReadInt(_this));
-  _this.addFunction(new FunctionReadString(_this));
+  _this.addFunction(FunctionError);
+  _this.addFunction(FunctionPrintInt);
+  _this.addFunction(FunctionPrintString);
+  _this.addFunction(FunctionReadInt);
+  _this.addFunction(FunctionReadString);
 
   _this.root = true;
 }

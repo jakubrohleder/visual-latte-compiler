@@ -78,7 +78,7 @@ function compile(state) {
     .add(end + ':', 'end label', -1)
   ;
 
-  _this.cond.value.free(state);
+  // _this.cond.value.free(state);
 
   return code;
 }

@@ -31,6 +31,6 @@ function compile(state) {
   var _this = this;
   return CodeBlock.create(_this)
     .add(_this.expr.compile(state))
-    .add(_this.expr.value.free(state))
+    // .add(_this.expr.value.free(state))
   ;
 }

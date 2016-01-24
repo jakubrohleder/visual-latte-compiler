@@ -1,21 +1,21 @@
 var CodeBlock = require('latte/code/code-block');
+var TypeInt = require('latte/core/types/type-int');
 
 var _Function = require('./function').constructor;
-
-module.exports = FunctionReadInt;
 
 FunctionReadInt.prototype = Object.create(_Function.prototype);
 FunctionReadInt.prototype.constructor = FunctionReadInt;
 FunctionReadInt.prototype.semanticCheck = semanticCheck;
 FunctionReadInt.prototype.compile = compile;
 
-function FunctionReadInt(rootScope) {
+module.exports = new FunctionReadInt();
+
+function FunctionReadInt() {
   var _this = this;
 
   _this.ident = 'readInt';
-  _this.type = rootScope.getType('int');
+  _this.type = TypeInt;
   _this.args = [];
-  _this.parent = rootScope;
   _this.decl = {
     loc: {
       first_line: 1,

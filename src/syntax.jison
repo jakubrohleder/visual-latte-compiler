@@ -115,7 +115,8 @@ ClassStms
   ;
 
 ClassStm
- : Type Items ';'
+ : IDENT Items ';'
+ | IDENT ARRAY Items ';'
  | FunctionDecl
  ;
 
@@ -124,13 +125,24 @@ ClassStm
  */
 
 FunctionDecl
-  : Type IDENT '(' Args ')' Block
+  : IDENT IDENT '(' Args ')' Block
     {
-      $$ = yy.Statement.DeclarationFunction.create({
+      $$ = yy.Statements.DeclarationFunction.create({
         args: $Args,
         block: $Block,
-        type: $Type,
-        ident: $IDENT,
+        type: $IDENT1,
+        ident: $IDENT2,
+        loc: _$
+      });
+    }
+  | IDENT ARRAY IDENT '(' Args ')' Block
+    {
+      $$ = yy.Statements.DeclarationFunction.create({
+        args: $Args,
+        block: $Block,
+        type: $IDENT1,
+        array: true,
+        ident: $IDENT2,
         loc: _$
       });
     }
@@ -146,11 +158,20 @@ Args
   ;
 
 Arg
-  : Type IDENT
+  : IDENT IDENT
     {
       $$ = yy.Argument.create({
-        type: $Type,
-        ident: $IDENT,
+        type: $IDENT1,
+        ident: $IDENT2,
+        loc: _$
+      });
+    }
+  | IDENT ARRAY IDENT
+    {
+      $$ = yy.Argument.create({
+        type: $IDENT1,
+        array: true,
+        ident: $IDENT2,
         loc: _$
       });
     }
@@ -183,7 +204,7 @@ Stmts
 Stmt
   : Block
     {
-      $$ = yy.Statement.Block.create({
+      $$ = yy.Statements.Block.create({
         block: $Block,
         loc: _$
       });
@@ -203,6 +224,7 @@ Stmt
     {
       $Items.map(function(item) {
         item.type = String($IDENT);
+        item.array = true;
       });
 
       $$ = $Items;
@@ -211,7 +233,7 @@ Stmt
 
   | Ident '=' Expr ';'
     {
-      $$ = yy.Statement.Assignment.create({
+      $$ = yy.Statements.Assignment.create({
         ident: $Ident,
         expr: $Expr,
         loc: _$
@@ -219,14 +241,14 @@ Stmt
     }
   | Ident INCR ';'
     {
-      $$ = yy.Statement.Incr.create({
+      $$ = yy.Statements.Incr.create({
         ident: $Ident,
         loc: _$
       });
     }
   | Ident DECR ';'
     {
-      $$ = yy.Statement.Decr.create({
+      $$ = yy.Statements.Decr.create({
         ident: $Ident,
         loc: _$
       });
@@ -234,7 +256,7 @@ Stmt
   | RETURN Expr ';'
     {
       {
-        $$ = yy.Statement.Return.create({
+        $$ = yy.Statements.Return.create({
           expr: $Expr,
           loc: _$
         });
@@ -242,13 +264,13 @@ Stmt
     }
   | RETURN ';'
     {
-      $$ = yy.Statement.Return.create({
+      $$ = yy.Statements.Return.create({
         loc: _$
       });
     }
   | IF '(' Expr ')' Stmt %prec IF_WITHOUT_ELSE
     {
-      $$ = yy.Statement.If.create({
+      $$ = yy.Statements.If.create({
         cond: $Expr,
         right: $Stmt,
         loc: _$
@@ -256,7 +278,7 @@ Stmt
     }
   | IF '(' Expr ')' Stmt ELSE Stmt
     {
-      $$ = yy.Statement.If.create({
+      $$ = yy.Statements.If.create({
         cond: $Expr,
         right: $Stmt1,
         wrong: $Stmt2,
@@ -265,22 +287,41 @@ Stmt
     }
   | WHILE '(' Expr ')' Stmt
     {
-      $$ = yy.Statement.While.create({
+      $$ = yy.Statements.While.create({
         cond: $Expr,
         loop: $Stmt,
         loc: _$
       });
     }
   | FOR '(' IDENT IDENT ':' IDENT ')' Stmt
+    {
+      $$ = yy.Statements.For.create({
+        decl: true,
+        type: $IDENT1,
+        ident: $IDENT2,
+        array: $IDENT3,
+        loop: $Stmt,
+        loc: _$
+      });
+    }
   | FOR '(' IDENT ':' IDENT ')' Stmt
+    {
+      $$ = yy.Statements.For.create({
+        decl: false,
+        ident: $IDENT1,
+        array: $IDENT2,
+        loop: $Stmt,
+        loc: _$
+      });
+    }
   | Expr ';'
     {
-      $$ = yy.Statement.Expression.create({
+      $$ = yy.Statements.Expression.create({
         expr: $Expr
       });
     }
   | ';'
-    { $$ = yy.Statement.Noop.create({
+    { $$ = yy.Statements.Noop.create({
       loc: _$
     }); }
   ;
@@ -295,14 +336,14 @@ Items
 Item
   : IDENT
     {
-      $$ = yy.Statement.DeclarationVariable.create({
+      $$ = yy.Statements.DeclarationVariable.create({
         ident: $IDENT,
         loc: _$
       });
     }
   | IDENT '=' Expr
     {
-      $$ = yy.Statement.DeclarationVariable.create({
+      $$ = yy.Statements.DeclarationVariable.create({
         ident: $IDENT,
         expr: $Expr,
         loc: _$
@@ -330,42 +371,42 @@ Expr
     { $$ = $String; }
   | Logical
     { $$ = $Logical; }
+  | Array
+    { $$ = $Array; }
+  | Class
+    { $$ = $Class  }
   | Ident
     {
-      $$ = yy.Expression.Variable.create({
+      $$ = yy.Expressions.Variable.create({
         ident: $Ident,
         loc: _$
       });
     }
   | Ident '(' Exprs ')'
     {
-      $$ = yy.Expression.Funcall.create({
+      $$ = yy.Expressions.Funcall.create({
         args: $Exprs,
         ident: $Ident,
         loc: _$
       });
     }
-  | NEW IDENT '[' Expr ']'
-    { console.log('undefined NEW IDENT [ Expr ]'); }
-  | NEW IDENT
-    { console.log('undefined NEW IDENT ');  }
   | '-' Expr %prec UMINUS
     {
-      $$ = yy.Expression.Uminus.create({
+      $$ = yy.Expressions.Uminus.create({
         expr: $Expr,
         loc: _$
       });
     }
   | '!' Expr %prec NEGATION
     {
-      $$ = yy.Expression.Negation.create({
+      $$ = yy.Expressions.Negation.create({
         expr: $Expr,
         loc: _$
       });
     }
   | Expr MulOp Expr %prec MULOP
     {
-      $$ = yy.Expression.Operation.create({
+      $$ = yy.Expressions.Operation.create({
         operator: $MulOp,
         left: $Expr1,
         right: $Expr2,
@@ -374,7 +415,7 @@ Expr
     }
   | Expr AddOp Expr %prec ADDOP
     {
-      $$ = yy.Expression.Operation.create({
+      $$ = yy.Expressions.Operation.create({
         operator: $AddOp,
         left: $Expr1,
         right: $Expr2,
@@ -383,7 +424,7 @@ Expr
     }
   | Expr RelOp Expr %prec RELOP
     {
-      $$ = yy.Expression.Comparison.create({
+      $$ = yy.Expressions.Comparison.create({
         operator: $RelOp,
         left: $Expr1,
         right: $Expr2,
@@ -392,7 +433,7 @@ Expr
     }
   | Expr LogOp Expr %prec LOGOP
     {
-      $$ = yy.Expression.Logical.create({
+      $$ = yy.Expressions.Logical.create({
         operator: $LogOp,
         left: $Expr1,
         right: $Expr2,
@@ -401,7 +442,7 @@ Expr
     }
   | '(' Expr ')'
     {
-      $$ = yy.Expression.Parenthesis.create({
+      $$ = yy.Expressions.Parenthesis.create({
         expr: $Expr
       });
     }
@@ -411,26 +452,48 @@ Expr
  * TYPES, CONSTANTS AND OPERATORS
  */
 
-Type
-  : IDENT
-    { $$ = String($IDENT); }
-  | IDENT ARRAY
-    { $$ = String($IDENT); }
-  ;
+Array
+ : NEW IDENT '[' Expr ']'
+    { $$ = yy.Expressions.Object.create({
+        type: $IDENT,
+        array: true,
+        expr: $Expr,
+        loc: _$
+      });
+    }
+ ;
 
+Class
+  : NEW IDENT
+    { }
+  ;
 Ident
   : IDENT
-    { $$ = $IDENT; }
+    { $$ = yy.Idents.Variable.create({
+        text: $IDENT,
+        loc: _$
+      });
+    }
   | Ident '.' IDENT
-    { console.log('undefined Ident . IDENT'); }
+    { $$ = yy.Idents.Property.create({
+        ident: $IDENT,
+        source: $Ident,
+        loc: _$
+      });
+    }
   | Ident '[' Expr ']'
-    { console.log('undefined Ident [ Expr ]'); }
+    { $$ = yy.Idents.Element.create({
+        expr: $Expr,
+        source: $Ident,
+        loc: _$
+      });
+    }
   ;
 
 Number
   : NUMBER
     {
-      $$ = yy.Expression.Object.create({
+      $$ = yy.Expressions.Object.create({
         type: 'int',
         text: Number(yytext),
         loc: _$
@@ -441,7 +504,7 @@ Number
 String
   : STRING_IDENT
     {
-      $$ = yy.Expression.Object.create({
+      $$ = yy.Expressions.Object.create({
         type: 'string',
         text: String(yytext),
         loc: _$
@@ -452,7 +515,7 @@ String
 Logical
   : LogVal
     {
-      $$ = yy.Expression.Object.create({
+      $$ = yy.Expressions.Object.create({
         type: 'boolean',
         text: JSON.parse($LogVal),
         loc: _$

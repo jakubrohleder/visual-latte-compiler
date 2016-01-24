@@ -21,6 +21,8 @@ function Type(opts) {
     unary: {}
   };
 
+  _this.properties = {};
+
   _this.loc = {
     first_line: 1,
     last_line: 1,

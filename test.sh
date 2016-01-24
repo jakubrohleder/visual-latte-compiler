@@ -63,8 +63,10 @@ function testBad {
     done
 }
 
-testGood "samples/good/*"
+# testGood "samples/good/*"
 
-testGood "samples/extra/good/basic/*"
+# testGood "samples/extra/good/basic/*"
 
-testBad "samples/bad/*"
+# testBad "samples/bad/*"
+
+testGood "samples/extensions/arrays1/*"

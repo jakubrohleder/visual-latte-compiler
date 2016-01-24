@@ -1,5 +1,6 @@
 var Element = require('./element');
 var parseError = require('latte/error').parseError;
+var TypeArray = require('latte/core/types/type-array');
 
 var exports = module.exports = {};
 
@@ -29,6 +30,10 @@ function semanticCheck(state) {
       _this.loc,
       _this
     );
+  }
+
+  if (_this.array === true) {
+    type = TypeArray.create(type);
   }
 
   _this.type = type;
