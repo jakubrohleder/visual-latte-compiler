@@ -54,7 +54,7 @@ function testBad {
             then
                 rm "${filename}.out"
                 rm "${filename}"
-                echo "${KATALOG}/latc_x86_64 ${filename}.lat \. && \"${filename}\""
+                echo "${KATALOG}/latc_x86_64 ${filename}.lat \."
                 echo "${filename}: ERROR"
             else
                 echo "${filename}: OK"
@@ -63,10 +63,12 @@ function testBad {
     done
 }
 
-# testGood "samples/good/*"
+testGood "samples/good/*"
 
-# testGood "samples/extra/good/basic/*"
+testGood "samples/extra/bad/runtime/*"
 
-# testBad "samples/bad/*"
+testBad "samples/extra/bad/semantic/*"
+
+testBad "samples/bad/*"
 
 testGood "samples/extensions/arrays1/*"
