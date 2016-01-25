@@ -53,8 +53,6 @@ function compile(state) {
     .add(_this.type.compileValue(state, _this))
   ;
 
-  // _this.value.expr = _this;
-
   return code;
 }
 

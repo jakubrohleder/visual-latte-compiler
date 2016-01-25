@@ -1,6 +1,5 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
-var Value = require('latte/core/value');
 
 var Expression = require('./expression');
 
@@ -72,11 +71,6 @@ function compile(state) {
   var code = CodeBlock.create(_this)
     .comment('' + _this.ident + ' calling with ' + _this.args.join(', '));
 
-  _this.value = Value.create({
-    type: _this.type,
-    expr: _this,
-    register: '%rax'
-  });
 
   state.stack.addFunctionCall(_this);
 
@@ -86,7 +80,6 @@ function compile(state) {
       .add(arg.compile(state))
       .add('movq %rax, ' + register)
     ;
-    // arg.value.register = register;
   });
 
   code

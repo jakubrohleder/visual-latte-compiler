@@ -1,6 +1,5 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
-var Value = require('latte/core/value');
 
 var Expression = require('./expression');
 
@@ -57,18 +56,12 @@ function compile(state) {
   var operator = _this.left.type.operators.binary[_this.operator];
   var rightRegister;
   var leftRegister;
-  _this.value = Value.create({
-    type: _this.type,
-    expr: _this,
-    register: '%rax'
-  });
 
   var code = CodeBlock.create(_this, 'Operation ' + _this)
     .add(_this.right.compile(state))
   ;
 
   rightRegister = state.pushRegister();
-  _this.right.value.register = rightRegister;
 
   code
     .add('movq %rax, ' + rightRegister)
@@ -76,7 +69,6 @@ function compile(state) {
   ;
 
   leftRegister = state.pushRegister();
-  _this.left.value.register = leftRegister;
 
   code
     .add('movq %rax, ' + leftRegister)

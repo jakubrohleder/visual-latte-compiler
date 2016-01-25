@@ -1,6 +1,5 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
-var Value = require('latte/core/value');
 
 var Expression = require('./expression');
 
@@ -56,11 +55,6 @@ function compile(state) {
   var _this = this;
   var operator = _this.left.type.operators.binary[_this.operator];
   var label = state.nextLabel();
-  _this.value = Value.create({
-    type: _this.type,
-    expr: _this,
-    register: '%rax'
-  });
 
   return CodeBlock.create(_this)
     .add(_this.left.compile(state))

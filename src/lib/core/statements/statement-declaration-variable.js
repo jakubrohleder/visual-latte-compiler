@@ -86,7 +86,6 @@ function compile(state) {
     .add('movq %rax, ' + _this.variable.address)
   ;
 
-  _this.variable.value = _this.expr.value;
   // _this.variable.value.addReference(_this.variable);
 
   return code;

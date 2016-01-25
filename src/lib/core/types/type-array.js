@@ -2,7 +2,6 @@ var Type = require('./type').constr;
 
 var CodeBlock = require('latte/code/code-block');
 var TypeInt = require('latte/core/types/type-int');
-var Value = require('latte/core/value');
 
 var arrayType = {};
 
@@ -55,11 +54,6 @@ function compileValue(state, expr) {
   var lengthPointer = state.pushRegister();
 
   state.popRegister();
-
-  expr.value = Value.create({
-    type: _this,
-    register: '%rax'
-  });
 
   if (state.os === 'darwin') {
     malloc = '_' + malloc;

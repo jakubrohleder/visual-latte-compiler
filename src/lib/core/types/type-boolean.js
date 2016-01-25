@@ -2,7 +2,6 @@ var Type = require('./type').constr;
 
 var CodeBlock = require('latte/code/code-block');
 var ExpressionObject = require('latte/core/expressions/expression-object');
-var Value = require('latte/core/value');
 
 TypeBoolean.prototype = Object.create(Type.prototype);
 TypeBoolean.prototype.constructor = TypeBoolean;
@@ -64,13 +63,7 @@ function compileNeg() {
 }
 
 function compileValue(state, expr) {
-  var _this = this;
   var value = expr.text ? 1 : 0;
-
-  expr.value = Value.create({
-    type: _this,
-    register: '%rax'
-  });
 
   return 'movq $' + value + ', %rax';
 }

@@ -1,6 +1,5 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
-var Value = require('latte/core/value');
 var TypeInt = require('latte/core/types/type-int');
 
 var Expression = require('./expression');
@@ -43,11 +42,6 @@ function create(opts) {
 
 function compile(state) {
   var _this = this;
-  _this.value = Value.create({
-    type: _this.type,
-    expr: _this,
-    register: '%rax'
-  });
 
   return CodeBlock.create(_this)
     .add(_this.expr.compile(state))

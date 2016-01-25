@@ -1,6 +1,5 @@
 var Element = require('latte/core/element');
 var Variable = require('latte/core/variable');
-var Value = require('latte/core/value');
 var TypeVoid = require('latte/core/types/type-void');
 
 var CodeBlock = require('latte/code/code-block');
@@ -106,11 +105,6 @@ function compile(state, shift) {
     argument.variable.address = newPos;
     argsBlock.add('movq ' + oldPos + ', %rax');
     argsBlock.add('movq %rax, ' + newPos);
-
-    argument.variable.value = Value.create({
-      register: newPos,
-      type: argument.variable.type
-    });
 
     // argument.variable.value.addReference(argument.variable);
   });

@@ -1,7 +1,6 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
 var Element = require('latte/core/element');
-var Value = require('latte/core/value');
 
 module.exports = {
   create: create
@@ -45,10 +44,6 @@ function create(opts) {
 
 function compile(state) {
   var _this = this;
-
-  _this.value = Value.create({
-    type: _this.type
-  });
 
   return CodeBlock.create(_this)
       .add(_this.source.compile(state))

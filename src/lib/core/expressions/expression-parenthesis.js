@@ -36,8 +36,6 @@ function compile(state) {
     .add(_this.expr.compile(state))
   ;
 
-  _this.value = _this.expr.value;
-
   return code;
 }
 

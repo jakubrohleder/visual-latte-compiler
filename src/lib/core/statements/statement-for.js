@@ -2,7 +2,6 @@ var Statement = require('./statement');
 var StatementBlock = require('./statement-block');
 var Block = require('latte/core/block');
 var Variable = require('latte/core/variable');
-var Value = require('latte/core/value');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -45,9 +44,6 @@ function semanticCheck(state) {
     _this.current = Variable.create({
       type: state.scope.getType(_this.type),
       ident: _this.ident,
-      value: Value.create({
-        type: state.scope.getType(_this.type)
-      }),
       decl: _this
     });
   }

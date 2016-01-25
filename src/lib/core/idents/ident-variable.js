@@ -40,8 +40,6 @@ function create(opts) {
 function compile() {
   var _this = this;
 
-  _this.value = _this.variable.value;
-
   return CodeBlock.create(_this)
     .add('leaq ' + _this.variable.address + ', %rax')
   ;

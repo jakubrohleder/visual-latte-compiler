@@ -1,7 +1,6 @@
 var Type = require('./type').constr;
 
 var CodeBlock = require('latte/code/code-block');
-var Value = require('latte/core/value');
 var parseError = require('latte/error').parseError;
 
 TypeInt.prototype = Object.create(Type.prototype);
@@ -67,13 +66,7 @@ function TypeInt() {
 }
 
 function compileValue(state, expr) {
-  var _this = this;
   var value = expr.text;
-
-  expr.value = Value.create({
-    type: _this,
-    register: '%rax'
-  });
 
   return 'movq $' + value + ', %rax';
 }
