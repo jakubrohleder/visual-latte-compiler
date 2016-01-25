@@ -120,20 +120,39 @@ ClassDecl
 
 ClassBlock
   : '{' '}'
-    {}
+    { $$ = yy.Block.create(); }
   | '{' ClassStms '}'
-    {}
+    { $$ = yy.Block.create($ClassStms); }
   ;
 
 ClassStms
-  : ClassStms ClassStm
-  | ClassStm
+  : ClassStm
+    { $$ = [$ClassStm]; }
+  | ClassStms ClassStm
+    { $$ = $ClassStms.concat([$ClassStm]); }
   ;
 
 ClassStm
  : IDENT Items ';'
+   {
+      var items = yy._.flattenDeep($Items);
+      items.map(function(item) {
+        item.type = item.type === undefined ? String($IDENT) : item.type;
+      });
+
+      $$ = items;
+    }
  | IDENT ARRAY Items ';'
+   {
+      $Items.map(function(item) {
+        item.type = String($IDENT);
+        item.array = true;
+      });
+
+      $$ = $Items;
+    }
  | FunctionDecl
+   { $$ = $FunctionDecl; }
  ;
 
 /**
@@ -245,8 +264,6 @@ Stmt
 
       $$ = $Items;
     }
-
-
   | Ident '=' Expr ';'
     {
       $$ = yy.Statements.Assignment.create({
