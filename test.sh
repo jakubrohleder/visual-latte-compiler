@@ -68,12 +68,13 @@ function testBad {
     done
 }
 
+testGood "samples/mine/*"
+
 testGood "samples/good/*"
 
+testBad "samples/bad/*"
 testGood "samples/extra/bad/runtime/*"
-
 testBad "samples/extra/bad/semantic/*"
 
-testBad "samples/bad/*"
-
+# testGood "samples/extra/good/arrays/*"
 testGood "samples/extensions/arrays1/*"

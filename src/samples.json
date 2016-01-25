@@ -82,6 +82,13 @@
     "core022.lat": "int main() {\n    int x;\n    printInt(x);\n    return 0;\n}\n",
     "core022.output": "0\n"
   },
+  "mine": {
+    "array_length.lat": "int main() {\n\n  int[] i = new int[20];\n\n  printInt(i.length);\n  printInt(i.references);\n\n  i = new int[10];\n\n  printInt(i.length);\n  printInt(i.references);\n\n  int j=0;\n\n  while (j<i.length) {\n    i[j] = j;\n    j++;\n  }\n\n  for (int x : i)\n    printInt(x);\n\n  return 0;\n}",
+    "array_length.output": "20\n0\n10\n0\n0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n",
+    "string_length.input": "abc\n",
+    "string_length.lat": "int main() {\n\n  string s = \"1234\";\n\n  string s2 = s + \"56789\";\n\n  printString(s);\n  printInt(s.length);\n  printInt(s.references);\n\n  printString(s2);\n  printInt(s2.length);\n  printInt(s2.references);\n\n  string s3;\n  s3 = s2 + readString();\n\n  printString(s3);\n  printInt(s3.length);\n  printInt(s3.references);\n\n  return 0;\n}",
+    "string_length.output": "1234\n4\n0\n123456789\n9\n0\n123456789abc\n12\n0\n"
+  },
   "extensions": {
     "arrays1": {
       "array000.lat": "int main() {\n  int[] a = new int[20];\n  a[10] = 1;\n  a[11] = 2;\n  printInt(a[10]);\n  printInt(a[11]);\n\n  return 0;\n}",

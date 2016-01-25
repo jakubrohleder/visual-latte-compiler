@@ -94,14 +94,20 @@ function compile(state) {
 
       .add(CodeBlock.create(undefined, 'Alloc result string')
         .add('movq %r15, %rdi')
+        .add('addq $16, %rdi')
         .add('call ' + malloc)
         .add('movq %rax, %rbx')
       )
 
       .add(CodeBlock.create(undefined, 'Memcpy result string')
-        .add('leaq  -24(%rbp), %rsi', 'String to src arg')
+        .add('leaq -24(%rbp), %rsi', 'String to src arg')
         .add('movq %rbx, %rdi', 'Result string to dest arg')
         .add('movq %r15, %rdx', 'Left string length')
+
+        .add('movq $0, (%rdi)', 'References to 0 pos')
+        .add('movq %r15, 8(%rdi)', 'Length to 8 pos')
+        .add('addq $16, %rdi', 'Shift references and length')
+
         .add('call ' + memcpy)
       )
 

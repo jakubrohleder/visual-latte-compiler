@@ -1,0 +1,24 @@
+int main() {
+
+  int[] i = new int[20];
+
+  printInt(i.length);
+  printInt(i.references);
+
+  i = new int[10];
+
+  printInt(i.length);
+  printInt(i.references);
+
+  int j=0;
+
+  while (j<i.length) {
+    i[j] = j;
+    j++;
+  }
+
+  for (int x : i)
+    printInt(x);
+
+  return 0;
+}

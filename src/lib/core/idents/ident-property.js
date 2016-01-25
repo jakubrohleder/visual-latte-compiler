@@ -35,7 +35,7 @@ function semanticCheck(state) {
   }
 
   _this.type = property.type;
-  _this.index = property.index;
+  _this.address = property.address;
 }
 
 function create(opts) {
@@ -48,7 +48,7 @@ function compile(state) {
   return CodeBlock.create(_this)
       .add(_this.source.compile(state))
       .add('movq (%rax), %rax')
-      .add('leaq ' + _this.index + '(%rax), %rax')
+      .add('leaq ' + _this.address + '(%rax), %rax')
   ;
 }
 

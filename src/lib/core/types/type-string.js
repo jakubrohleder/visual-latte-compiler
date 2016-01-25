@@ -3,6 +3,7 @@ var ExpressionObject = require('latte/core/expressions/expression-object');
 var unescape = require('latte/utils').unescape;
 
 var Type = require('./type').constr;
+var TypeInt = require('latte/core/types/type-int');
 
 TypeString.prototype = Object.create(Type.prototype);
 TypeString.prototype.constructor = TypeString;
@@ -29,17 +30,26 @@ function TypeString() {
       compile: compileAdd.bind(_this)
     }
   };
+
+  _this.properties = {
+    references: {
+      function: false,
+      type: TypeInt,
+      address: 0
+    },
+    length: {
+      function: false,
+      type: TypeInt,
+      address: 8
+    }
+  };
 }
 
 function compileAdd(state, left, right) {
   var leftPointer = left;
   var rightPointer = right;
   var resultPointer = state.pushRegister();
-  var leftLength = state.pushRegister();
-  var rightLength = state.pushRegister();
 
-  state.popRegister();
-  state.popRegister();
   state.popRegister();
 
   var strlen = 'strlen';
@@ -53,36 +63,43 @@ function compileAdd(state, left, right) {
   }
 
   return CodeBlock.create(this)
-    .add('movq ' + leftPointer + ', %rdi')
-    .add('call ' + strlen)
-    .add('movq %rax, ' + leftLength, 'Save left string len')
-
-    .add('movq ' + rightPointer + ', %rdi')
-    .add('call ' + strlen)
-    .add('movq %rax, ' + rightLength, 'Save right string len')
-
-    .add('addq ' + leftLength + ', %rax')
-    .add('leaq 1(%rax), %rdi')
+    .add('movq ' + rightPointer + ', %rax')
+    .add('movq 8(%rax), %rdi')
+    .add('movq ' + leftPointer + ', %rax')
+    .add('addq 8(%rax), %rdi')
+    .add('addq $17, %rdi')
     .add('call ' + malloc, 'Alloc result string')
     .add('movq %rax, ' + resultPointer)
 
     .add(CodeBlock.create(undefined, 'Memcpy left string')
       .add('movq ' + leftPointer + ', %rsi', 'Left string to src arg')
+      .add('movq 8(%rsi), %rdx', 'Left string length')
+      .add('addq $16, %rsi', 'Shift length and references')
       .add('movq ' + resultPointer + ', %rdi', 'Result string to dest arg')
-      .add('movq ' + leftLength + ', %rdx', 'Left string length')
+      .add('addq $16, %rdi', 'Shift length and references')
       .add('call ' + memcpy)
     )
     .add(CodeBlock.create(undefined, 'Memcpy right string')
       .add('movq ' + rightPointer + ', %rsi', 'Right string to src arg')
-      .add('movq ' + resultPointer + ', %rax')
-      .add('addq ' + leftLength + ', %rax')
-      .add('movq %rax, %rdi', 'Result + left string length to dest arg')
-      .add('movq ' + rightLength + ', %rdx', 'Right string length to rdx')
+      .add('movq 8(%rsi), %rdx', 'Right string length to rdx')
+      .add('addq $16, %rsi', 'Shift length and references')
+      .add('movq ' + resultPointer + ', %rdi', 'Result + left string length to dest arg')
+
+      .add('movq ' + leftPointer + ', %rax')
+      .add('addq 8(%rax), %rdi')
+      .add('addq $16, %rdi', 'Shift length and references')
+
       .add('call ' + memcpy)
     )
-    .add('movq ' + resultPointer + ', %rax')
-    .add('addq ' + rightLength + ', %rax')
-    .add('addq ' + leftLength + ', %rax')
+    .add('movq ' + rightPointer + ', %rdx')
+    .add('movq 8(%rdx), %rax')
+    .add('movq ' + leftPointer + ', %rdx')
+    .add('addq 8(%rdx), %rax')
+    .add('movq ' + resultPointer + ', %rdx')
+    .add('movq %rax, 8(%rdx)')
+    .add('movq $0, (%rdx)')
+    .add('leaq 16(%rdx, %rax), %rax')
+
     .add('movq $0, (%rax)')
     .add('movq ' + resultPointer + ', %rax')
   ;
@@ -99,15 +116,18 @@ function compileValue(state, expr) {
   }
 
   code = CodeBlock.create(undefined, 'Allocating string')
-    .add('movq $' + (length + 1) + ', %rdi')
+    .add('movq $' + (length + 17) + ', %rdi')
     .add('call ' + malloc)
   ;
 
+  code.add('movq $0, (%rax)');
+  code.add('movq $' + length + ', 8(%rax)');
+
   for (var i = 0; i < length; i++) {
-    code.add('movb $' + value.charCodeAt(i) + ', ' + i + '(%rax)');
+    code.add('movb $' + value.charCodeAt(i) + ', ' + (i + 16) + '(%rax)');
   }
 
-  code.add('movb $0, ' + length + '(%rax)');
+  code.add('movb $0, ' + (length + 16) + '(%rax)');
 
   return code;
 }

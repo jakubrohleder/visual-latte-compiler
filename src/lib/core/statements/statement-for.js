@@ -102,27 +102,28 @@ function compile(state) {
   var _this = this;
   var start = state.nextLabel();
   var end = state.nextLabel();
+  var counter = state.pushRegister();
 
   _this.current.address = '' + -state.stack.addVariable(_this.current) + '(%rbp)';
 
   var code = CodeBlock.create(_this)
-    .add('movq %rbx, ' + state.pushRegister())
-    .add('movq $0, %rbx')
+    .add('movq $0, ' + counter)
     .add(start + ':', 'start label', -1)
     .add(CodeBlock.create(undefined, 'For condition')
       .add('movq ' + _this.array.address + ', %rax')
-      .add('cmpq %rbx, (%rax)')
+      .add('cmpq ' + counter + ', 8(%rax)')
       .add('jle ' + end)
     )
     .add('movq ' + _this.array.address + ', %rax')
-    .add('movq 8(%rax, %rbx, ' + _this.type.size + '), %rax')
+    .add('movq 16(%rax, ' + counter + ', ' + _this.type.size + '), %rax')
     .add('movq %rax, ' + _this.current.address)
     .add(_this.loop.compile(state))
-    .add('incq %rbx')
+    .add('incq ' + counter)
     .add('jmp ' + start)
     .add(end + ':', 'end label', -1)
-    .add('movq ' + state.popRegister() + ', %rbx')
   ;
+
+  state.popRegister();
 
   // _this.cond.value.free(state);
 

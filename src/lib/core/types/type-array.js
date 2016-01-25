@@ -32,10 +32,15 @@ function TypeArray(elementType) {
   _this.elementType = elementType;
 
   _this.properties = {
+    references: {
+      function: false,
+      type: TypeInt,
+      address: 0
+    },
     length: {
       function: false,
       type: TypeInt,
-      index: 0
+      address: 8
     }
   };
 }
@@ -63,10 +68,11 @@ function compileValue(state, expr) {
     .add(expr.expr.compile(state))
     .add('movq %rax, ' + lengthPointer)
     .add('imulq $' + _this.elementType.size + ', %rax')
-    .add('addq $8, %rax')
+    .add('addq $16, %rax')
     .add('movq %rax, %rdi')
     .add('call ' + malloc)
-    .add('movq ' + lengthPointer + ', (%rax)')
+    .add('movq $0, (%rax)')
+    .add('movq ' + lengthPointer + ', 8(%rax)')
   ;
 }
 

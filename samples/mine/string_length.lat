@@ -1,0 +1,23 @@
+int main() {
+
+  string s = "1234";
+
+  string s2 = s + "56789";
+
+  printString(s);
+  printInt(s.length);
+  printInt(s.references);
+
+  printString(s2);
+  printInt(s2.length);
+  printInt(s2.references);
+
+  string s3;
+  s3 = s2 + readString();
+
+  printString(s3);
+  printInt(s3.length);
+  printInt(s3.references);
+
+  return 0;
+}

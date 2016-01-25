@@ -47,7 +47,7 @@ function compile(state) {
       .add('movq (%rax), %rax')
       .add('movq %rax, ' + state.pushRegister())
       .add(_this.expr.compile(state))
-      .add('leaq 8(' + state.popRegister() + ', %rax, ' + _this.type.size + '), %rax')
+      .add('leaq 16(' + state.popRegister() + ', %rax, ' + _this.type.size + '), %rax')
   ;
 }
 

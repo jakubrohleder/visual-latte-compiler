@@ -52,7 +52,8 @@ function compile(state) {
       .add('pushq %rbp')
       .add('movq %rsp, %rbp')
 
-      .add('movq  16(%rbp), %rdi')
+      .add('movq 16(%rbp), %rdi')
+      .add('addq $16, %rdi')
       .add('xorq %rax, %rax')
       .add('call ' + puts)
 
