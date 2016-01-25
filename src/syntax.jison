@@ -4,10 +4,10 @@
 %lex
 
 %%
-\s+                       /* skip whitespace */
-"//".*                    /* skip line comments */
-"#".*                    /* skip hash line comments */
-"/*"((\*+[^/*])|([^*]))*\**"*/" /* skip block comments */
+\s+                               /* skip whitespace */
+"//".*                            /* skip line comments */
+"#".*                             /* skip hash line comments */
+"/*"((\*+[^/*])|([^*]))*\**"*/"   /* skip block comments */
 
 null                      return 'NULL'
 true                      return 'TRUE'
@@ -264,25 +264,25 @@ Stmt
 
       $$ = $Items;
     }
-  | Ident '=' Expr ';'
+  | IdentExpression '=' Expr ';'
     {
       $$ = yy.Statements.Assignment.create({
-        ident: $Ident,
+        ident: $IdentExpression,
         expr: $Expr,
         loc: _$
       });
     }
-  | Ident INCR ';'
+  | IdentExpression INCR ';'
     {
       $$ = yy.Statements.Incr.create({
-        ident: $Ident,
+        ident: $IdentExpression,
         loc: _$
       });
     }
-  | Ident DECR ';'
+  | IdentExpression DECR ';'
     {
       $$ = yy.Statements.Decr.create({
-        ident: $Ident,
+        ident: $IdentExpression,
         loc: _$
       });
     }
@@ -410,18 +410,18 @@ Expr
     { $$ = $Class  }
   | NULL
     { $$ = yy.Expressions.Null.create(); }
-  | Ident
+  | IdentExpression
     {
       $$ = yy.Expressions.Variable.create({
-        ident: $Ident,
+        ident: $IdentExpression,
         loc: _$
       });
     }
-  | Ident '(' Exprs ')'
+  | IdentExpression '(' Exprs ')'
     {
       $$ = yy.Expressions.Funcall.create({
         args: $Exprs,
-        ident: $Ident,
+        ident: $IdentExpression,
         loc: _$
       });
     }
@@ -475,12 +475,6 @@ Expr
         loc: _$
       });
     }
-  | '(' Expr ')'
-    {
-      $$ = yy.Expressions.Parenthesis.create({
-        expr: $Expr
-      });
-    }
   ;
 
 /**
@@ -500,26 +494,37 @@ Array
 
 Class
   : NEW IDENT
-    { }
+    { $$ = yy.Expressions.Object.create({
+        type: $IDENT,
+        loc: _$
+      });
+    }
   ;
-Ident
+
+IdentExpression
   : IDENT
     { $$ = yy.Idents.Variable.create({
         text: $IDENT,
         loc: _$
       });
     }
-  | Ident '.' IDENT
+  | '(' Expr ')'
+    {
+      $$ = yy.Expressions.Parenthesis.create({
+        expr: $Expr
+      });
+    }
+  | IdentExpression '.' IDENT
     { $$ = yy.Idents.Property.create({
         ident: $IDENT,
-        source: $Ident,
+        source: $IdentExpression,
         loc: _$
       });
     }
-  | Ident '[' Expr ']'
+  | IdentExpression '[' Expr ']'
     { $$ = yy.Idents.Element.create({
         expr: $Expr,
-        source: $Ident,
+        source: $IdentExpression,
         loc: _$
       });
     }

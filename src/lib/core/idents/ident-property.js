@@ -1,6 +1,7 @@
 var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
 var Element = require('latte/core/element');
+var getFunctionName = require('latte/utils').getFunctionName;
 
 module.exports = {
   create: create
@@ -45,11 +46,15 @@ function create(opts) {
 function compile(state) {
   var _this = this;
 
-  return CodeBlock.create(_this)
-      .add(_this.source.compile(state))
-      .add('movq (%rax), %rax')
-      .add('leaq ' + _this.address + '(%rax), %rax')
-  ;
+  var code = CodeBlock.create(_this).add(_this.source.compile(state));
+
+  if (getFunctionName(_this.source) !== 'ExpressionParenthesis') {
+    code.add('movq (%rax), %rax');
+  }
+
+  code.add('leaq ' + _this.address + '(%rax), %rax');
+
+  return code;
 }
 
 function toString() {

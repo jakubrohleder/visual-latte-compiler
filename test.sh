@@ -76,5 +76,5 @@ testBad "samples/bad/*"
 testGood "samples/extra/bad/runtime/*"
 testBad "samples/extra/bad/semantic/*"
 
-# testGood "samples/extra/good/arrays/*"
+testGood "samples/extra/good/arrays/*"
 testGood "samples/extensions/arrays1/*"

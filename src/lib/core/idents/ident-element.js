@@ -2,6 +2,7 @@ var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
 var Element = require('latte/core/element');
 var TypeInt = require('latte/core/types/type-int');
+var getFunctionName = require('latte/utils').getFunctionName;
 
 module.exports = {
   create: create
@@ -41,14 +42,20 @@ function create(opts) {
 
 function compile(state) {
   var _this = this;
+  var code = CodeBlock.create(_this)
+    .add(_this.source.compile(state));
 
-  return CodeBlock.create(_this)
-      .add(_this.source.compile(state))
-      .add('movq (%rax), %rax')
-      .add('movq %rax, ' + state.pushRegister())
-      .add(_this.expr.compile(state))
-      .add('leaq 16(' + state.popRegister() + ', %rax, ' + _this.type.size + '), %rax')
+  if (getFunctionName(_this.source) !== 'ExpressionParenthesis') {
+    code.add('movq (%rax), %rax');
+  }
+
+  code
+    .add('movq %rax, ' + state.pushRegister())
+    .add(_this.expr.compile(state))
+    .add('leaq 16(' + state.popRegister() + ', %rax, ' + _this.type.size + '), %rax')
   ;
+
+  return code;
 }
 
 function toString() {

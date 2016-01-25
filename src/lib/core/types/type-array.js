@@ -56,12 +56,16 @@ function create(elementType) {
 function compileValue(state, expr) {
   var _this = this;
   var malloc = 'malloc';
+  var memset = 'memset';
   var lengthPointer = state.pushRegister();
+  var resultPointer = state.pushRegister();
 
+  state.popRegister();
   state.popRegister();
 
   if (state.os === 'darwin') {
     malloc = '_' + malloc;
+    memset = '_' + memset;
   }
 
   return CodeBlock.create(undefined, 'Allocating array')
@@ -71,8 +75,19 @@ function compileValue(state, expr) {
     .add('addq $16, %rax')
     .add('movq %rax, %rdi')
     .add('call ' + malloc)
-    .add('movq $0, (%rax)')
-    .add('movq ' + lengthPointer + ', 8(%rax)')
+    .add('movq %rax, ' + resultPointer)
+
+    .add('movq %rax, %rdi')
+    .add('movq $0, %rsi')
+    .add('movq ' + lengthPointer + ', %rax')
+    .add('imulq $' + _this.elementType.size + ', %rax')
+    .add('addq $16, %rax')
+    .add('movq %rax, %rdx')
+    .add('call ' + memset)
+
+    .add('movq ' + resultPointer + ', %rax')
+    .add('movq ' + lengthPointer + ', %rdx')
+    .add('movq %rdx, 8(%rax)')
   ;
 }
 

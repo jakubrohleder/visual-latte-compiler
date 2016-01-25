@@ -1,5 +1,6 @@
 var CodeBlock = require('latte/code/code-block');
 var Expression = require('./expression');
+var getFunctionName = require('latte/utils').getFunctionName;
 
 module.exports = {
   create: create
@@ -31,14 +32,15 @@ function semanticCheck(state) {
 
 function compile(state) {
   var _this = this;
-  var code = _this.ident.compile(state);
+  var code = CodeBlock.create(_this)
+    .add(_this.ident.compile(state));
 
-  _this.value = _this.ident.value;
+  if (getFunctionName(_this.ident) !== 'ExpressionParenthesis') {
+    code
+     .add('movq (%rax), %rax');
+  }
 
-  return CodeBlock.create(_this)
-    .add(code)
-    .add('movq (%rax), %rax')
-  ;
+  return code;
 }
 
 function toString() {

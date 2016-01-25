@@ -58,6 +58,9 @@ function compile(state) {
 
 function toString() {
   var _this = this;
+  if (_this.array === true) {
+    return 'new ' + _this.type + '[' + _this.expr + ']';
+  }
 
   return _this.text;
 }
