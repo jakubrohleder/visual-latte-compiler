@@ -29,20 +29,18 @@ function TypeArray(elementType) {
   _this.name = 'array';
   _this.size = 8;
   _this.pointer = true;
+
   _this.elementType = elementType;
 
-  _this.properties = {
-    references: {
-      function: false,
-      type: TypeInt,
-      address: 0
-    },
-    length: {
-      function: false,
-      type: TypeInt,
-      address: 8
-    }
-  };
+  _this.addProperty({
+    type: TypeInt,
+    name: 'references'
+  }, 'references');
+
+  _this.addProperty({
+    type: TypeInt,
+    name: 'length'
+  }, 'length');
 }
 
 function create(elementType) {
@@ -116,7 +114,7 @@ function compile() {
 }
 
 function semanticCheck() {
-  //
+//
 }
 
 function semanticCheckValue() {

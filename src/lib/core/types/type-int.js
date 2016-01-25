@@ -10,6 +10,7 @@ TypeInt.prototype.compile = compile;
 TypeInt.prototype.semanticCheck = semanticCheck;
 TypeInt.prototype.semanticCheckValue = semanticCheckValue;
 TypeInt.prototype.defaultValueExpr = defaultValueExpr;
+TypeInt.prototype.eq = eq;
 
 var typeInt = module.exports = new TypeInt();
 
@@ -63,6 +64,10 @@ function TypeInt() {
       compile: compileNeg.bind(_this)
     }
   };
+}
+
+function eq(argument) {
+  return argument === this;
 }
 
 function compileValue(state, expr) {

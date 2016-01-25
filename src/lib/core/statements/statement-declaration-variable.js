@@ -56,14 +56,14 @@ function semanticCheck(state) {
   });
 
   if (_this.array === true) {
-    if (_this.expr.type.elementType !== type) {
+    if (!_this.expr.type.elementType.eq(type)) {
       parseError(
         'Wrong type for assigment to array: ' + _this.expr.type + ' instead of ' + _this.type,
         _this.loc[_this.loc.length - 2],
         _this
       );
     }
-  } else if (_this.expr.type !== _this.type) {
+  } else if (!_this.type.eq(_this.expr.type)) {
     parseError(
       'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type,
       _this.loc[_this.loc.length - 2],

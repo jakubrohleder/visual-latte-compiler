@@ -1,6 +1,7 @@
 var Statement = require('./statement');
 var StatementBlock = require('./statement-block');
 var Block = require('../block');
+var TypeBoolean = require('latte/core/types/type-boolean');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -26,12 +27,11 @@ function create(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var bool = state.rootScope.getType('boolean');
   _this.cond.semanticCheck(state);
 
-  if (_this.cond.type !== bool) {
+  if (!_this.cond.type.eq(TypeBoolean)) {
     parseError(
-      'Wrong type of if condition: \'' + _this.cond.type + '\' instead of \'' + bool + '\'',
+      'Wrong type of if condition: \'' + _this.cond.type + '\' instead of \'' + TypeBoolean + '\'',
       _this.loc,
       _this
     );

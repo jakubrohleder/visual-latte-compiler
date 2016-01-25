@@ -27,7 +27,7 @@ function semanticCheck(state) {
   _this.left.semanticCheck(state);
   _this.right.semanticCheck(state);
 
-  if (_this.left.type !== _this.right.type) {
+  if (!_this.left.type.eq(_this.right.type)) {
     parseError(
       'Can\'t compare diferent type variables: ' + _this.left.type + ' and ' + _this.right.type,
       _this.loc,

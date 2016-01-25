@@ -26,7 +26,7 @@ function semanticCheck(state) {
 
   _this.type = _this.ident.type;
 
-  if (_this.expr.type !== _this.type) {
+  if (!_this.type.eq(_this.expr.type)) {
     parseError(
       'Wrong type for assigment: ' + _this.expr.type + ' instead of ' + _this.type,
       _this.loc[_this.loc.length - 2],

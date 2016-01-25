@@ -1,5 +1,6 @@
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
+var TypeVoid = require('latte/core/types/type-void');
 
 var _ = require('lodash');
 
@@ -66,6 +67,14 @@ function addFunction(fun) {
 function addVariable(variable) {
   var _this = this;
   var loc = variable.decl.loc[variable.decl.loc.length - 1];
+
+  if (variable.type === TypeVoid) {
+    parseError(
+      'Variable ' + variable.ident + ' has type void',
+      loc,
+      _this
+    );
+  }
 
   if (_this.variables[variable.ident] !== undefined) {
     parseError(

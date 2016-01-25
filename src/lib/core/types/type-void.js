@@ -1,11 +1,10 @@
-var _ = require('lodash');
-
 var Type = require('./type').constr;
 
 TypeVoid.prototype = Object.create(Type.prototype);
 TypeVoid.prototype.constructor = TypeVoid;
 TypeVoid.prototype.semanticCheck = semanticCheck;
 TypeVoid.prototype.compile = compile;
+TypeVoid.prototype.eq = eq;
 
 module.exports = new TypeVoid();
 
@@ -16,6 +15,10 @@ function TypeVoid() {
 
   _this.builtin = true;
   _this.name = 'void';
+}
+
+function eq(argument) {
+  return argument === this;
 }
 
 function semanticCheck() {

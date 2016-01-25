@@ -57,7 +57,7 @@ function semanticCheck(state) {
       _this.loc,
       _this
     );
-  } else if (_this.type !== _this.current.type) {
+  } else if (!_this.type.eq(_this.current.type)) {
     parseError(
       'Wrong index type in \'for\' loop: ' + _this.current.type + ' instead of ' + _this.array.type.elementType,
       _this.loc,

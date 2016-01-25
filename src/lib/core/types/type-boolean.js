@@ -9,6 +9,7 @@ TypeBoolean.prototype.defaultValueExpr = defaultValueExpr;
 TypeBoolean.prototype.compileValue = compileValue;
 TypeBoolean.prototype.compile = compile;
 TypeBoolean.prototype.semanticCheck = semanticCheck;
+TypeBoolean.prototype.eq = eq;
 
 var typeBoolean = module.exports = new TypeBoolean();
 
@@ -41,6 +42,10 @@ function TypeBoolean() {
       compile: compileNeg.bind(_this)
     }
   };
+}
+
+function eq(argument) {
+  return argument === this;
 }
 
 function compileOr(state, label) {

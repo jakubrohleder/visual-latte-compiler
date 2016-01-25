@@ -2,6 +2,7 @@ var Statement = require('./statement');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
+var TypeVoid = require('latte/core/types/type-void');
 
 module.exports = {
   create: create
@@ -30,20 +31,20 @@ function semanticCheck(state) {
   if (_this.expr !== undefined) {
     _this.expr.semanticCheck(state);
 
-    if (type !== _this.expr.type) {
+    if (!type.eq(_this.expr.type)) {
       parseError(
         'Wrong type of return: \'' + _this.expr.type + '\' instead of \'' + type + '\'',
         _this.loc[_this.loc.length - 2],
         _this
       );
-    } else if (type === _void) {
+    } else if (type.eq(TypeVoid)) {
       parseError(
         'Void function can\'t return any value',
         _this.loc[_this.loc.length - 2],
         _this
       );
     }
-  } else if (type !== _void) {
+  } else if (!type.eq(TypeVoid)) {
     parseError(
       'Wrong type of return: \'' + _void + '\' instead of \'' + type + '\'',
       _this.loc,

@@ -89,8 +89,12 @@ function semanticCheck(state) {
     element.semanticCheck(state);
   });
 
-  _.forEach(state.scope.functions, function(element) {
-    element.semanticCheck(state);
+  _.forEach(state.scope.types, function(type) {
+    type.semanticCheck(state);
+  });
+
+  _.forEach(state.scope.functions, function(fun) {
+    fun.semanticCheck(state);
   });
 }
 

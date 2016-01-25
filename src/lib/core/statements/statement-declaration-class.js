@@ -23,7 +23,9 @@ function semanticCheck(state) {
   var _this = this;
 
   _this.type = Type.create({
-    name: _this.name
+    name: _this.name,
+    block: _this.block,
+    decl: _this
   });
 
   state.scope.addType(_this.type);
@@ -34,5 +36,7 @@ function create(opts) {
 }
 
 function compile() {
-  return [];
+  var _this = this;
+
+  return CodeBlock.create(_this);
 }

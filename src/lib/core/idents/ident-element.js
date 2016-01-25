@@ -24,7 +24,7 @@ function semanticCheck(state) {
   var _this = this;
 
   _this.expr.semanticCheck(state);
-  if (_this.expr.type !== TypeInt) {
+  if (!_this.expr.type.eq(TypeInt)) {
     parseError(
       'Wrong type for array index \'' + _this.expr.type + '\' instead of \'int\'',
       _this.loc,

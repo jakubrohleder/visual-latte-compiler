@@ -78,3 +78,5 @@ testBad "samples/extra/bad/semantic/*"
 
 testGood "samples/extra/good/arrays/*"
 testGood "samples/extensions/arrays1/*"
+
+testGood "samples/extensions/struct/*"

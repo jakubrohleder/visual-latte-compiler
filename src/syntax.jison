@@ -409,7 +409,7 @@ Expr
   | Class
     { $$ = $Class  }
   | NULL
-    { $$ = yy.Expressions.Null.create(); }
+    { $$ = yy.Null; }
   | IdentExpression
     {
       $$ = yy.Expressions.Variable.create({

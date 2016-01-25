@@ -1,19 +1,16 @@
 var CodeBlock = require('latte/code/code-block');
 
-module.exports = {
-  create: create
-};
+module.exports = new ExpressionNull();
 
 ExpressionNull.prototype.semanticCheck = semanticCheck;
 ExpressionNull.prototype.compile = compile;
 ExpressionNull.prototype.toString = toString;
+ExpressionNull.prototype.eq = eq;
 
 function ExpressionNull() {
+  var _this = this;
 
-}
-
-function create(opts) {
-  return new ExpressionNull(opts);
+  _this.type = _this;
 }
 
 function semanticCheck() {
@@ -30,4 +27,8 @@ function compile() {
 
 function toString() {
   return 'NULL';
+}
+
+function eq(argument) {
+  return argument === this;
 }

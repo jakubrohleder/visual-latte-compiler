@@ -1,4 +1,5 @@
 var Statement = require('./statement');
+var TypeInt = require('latte/core/types/type-int');
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -21,7 +22,6 @@ function StatementDecr(opts) {
 function semanticCheck(state) {
   var _this = this;
   var variable = state.scope.getVariable(_this.ident);
-  var integer = state.rootScope.getType('int');
 
   if (variable === undefined) {
     parseError(
@@ -33,9 +33,9 @@ function semanticCheck(state) {
 
   _this.variable = variable;
 
-  if (variable.type !== integer) {
+  if (!variable.type.eq(TypeInt)) {
     parseError(
-      'Can\'t decrement \'' + variable.type + '\' works only for \'' + integer + '\'',
+      'Can\'t decrement \'' + variable.type + '\' works only for \'' + TypeInt + '\'',
       _this.loc[_this.loc.length - 3],
       _this
     );

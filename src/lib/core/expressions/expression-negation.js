@@ -25,7 +25,7 @@ function semanticCheck(state) {
 
   _this.expr.semanticCheck(state);
 
-  if (_this.expr.type !== TypeBoolean) {
+  if (!_this.expr.type.eq(TypeBoolean)) {
     parseError(
       'Wrong type for boolean negation \'' + _this.expr.type + '\' instead of \'boolean\'',
       _this.loc,

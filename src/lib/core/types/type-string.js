@@ -12,6 +12,7 @@ TypeString.prototype.semanticCheckValue = semanticCheckValue;
 TypeString.prototype.compileValue = compileValue;
 TypeString.prototype.compile = compile;
 TypeString.prototype.defaultValueExpr = defaultValueExpr;
+TypeString.prototype.eq = eq;
 
 var typeString = module.exports = new TypeString();
 
@@ -25,23 +26,8 @@ function TypeString() {
   _this.size = 8;
   _this.pointer = true;
 
-  _this.operators.binary = {
-    '+': {
-      compile: compileAdd.bind(_this)
-    }
-  };
-
-  _this.properties = {
-    references: {
-      function: false,
-      type: TypeInt,
-      address: 0
-    },
-    length: {
-      function: false,
-      type: TypeInt,
-      address: 8
-    }
+  _this.operators.binary['+'] = {
+    compile: compileAdd.bind(_this)
   };
 }
 
@@ -132,6 +118,10 @@ function compileValue(state, expr) {
   return code;
 }
 
+function eq(argument) {
+  return argument === this;
+}
+
 function defaultValueExpr(loc) {
   return ExpressionObject.create({
     type: typeString,
@@ -141,7 +131,17 @@ function defaultValueExpr(loc) {
 }
 
 function semanticCheck() {
-  // empty
+  var _this = this;
+
+  _this.addProperty({
+    type: TypeInt,
+    name: 'references'
+  }, 'references');
+
+  _this.addProperty({
+    type: TypeInt,
+    name: 'length'
+  }, 'length');
 }
 
 function semanticCheckValue() {

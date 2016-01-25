@@ -1,4 +1,5 @@
 var parseError = require('latte/error').parseError;
+var TypeInt = require('latte/core/types/type-int');
 
 var _Function = require('./function').constr;
 
@@ -34,7 +35,7 @@ function semanticCheck(state) {
       _this.loc[_this.loc.length - 2],
       _this
     );
-  } else if (_this.type !== state.rootScope.getType('int')) {
+  } else if (!_this.type.eq(TypeInt)) {
     parseError(
       'Main must have type \'int\'',
       _this.loc[_this.loc.length - 2],

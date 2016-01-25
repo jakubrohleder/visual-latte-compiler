@@ -51,7 +51,7 @@ function semanticCheck(state) {
     funArg = fun.args[index];
     arg.semanticCheck(state);
 
-    if (funArg.type !== arg.type) {
+    if (!funArg.type.eq(arg.type)) {
       parseError(
         'Wrong type of ' + (index + 1) + ' argument in \'' + fun.ident + '\' call: \'' + arg.type + '\' instead of \'' + funArg.type + '\'',
         arg.loc,

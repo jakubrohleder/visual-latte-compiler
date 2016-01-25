@@ -61,7 +61,7 @@ function semanticCheck(state) {
 
   _this.block.semanticCheck(state);
 
-  if (_this.type !== TypeVoid && state.scope.return === false) {
+  if (!_this.type.eq(TypeVoid) && state.scope.return === false) {
     parseError(
       'No return in function \'' + _this.ident + '\'',
       _this.decl.loc[_this.decl.loc.length - 2],
