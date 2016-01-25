@@ -9,6 +9,7 @@
 "#".*                             /* skip hash line comments */
 "/*"((\*+[^/*])|([^*]))*\**"*/"   /* skip block comments */
 
+self                      return 'SELF'
 null                      return 'NULL'
 true                      return 'TRUE'
 false                     return 'FALSE'
@@ -518,6 +519,8 @@ IdentExpression
         expr: $Expr
       });
     }
+  | SELF
+    { $$ = yy.Self; }
   | IdentExpression '.' IDENT
     { $$ = yy.Idents.Property.create({
         ident: $IDENT,

@@ -82,4 +82,4 @@ function testBad {
 # testGood "samples/extensions/struct/*"
 
 testGood "samples/extensions/objects1/*"
-# testGood "samples/extensions/objects2/*"
+testGood "samples/extensions/objects2/*"

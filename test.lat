@@ -1,5 +1,15 @@
-int main() {
-  printInt(1);
+class Test {
+  void tell() {
+    printInt(1);
+  }
 
+  void makemetell() {
+    self.tell();
+  }
+}
+
+int main() {
+  Test t = new Test;
+  t.makemetell();
   return 0;
 }

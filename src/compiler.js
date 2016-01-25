@@ -15,6 +15,7 @@ var Argument = require('latte/core/argument');
 var Variable = require('latte/core/variable');
 var Block = require('latte/core/block');
 var Null = require('latte/core/null');
+var Self = require('latte/core/self');
 
 var State = require('latte/core/state');
 
@@ -40,6 +41,7 @@ function parse(code) {
   parser.yy.Variable = Variable;
   parser.yy.Block = Block;
   parser.yy.Null = Null;
+  parser.yy.Self = Self;
 
   try {
     result = parser.parse(code);

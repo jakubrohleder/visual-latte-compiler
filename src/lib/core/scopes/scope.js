@@ -171,6 +171,10 @@ function compile(state) {
   var _this = this;
   var code = CodeBlock.create(_this);
 
+  _.forEach(_this.types, function(type) {
+    code.add(type.compile(state));
+  });
+
   _.forEach(_this.functions, function(fun) {
     code.add(fun.compile(state));
   });

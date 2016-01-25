@@ -25,6 +25,7 @@ function semanticCheck(state) {
   _this.type = Type.create({
     name: _this.name,
     block: _this.block,
+    extends: _this.extends,
     decl: _this
   });
 

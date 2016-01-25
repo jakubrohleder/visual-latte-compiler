@@ -41,7 +41,7 @@ function semanticCheck(state) {
   _.forEach(_this.args, function(argument, index) {
     if (argument.type === TypeVoid) {
       parseError(
-        'Void argument ' + argument.ident + ' in function ' + _this.ident,
+        'Void argument ' + argument.ident + ' in function ' + _this.name,
         argument.loc,
         _this
       );
@@ -63,7 +63,7 @@ function semanticCheck(state) {
 
   if (!_this.type.eq(TypeVoid) && state.scope.return === false) {
     parseError(
-      'No return in function \'' + _this.ident + '\'',
+      'No return in function \'' + _this.name + '\'',
       _this.decl.loc[_this.decl.loc.length - 2],
       _this
     );
@@ -113,6 +113,14 @@ function compile(state, shift) {
 
   pushRegsBlock = CodeBlock.create(undefined, 'Registers to local memory');
   popRegsBlock = CodeBlock.create(undefined, 'Registers from local memory');
+
+  if (_this.method === true) {
+    pos = -state.stack.addRegister();
+    pushRegsBlock
+      .add('movq %rbx, ' + pos + '(%rbp)')
+      .add('movq %rdi, %rbx');
+    popRegsBlock.add('movq ' + pos + '(%rbp), %rbx');
+  }
 
   for (var i = 0; i < _this.lastRegister && i < 4; i++) {
     pos = -state.stack.addRegister();

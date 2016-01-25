@@ -22,7 +22,7 @@ class Stack {
   }
 
   boolean isEmpty() {
-    return head==(Node)null;
+    return head==null;
   }
 
   int top() {
@@ -41,7 +41,7 @@ int main() {
      s.push(i);
      i++;
    }
-     
+
    while (!s.isEmpty()) {
      printInt(s.top());
      s.pop();

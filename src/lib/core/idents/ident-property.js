@@ -2,6 +2,7 @@ var CodeBlock = require('latte/code/code-block');
 var parseError = require('latte/error').parseError;
 var Element = require('latte/core/element');
 var getFunctionName = require('latte/utils').getFunctionName;
+var Self = require('latte/core/self');
 
 module.exports = {
   create: create
@@ -19,13 +20,18 @@ function IdentProperty(opts) {
   Element.call(_this, opts);
 }
 
-function semanticCheck(state) {
+function semanticCheck(state, fun) {
   var _this = this;
   var property;
 
   _this.source.semanticCheck(state);
 
-  property = _this.source.type.properties[_this.ident];
+  if (fun === true) {
+    property = _this.source.type.functions[_this.ident];
+    _this.function = property;
+  } else {
+    property = _this.source.type.properties[_this.ident];
+  }
 
   if (property === undefined) {
     parseError(
@@ -36,7 +42,7 @@ function semanticCheck(state) {
   }
 
   _this.type = property.type;
-  _this.address = property.address;
+  _this.addressShift = property.addressShift;
 }
 
 function create(opts) {
@@ -48,11 +54,13 @@ function compile(state) {
 
   var code = CodeBlock.create(_this).add(_this.source.compile(state));
 
-  if (getFunctionName(_this.source) !== 'ExpressionParenthesis') {
+  if (getFunctionName(_this.source) !== 'ExpressionParenthesis' && _this.source !== Self) {
     code.add('movq (%rax), %rax');
   }
 
-  code.add('leaq ' + _this.address + '(%rax), %rax');
+  code
+    .add('movq %rax, %rdi')
+    .add('leaq ' + _this.addressShift + '(%rax), %rax');
 
   return code;
 }

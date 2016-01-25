@@ -44,7 +44,8 @@ function compile(state) {
     .add('movq %rax, ' + state.pushRegister())
     // .add(_this.ident.value.removeReference(_this.variable, _this.ident, state))
     .add(_this.ident.compile(state))
-    .add('movq ' + state.popRegister() + ', (%rax)', 'save ' + _this.expr + ' on ' + _this.ident)
+    .add('movq ' + state.popRegister() + ', %rdx')
+    .add('movq %rdx, (%rax)', 'save ' + _this.expr + ' on ' + _this.ident)
   ;
 
   // _this.expr.value.addReference(_this.variable);

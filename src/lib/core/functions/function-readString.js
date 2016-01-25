@@ -56,13 +56,13 @@ function compile(state) {
     .add(_this.ident + ':')
     .add(CodeBlock.create(undefined, 'ReadInt function body', true)
       .add('pushq %rbp')
-      .add('pushq %rbx')
-      .add('pushq %r15')
+      .add('pushq %r12')
+      .add('pushq %r13')
       .add('movq %rsp, %rbp')
       .add('subq  $16, %rsp')
 
-      .add('leaq -24(%rbp), %rbx')
-      .add('movq $0, %r15')
+      .add('leaq -24(%rbp), %r12')
+      .add('movq $0, %r13')
 
       .add('xorq %rax, %rax')
       .add('leaq NEW_LINE_FORMAT(%rip), %rdi')
@@ -75,7 +75,7 @@ function compile(state) {
       .add('je ' + end)
 
       .add(CodeBlock.create(undefined, 'Every 16th char sub 16 from stack')
-        .add('movq %r15, %rax')
+        .add('movq %r13, %rax')
         .add('movq $16, %r9')
         .add('cqto')
         .add('idivq %r9')
@@ -86,35 +86,35 @@ function compile(state) {
 
       .add(save + ':')
 
-      .add('movb  %cl, (%rbx)')
-      .add('incq  %r15')
-      .add('incq  %rbx')
+      .add('movb  %cl, (%r12)')
+      .add('incq  %r13')
+      .add('incq  %r12')
 
       .add('jmp ' + begin)
 
       .add(end + ':')
 
       .add(CodeBlock.create(undefined, 'Alloc result string')
-        .add('movq %r15, %rdi')
+        .add('movq %r13, %rdi')
         .add('addq $16, %rdi')
         .add('call ' + malloc)
-        .add('movq %rax, %rbx')
+        .add('movq %rax, %r12')
       )
 
       .add(CodeBlock.create(undefined, 'Memcpy result string')
         .add('leaq -24(%rbp), %rsi', 'String to src arg')
-        .add('movq %rbx, %rdi', 'Result string to dest arg')
-        .add('movq %r15, %rdx', 'Left string length')
+        .add('movq %r12, %rdi', 'Result string to dest arg')
+        .add('movq %r13, %rdx', 'Left string length')
 
         .add('movq $0, (%rdi)', 'References to 0 pos')
-        .add('movq %r15, 8(%rdi)', 'Length to 8 pos')
+        .add('movq %r13, 8(%rdi)', 'Length to 8 pos')
         .add('addq $16, %rdi', 'Shift references and length')
 
         .add('call ' + memcpy)
       )
 
       .add(CodeBlock.create(undefined, 'Clear stack')
-        .add('leaq 15(%r15), %rax')
+        .add('leaq 15(%r13), %rax')
         .add('movq $16, %r9')
         .add('cqto')
         .add('idivq %r9')
@@ -122,11 +122,11 @@ function compile(state) {
         .add('addq %rax, %rsp')
       )
 
-      .add('movq %rbx, %rax')
+      .add('movq %r12, %rax')
 
       .add('addq  $16, %rsp')
-      .add('popq %r15')
-      .add('popq %rbx')
+      .add('popq %r13')
+      .add('popq %r12')
       .add('popq %rbp')
       .add('retq')
     );

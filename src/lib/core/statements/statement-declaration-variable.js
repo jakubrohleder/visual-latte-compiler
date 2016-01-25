@@ -83,8 +83,14 @@ function compile(state) {
   code = CodeBlock.create(_this)
     .comment('Declaring variable ' + _this.ident + ' on ' + _this.variable.address)
     .add(_this.expr.compile(state))
-    .add('movq %rax, ' + _this.variable.address)
   ;
+
+  if (_this.variable.addressShift === undefined) {
+    code.add('movq %rax, ' + _this.variable.address);
+  } else {
+    // For type defualt property values
+    code.add('movq %rax, ' + _this.variable.addressShift + '(%rbx)');
+  }
 
   // _this.variable.value.addReference(_this.variable);
 

@@ -23,18 +23,13 @@ function ExpressionFuncall(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var fun = state.scope.getFunction(_this.ident);
   var funArg;
+  var fun;
 
-  if (fun === undefined) {
-    parseError(
-      'Undeclared function: ' + _this.ident,
-      _this.loc[_this.loc.length - 4],
-      _this
-    );
-  }
+  _this.ident.semanticCheck(state, true);
 
-  _this.function = fun;
+  fun = _this.function = _this.ident.function;
+  _this.type = fun.type;
 
   if (fun.args.length !== _this.args.length) {
     parseError(
@@ -44,16 +39,13 @@ function semanticCheck(state) {
     );
   }
 
-  _this.type = fun.type;
-
-
   _.forEach(_this.args, function(arg, index) {
     funArg = fun.args[index];
     arg.semanticCheck(state);
 
     if (!funArg.type.eq(arg.type)) {
       parseError(
-        'Wrong type of ' + (index + 1) + ' argument in \'' + fun.ident + '\' call: \'' + arg.type + '\' instead of \'' + funArg.type + '\'',
+        'Wrong type of ' + (index + 1) + ' argument in \'' + fun.name + '\' call: \'' + arg.type + '\' instead of \'' + funArg.type + '\'',
         arg.loc,
         _this
       );
@@ -82,8 +74,17 @@ function compile(state) {
     ;
   });
 
+  code.add(_this.ident.compile(state));
+
+  if (_this.ident.functionIdent !== undefined) {
+    code.add('callq ' + _this.ident.functionIdent);
+  } else {
+    code
+      .add('movq (%rax), %rax')
+      .add('callq *%rax');
+  }
+
   code
-    .add('callq ' + _this.function.ident)
     .add('movq %rax, ' + state.pushRegister())
     .comment('' + _this.ident + ' call end');
 

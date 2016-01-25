@@ -75,54 +75,119 @@ function compileNeq() {
 }
 
 function eq(argument) {
-  return argument === this || argument === Null;
+  var _this = this;
+  var isExt = false;
+  var ext = argument.extends;
+
+  while (!isExt && ext !== undefined) {
+    isExt = ext === _this;
+    ext = ext.extends;
+  }
+
+  return argument === _this || argument === Null || isExt;
 }
 
 function addProperty(property, name) {
   var _this = this;
 
-  property.address = _this.internalSize;
-  _this.properties[name] = property;
-  _this.internalSize += property.type.size;
+  if (_this.properties[name] === undefined) {
+    property.addressShift = _this.internalSize;
+    property.address = property.addressShift + '(%rbx)';
+    _this.properties[name] = property;
+    _this.internalSize += property.type.size;
+  }
+
+  return property.addressShift;
 }
 
 function addFunction(fun, name) {
   var _this = this;
+  var oldFun;
 
-  fun.address = _this.internalSize;
-  _this.functions[name] = fun;
-  _this.internalSize += 8;
+  if (_this.functions[name] === undefined) {
+    fun.addressShift = _this.internalSize;
+    _this.functions[name] = fun;
+    _this.internalSize += 8;
+  } else {
+    oldFun = _this.functions[name];
+
+    if (!oldFun.type.eq(fun.type)) {
+      parseError(
+        'Wrong type for function ' + name + ' ovveride: ' + fun.type + ' instead of ' + oldFun.type,
+        _this.loc,
+        _this
+      );
+    }
+
+    fun.addressShift = oldFun.addressShift;
+    _this.functions[name] = fun;
+  }
+
+  return fun.addressShift;
 }
 
 function semanticCheck(state) {
   var _this = this;
   var TypeInt = require('latte/core/types/type-int');
+  var ext;
+
+  if (_this.scope !== undefined) {
+    return;
+  }
+
+  if (_this.extends !== undefined) {
+    ext = state.scope.getType(_this.extends);
+
+    if (ext === undefined) {
+      parseError(
+        'Undefined class for extends: ' + _this + ' extends ' + _this.extends,
+        _this.loc,
+        _this
+      );
+    }
+
+    _this.extends = ext;
+
+    if (_this.extends.scope === undefined) {
+      _this.extends.semanticCheck(state);
+    }
+  }
 
   _this.scope = state.pushScope();
+
+  if (_this.extends !== undefined) {
+    _this.scope.parent = _this.extends.scope;
+  }
+
   state.pushType(_this);
+  _this.block.semanticCheck(state, true);
 
-  _this.block.semanticCheck(state);
-  _this.addProperty({
-    type: TypeInt,
-    name: 'references'
-  }, 'references');
+  if (_this.extends === undefined) {
+    _this.addProperty({
+      type: TypeInt,
+      name: 'references'
+    }, 'references');
 
-  _this.addProperty({
-    type: TypeInt,
-    name: 'length'
-  }, 'length');
+    _this.addProperty({
+      type: TypeInt,
+      name: 'length'
+    }, 'length');
+  } else {
+    _.forEach(_this.extends.properties, _this.addProperty.bind(_this));
+    _.forEach(_this.extends.functions, _this.addFunction.bind(_this));
+  }
 
   _.forEach(_this.scope.variables, _this.addProperty.bind(_this));
   _.forEach(_this.scope.functions, _this.addFunction.bind(_this));
-
-  console.log(_this);
 
   state.popType();
   state.popScope();
 }
 
-function compile() {
-  //
+function compile(state) {
+  var _this = this;
+
+  return _this.scope.compile(state);
 }
 
 function semanticCheckValue() {
@@ -132,18 +197,43 @@ function semanticCheckValue() {
 function compileValue(state) {
   var _this = this;
   var malloc = 'malloc';
+  var rbx = state.pushRegister();
+  var code;
+  var ext;
 
   if (state.os === 'darwin') {
     malloc = '_' + malloc;
   }
 
-  return CodeBlock.create(undefined, 'Allocating ' + _this.name)
+  code = CodeBlock.create(undefined, 'Allocating ' + _this.name)
+    .add('movq %rbx, ' + rbx)
     .add('movq $' + _this.internalSize + ', %rdi')
     .add('call ' + malloc)
 
-    .add('movq $0, (%rax)')
-    .add('movq $' + _this.internalSize + ', 8(%rax)')
+    .add('movq %rax, %rbx')
+    .add('movq $0, (%rbx)')
+    .add('movq $' + _this.internalSize + ', 8(%rbx)')
   ;
+
+  ext = _this.extends;
+
+  while (ext !== undefined) {
+    code.add(ext.block.compile(state));
+    ext = ext.extends;
+  }
+
+  code.add(_this.block.compile(state));
+
+  _.forEach(_this.functions, function(fun) {
+    code
+      .add('leaq ' + fun.ident + '(%rip), %rdx')
+      .add('movq %rdx, ' + fun.addressShift + '(%rbx)');
+  });
+
+  code.add('movq %rbx, %rax');
+  code.add('movq ' + rbx + ', %rbx');
+
+  return code;
 }
 
 function defaultValueExpr() {

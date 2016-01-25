@@ -33,7 +33,7 @@ function create(elements) {
   return new Block(elements);
 }
 
-function semanticCheck(state) {
+function semanticCheck(state, noFunctions) {
   var _this = this;
   var noop = StatementNoop.create({loc: _this.loc});
 
@@ -93,9 +93,23 @@ function semanticCheck(state) {
     type.semanticCheck(state);
   });
 
-  _.forEach(state.scope.functions, function(fun) {
-    fun.semanticCheck(state);
+  _.forEach(state.scope.types, function(type) {
+    if (type.block) {
+      state.pushScope(type.scope);
+      state.pushType(type);
+      _.forEach(state.scope.functions, function(fun) {
+        fun.semanticCheck(state);
+      });
+      state.popType();
+      state.popScope();
+    }
   });
+
+  if (noFunctions !== true) {
+    _.forEach(state.scope.functions, function(fun) {
+      fun.semanticCheck(state);
+    });
+  }
 }
 
 function compile(state) {
