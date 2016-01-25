@@ -17,27 +17,16 @@ function StatementIncr(opts) {
   var _this = this;
 
   Statement.call(_this, opts);
-
-  _this.ident = opts.ident;
 }
 
 function semanticCheck(state) {
   var _this = this;
-  var variable = state.scope.getVariable(_this.ident);
 
-  if (variable === undefined) {
+  _this.ident.semanticCheck(state);
+
+  if (!_this.ident.type.eq(TypeInt)) {
     parseError(
-      'Undeclared variable to decrement: ' + _this.ident,
-      _this.loc,
-      _this
-    );
-  }
-
-  _this.variable = variable;
-
-  if (!variable.type.eq(TypeInt)) {
-    parseError(
-      'Can\'t increment \'' + variable.type + '\' works only for \'' + TypeInt + '\'',
+      'Can\'t increment \'' + _this.ident.type + '\' works only for \'' + TypeInt + '\'',
       _this.loc[_this.loc.length - 3],
       _this
     );
@@ -48,12 +37,10 @@ function create(opts) {
   return new StatementIncr(opts);
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('movq ' + _this.variable.address + ', %rax')
-    .add('incq %rax')
-    .add('movq %rax, ' + _this.variable.address)
-  ;
+    .add(_this.ident.compile(state))
+    .add('incq (%rax)');
 }

@@ -21,21 +21,12 @@ function StatementDecr(opts) {
 
 function semanticCheck(state) {
   var _this = this;
-  var variable = state.scope.getVariable(_this.ident);
 
-  if (variable === undefined) {
+  _this.ident.semanticCheck(state);
+
+  if (!_this.ident.type.eq(TypeInt)) {
     parseError(
-      'Undeclared variable to decrement: ' + _this.ident,
-      _this.loc,
-      _this
-    );
-  }
-
-  _this.variable = variable;
-
-  if (!variable.type.eq(TypeInt)) {
-    parseError(
-      'Can\'t decrement \'' + variable.type + '\' works only for \'' + TypeInt + '\'',
+      'Can\'t decrement \'' + _this.ident.type + '\' works only for \'' + TypeInt + '\'',
       _this.loc[_this.loc.length - 3],
       _this
     );
@@ -46,12 +37,10 @@ function create(opts) {
   return new StatementDecr(opts);
 }
 
-function compile() {
+function compile(state) {
   var _this = this;
 
   return CodeBlock.create(_this)
-    .add('movq ' + _this.variable.address + ', %rax')
-    .add('decq %rax')
-    .add('movq %rax, ' + _this.variable.address)
-  ;
+    .add(_this.ident.compile(state))
+    .add('decq (%rax)');
 }
