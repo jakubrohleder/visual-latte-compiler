@@ -1,9 +1,9 @@
 var IdentProperty = require('./idents/ident-property');
 var IdentElement = require('./idents/ident-element');
-var IdentVariable = require('./idents/ident-variable');
+var IdentRoot = require('./idents/ident-root');
 
 module.exports = {
   Property: IdentProperty,
-  Variable: IdentVariable,
+  Root: IdentRoot,
   Element: IdentElement
 };

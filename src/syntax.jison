@@ -152,7 +152,9 @@ ClassStm
       $$ = $Items;
     }
  | FunctionDecl
-   { $$ = $FunctionDecl; }
+  {
+    $$ = $FunctionDecl;
+  }
  ;
 
 /**
@@ -166,7 +168,7 @@ FunctionDecl
         args: $Args,
         block: $Block,
         type: $IDENT1,
-        ident: $IDENT2,
+        name: $IDENT2,
         loc: _$
       });
     }
@@ -177,7 +179,7 @@ FunctionDecl
         block: $Block,
         type: $IDENT1,
         array: true,
-        ident: $IDENT2,
+        name: $IDENT2,
         loc: _$
       });
     }
@@ -424,6 +426,8 @@ Expr
         ident: $IdentExpression,
         loc: _$
       });
+
+      $$.ident.function = true;
     }
   | '-' Expr %prec UMINUS
     {
@@ -503,7 +507,7 @@ Class
 
 IdentExpression
   : IDENT
-    { $$ = yy.Idents.Variable.create({
+    { $$ = yy.Idents.Root.create({
         text: $IDENT,
         loc: _$
       });

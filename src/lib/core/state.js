@@ -13,6 +13,8 @@ State.prototype.pushScope = pushScope;
 State.prototype.popScope = popScope;
 State.prototype.pushStack = pushStack;
 State.prototype.popStack = popStack;
+State.prototype.pushType = pushType;
+State.prototype.popType = popType;
 
 State.prototype.nextLabel = nextLabel;
 
@@ -32,6 +34,8 @@ function State(opts) {
 
   _this.rootScope = rootScope;
   _this.functions = [];
+
+  _this.types = [];
 
   _this.stack = stack;
   _this.stacks = [stack];
@@ -63,6 +67,20 @@ function popFunction() {
 
   _this.functions.splice(-1, 1);
   _this.function = _this.functions.length > 0 ? _this.functions[_this.functions.length - 1] : undefined;
+}
+
+function pushType(type) {
+  var _this = this;
+
+  _this.type = type;
+  _this.types.push(type);
+}
+
+function popType() {
+  var _this = this;
+
+  _this.types.splice(-1, 1);
+  _this.type = _this.types.length > 0 ? _this.types[_this.types.length - 1] : undefined;
 }
 
 function pushStack() {
@@ -118,7 +136,7 @@ function popRegister() {
   var _this = this;
 
   if (_this.function.register === 0) {
-    throw('WRONG', popRegister.caller);
+    throw('WRONG POP REGISTER');
   }
 
   return _this.function.registers[--_this.function.register];

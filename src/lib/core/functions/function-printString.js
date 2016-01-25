@@ -1,6 +1,7 @@
 var CodeBlock = require('latte/code/code-block');
 var TypeVoid = require('latte/core/types/type-void');
 var TypeString = require('latte/core/types/type-string');
+var encodeFunctionName = require('latte/utils').encodeFunctionName;
 
 var _Function = require('./function').constr;
 var Argument = require('../argument');
@@ -19,9 +20,10 @@ function FunctionPrintString() {
     ident: 'arg'
   });
 
-  _this.ident = 'printString';
+  _this.name = 'printString';
   _this.type = TypeVoid;
   _this.args = [arg];
+  _this.ident = encodeFunctionName(_this, undefined, true);
   _this.decl = {
     loc: {
       first_line: 1,

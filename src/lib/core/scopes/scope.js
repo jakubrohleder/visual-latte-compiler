@@ -49,19 +49,19 @@ function addFunction(fun) {
   var _this = this;
   var loc = fun.decl.loc[fun.decl.loc.length - 2];
 
-  if (_this.functions[fun.ident] !== undefined) {
+  if (_this.functions[fun.name] !== undefined) {
     parseError(
-      'Function \'' + fun.ident + '\' already defined',
+      'Function \'' + fun.name + '\' already defined',
       loc,
       _this
     );
   }
 
-  if (_this.getFunction(fun.ident) !== undefined) {
-    // console.info('Warning: Redefining parent scope function', fun.ident, 'on line', loc.first_line);
+  if (_this.getFunction(fun.name) !== undefined) {
+    // console.info('Warning: Redefining parent scope function', fun.name, 'on line', loc.first_line);
   }
 
-  _this.functions[fun.ident] = fun;
+  _this.functions[fun.name] = fun;
 }
 
 function addVariable(variable) {

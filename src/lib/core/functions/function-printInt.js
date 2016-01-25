@@ -1,6 +1,7 @@
 var CodeBlock = require('latte/code/code-block');
 var TypeVoid = require('latte/core/types/type-void');
 var TypeInt = require('latte/core/types/type-int');
+var encodeFunctionName = require('latte/utils').encodeFunctionName;
 
 var _Function = require('./function').constr;
 var Argument = require('../argument');
@@ -19,9 +20,10 @@ function FunctionPrintInt() {
     ident: 'arg'
   });
 
-  _this.ident = 'printInt';
+  _this.name = 'printInt';
   _this.type = TypeVoid;
   _this.args = [arg];
+  _this.ident = encodeFunctionName(_this, undefined, true);
   _this.decl = {
     loc: {
       first_line: 1,

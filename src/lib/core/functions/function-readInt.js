@@ -1,5 +1,6 @@
 var CodeBlock = require('latte/code/code-block');
 var TypeInt = require('latte/core/types/type-int');
+var encodeFunctionName = require('latte/utils').encodeFunctionName;
 
 var _Function = require('./function').constr;
 
@@ -13,9 +14,10 @@ module.exports = new FunctionReadInt();
 function FunctionReadInt() {
   var _this = this;
 
-  _this.ident = 'readInt';
+  _this.name = 'readInt';
   _this.type = TypeInt;
   _this.args = [];
+  _this.ident = encodeFunctionName(_this, undefined, true);
   _this.decl = {
     loc: {
       first_line: 1,

@@ -1,7 +1,9 @@
 var Statement = require('./statement');
 var _Function = require('../functions/function');
 var FunctionMain = require('../functions/function-main');
+var FunctionMethod = require('../functions/function-method');
 var TypeArray = require('latte/core/types/type-array');
+var encodeFunctionName = require('latte/utils').encodeFunctionName;
 
 var parseError = require('latte/error').parseError;
 var CodeBlock = require('latte/code/code-block');
@@ -26,7 +28,13 @@ function StatementDeclarationFunction(opts) {
 function semanticCheck(state) {
   var _this = this;
   var type = state.scope.getType(_this.type);
-  var constructor = _this.ident === 'main' ? FunctionMain : _Function;
+  var constructor = _Function;
+
+  if (state.type !== undefined) {
+    constructor = FunctionMethod;
+  } else if (_this.name === 'main') {
+    constructor = FunctionMain;
+  }
 
   if (type === undefined) {
     parseError(
@@ -41,6 +49,7 @@ function semanticCheck(state) {
   }
 
   _this.type = type;
+  _this.ident = encodeFunctionName(_this, state.type);
 
   _.forEach(_this.args, function(arg) {
     arg.semanticCheck(state);
@@ -48,10 +57,12 @@ function semanticCheck(state) {
 
   _this.function = constructor.create({
     type: _this.type,
+    name: _this.name,
     ident: _this.ident,
     decl: _this,
     args: _this.args,
-    block: _this.block
+    block: _this.block,
+    parent: state.type
   });
 
   state.scope.addFunction(_this.function);

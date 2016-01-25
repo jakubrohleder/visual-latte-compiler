@@ -1,5 +1,6 @@
 var CodeBlock = require('latte/code/code-block');
 var TypeString = require('latte/core/types/type-string');
+var encodeFunctionName = require('latte/utils').encodeFunctionName;
 
 var _Function = require('./function').constr;
 
@@ -13,9 +14,10 @@ module.exports = new FunctionReadString();
 function FunctionReadString() {
   var _this = this;
 
-  _this.ident = 'readString';
+  _this.name = 'readString';
   _this.type = TypeString;
   _this.args = [];
+  _this.ident = encodeFunctionName(_this, undefined, true);
   _this.decl = {
     loc: {
       first_line: 1,

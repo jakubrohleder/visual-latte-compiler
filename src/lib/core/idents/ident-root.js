@@ -6,13 +6,13 @@ module.exports = {
   create: create
 };
 
-IdentVariable.prototype = Object.create(Element.prototype);
-IdentVariable.prototype.constructor = IdentVariable;
-IdentVariable.prototype.semanticCheck = semanticCheck;
-IdentVariable.prototype.compile = compile;
-IdentVariable.prototype.toString = toString;
+IdentRoot.prototype = Object.create(Element.prototype);
+IdentRoot.prototype.constructor = IdentRoot;
+IdentRoot.prototype.semanticCheck = semanticCheck;
+IdentRoot.prototype.compile = compile;
+IdentRoot.prototype.toString = toString;
 
-function IdentVariable(opts) {
+function IdentRoot(opts) {
   var _this = this;
 
   Element.call(_this, opts);
@@ -34,7 +34,7 @@ function semanticCheck(state) {
 }
 
 function create(opts) {
-  return new IdentVariable(opts);
+  return new IdentRoot(opts);
 }
 
 function compile() {

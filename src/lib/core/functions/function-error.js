@@ -1,5 +1,6 @@
 var CodeBlock = require('latte/code/code-block');
 var TypeVoid = require('latte/core/types/type-void');
+var encodeFunctionName = require('latte/utils').encodeFunctionName;
 
 var _Function = require('./function').constr;
 
@@ -13,9 +14,10 @@ module.exports = new FunctionError();
 function FunctionError() {
   var _this = this;
 
-  _this.ident = 'error';
+  _this.name = 'error';
   _this.type = TypeVoid;
   _this.args = [];
+  _this.ident = encodeFunctionName(_this, undefined, true);
   _this.decl = {
     loc: {
       first_line: 1,

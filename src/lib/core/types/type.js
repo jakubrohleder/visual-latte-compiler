@@ -26,6 +26,7 @@ Type.prototype.defaultValueExpr = defaultValueExpr;
 Type.prototype.eq = eq;
 
 Type.prototype.addProperty = addProperty;
+Type.prototype.addFunction = addFunction;
 
 function Type(opts) {
   var _this = this;
@@ -85,11 +86,20 @@ function addProperty(property, name) {
   _this.internalSize += property.type.size;
 }
 
+function addFunction(fun, name) {
+  var _this = this;
+
+  fun.address = _this.internalSize;
+  _this.functions[name] = fun;
+  _this.internalSize += 8;
+}
+
 function semanticCheck(state) {
   var _this = this;
   var TypeInt = require('latte/core/types/type-int');
 
   _this.scope = state.pushScope();
+  state.pushType(_this);
 
   _this.block.semanticCheck(state);
   _this.addProperty({
@@ -102,10 +112,12 @@ function semanticCheck(state) {
     name: 'length'
   }, 'length');
 
-  _this.functions = _this.scope.functions;
-
   _.forEach(_this.scope.variables, _this.addProperty.bind(_this));
+  _.forEach(_this.scope.functions, _this.addFunction.bind(_this));
 
+  console.log(_this);
+
+  state.popType();
   state.popScope();
 }
 
@@ -169,6 +181,6 @@ function binaryOperationCheck(operator, rightType) {
 }
 
 function toString() {
-  return 't:' + this.name;
+  return this.name;
 }
 
