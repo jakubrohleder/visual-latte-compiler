@@ -7,7 +7,7 @@ var conf = require('./conf');
 var $ = require('gulp-load-plugins')();
 
 gulp.task('samples', function() {
-  return gulp.src(path.join(conf.paths.lib.samples, '/**/*'))
+  return gulp.src(path.join(conf.paths.lib.samples, '/**/*.lat'))
       .pipe($.fileContentsToJson('samples.json'))
       .pipe(gulp.dest(conf.paths.lib.src));
 });
