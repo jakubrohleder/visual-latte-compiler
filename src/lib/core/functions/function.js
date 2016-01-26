@@ -83,9 +83,11 @@ function compile(state, shift) {
   var argsBlock;
   var pushRegsBlock;
   var popRegsBlock;
+  var cleanVarsBlock;
   var newPos;
   var oldPos;
   var pos;
+  var end;
 
   shift = shift || 0;
 
@@ -106,7 +108,16 @@ function compile(state, shift) {
     argsBlock.add('movq ' + oldPos + ', %rax');
     argsBlock.add('movq %rax, ' + newPos);
 
-    // argument.variable.value.addReference(argument.variable);
+    if (argument.type.pointer === true) {
+      end = state.nextLabel();
+      argsBlock
+        .add('movq %rax, %rdx')
+        .add('cmpq $0, %rdx')
+        .add('je ' + end)
+        .add('incq (%rdx)')
+        .add(end + ':')
+      ;
+    }
   });
 
   code = _this.block.compile(state);
@@ -128,6 +139,23 @@ function compile(state, shift) {
     popRegsBlock.add('movq ' + pos + '(%rbp), ' + _this.registers[i]);
   }
 
+  cleanVarsBlock = CodeBlock.create(undefined, 'Cleaning vars references')
+    .add('movq %rax, %r8');
+  _.forEach(_this.scope.variables, function(variable) {
+    if (variable.type.pointer === true) {
+      end = state.nextLabel();
+      cleanVarsBlock
+        .add('movq ' + variable.address + ', %rdx', 'Var ' + variable)
+        .add('cmpq $0, %rdx')
+        .add('je ' + end)
+        .add('decq (%rdx)')
+        .add(end + ':')
+      ;
+    }
+  });
+  cleanVarsBlock.add('movq %r8, %rax');
+
+
   code = CodeBlock.create(_this)
     .add('.globl ' + _this.ident)
     .add(_this.ident + ':')
@@ -137,6 +165,7 @@ function compile(state, shift) {
       .add(argsBlock)
       .add(code)
       .add(_this.exitLabel + ':')
+      .add(cleanVarsBlock)
       .add(popRegsBlock)
       .add(_this.generateExit(state))
     );

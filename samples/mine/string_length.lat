@@ -1,6 +1,7 @@
 int main() {
 
   string s = "1234";
+  string t = s;
 
   string s2 = s + "56789";
 

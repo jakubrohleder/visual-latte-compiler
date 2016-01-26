@@ -1,0 +1,68 @@
+class Node {
+  Node next;
+}
+
+string test (string s) {
+  printInt(s.references);
+  return s;
+}
+
+string test2 () {
+  return "sadaS";
+}
+
+int main() {
+  printString("strings");
+  string s = "aaa";
+  string a = s;
+  string b;
+  b = a;
+  string c = "ccc";
+
+  printInt(s.references);
+  printInt(a.references);
+  printInt(b.references);
+
+  a = c;
+
+  printInt(s.references);
+  printInt(a.references);
+
+  test(s);
+  printInt(s.references);
+
+  string d = test2();
+  printInt(d.references);
+
+  printString("string arrays");
+
+  string[] as = new string[10];
+
+  as[1] = s;
+  int t = readInt();
+  as[t] = s;
+
+  printInt(s.references);
+
+  s = test(s);
+  a = test(s);
+
+  printInt(b.references);
+
+  printString("classes");
+
+  Node n = new Node;
+  printInt(n.references);
+
+  n.next = n;
+  printInt(n.references);
+
+  Node tn = n.next;
+
+  n = new Node;
+  tn.next = tn;
+  printInt(n.references);
+  printInt(tn.references);
+
+  return 0;
+}

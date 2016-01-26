@@ -119,11 +119,7 @@ function compile(state) {
     .add('movq ' + counter + ', %rdx')
   ;
 
-  if (_this.type.pointer === true) {
-    code.add('leaq 16(%rax, %rdx, ' + _this.type.size + '), %rax');
-  } else {
-    code.add('movq 16(%rax, %rdx, ' + _this.type.size + '), %rax');
-  }
+  code.add('movq 16(%rax, %rdx, ' + _this.type.size + '), %rax');
 
   code
     .add('movq %rax, ' + _this.current.address)

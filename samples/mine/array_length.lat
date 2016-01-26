@@ -1,6 +1,7 @@
 int main() {
 
   int[] i = new int[20];
+  int[] t = i;
 
   printInt(i.length);
   printInt(i.references);

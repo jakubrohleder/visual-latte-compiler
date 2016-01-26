@@ -38,18 +38,38 @@ function semanticCheck(state) {
 function compile(state) {
   var _this = this;
   var code;
+  var endDecq = state.nextLabel();
+  var endIncq = state.nextLabel();
 
   code = CodeBlock.create(_this)
     .add(_this.expr.compile(state))
     .add('movq %rax, ' + state.pushRegister())
-    // .add(_this.ident.value.removeReference(_this.variable, _this.ident, state))
     .add(_this.ident.compile(state))
+  ;
+
+  if (_this.type.pointer === true) {
+    code
+      .add('movq (%rax), %rdx')
+      .add('cmpq $0, %rdx')
+      .add('je ' + endDecq)
+      .add('decq (%rdx)')
+      .add(endDecq + ':')
+    ;
+  }
+
+  code
     .add('movq ' + state.popRegister() + ', %rdx')
     .add('movq %rdx, (%rax)', 'save ' + _this.expr + ' on ' + _this.ident)
   ;
 
-  // _this.expr.value.addReference(_this.variable);
-  // _this.variable.value = _this.expr.value;
+  if (_this.type.pointer === true) {
+    code
+      .add('cmpq $0, %rdx')
+      .add('je ' + endIncq)
+      .add('incq (%rdx)')
+      .add(endIncq + ':')
+    ;
+  }
 
   return code;
 }

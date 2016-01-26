@@ -56,9 +56,10 @@ function compile(state) {
   if (
     getFunctionName(_this.source) !== 'ExpressionParenthesis' &&
     getFunctionName(_this.ident) !== 'ExpressionFuncall' &&
+    getFunctionName(_this.source) !== 'ExpressionFuncall' &&
     _this.source !== Self
   ) {
-    code.add('movq (%rax), %rax', 'IdentProperty');
+    code.add('movq (%rax), %rax', 'IdentProperty ' + getFunctionName(_this.ident) + ' ' + getFunctionName(_this.source));
   }
 
   code

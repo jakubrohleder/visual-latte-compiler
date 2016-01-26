@@ -77,6 +77,7 @@ function semanticCheck(state) {
 function compile(state) {
   var _this = this;
   var code;
+  var end;
 
   if (_this.variable.addressShift === undefined) {
     _this.variable.address = '' + -state.stack.addVariable(_this.variable) + '(%rbp)';
@@ -90,7 +91,15 @@ function compile(state) {
     .add('movq %rax, ' + _this.variable.address)
   ;
 
-  // _this.variable.value.addReference(_this.variable);
+  if (_this.type.pointer === true) {
+    end  = state.nextLabel();
+    code
+      .add('cmpq $0, %rax')
+      .add('je ' + end)
+      .add('incq (%rax)')
+      .add(end + ':')
+    ;
+  }
 
   return code;
 }
