@@ -66,12 +66,21 @@ function compile(state) {
 
   state.stack.addFunctionCall(_this);
 
+  _.forEach(_this.args, function(arg) {
+    arg.register = state.pushRegister();
+    code
+      .add(arg.compile(state))
+      .add('movq %rax, ' + arg.register)
+    ;
+  });
+
   _.forEach(_this.args, function(arg, index) {
     register = (index * 8) + '(%rsp)';
     code
-      .add(arg.compile(state))
+      .add('movq ' + arg.register + ', %rax')
       .add('movq %rax, ' + register)
     ;
+    state.popRegister();
   });
 
   code.add(_this.ident.compile(state));

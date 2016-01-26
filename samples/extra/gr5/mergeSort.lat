@@ -1,7 +1,10 @@
 // autor: Pawel Magryta pm262455
 
 
-
+class Lista{
+	Lista poprzedni, nastepny;
+	int wartosc;
+}
 
 
 
@@ -46,7 +49,7 @@ Lista scalaj(Lista lj, int ljLength, Lista ld, int ldLength){
 		if (w2 == ldLength)	wart2 = -1;
 		else wart2 = pokazWartosc(ld, w2);
 		if (wart2 > wart){
-			w2++;		
+			w2++;
 			ladujWartosc(start, ws, wart2);
 		} else{
 			w1++;
@@ -92,14 +95,14 @@ Lista generujTablicoListeDoSortowaniaMerge13co7Malejaco(int dlugoscListy, boolea
 		a = a.nastepny;
 		if (wsk % 5 == 3) a.wartosc = dlugoscListy - wsk / 2;
 		else a.wartosc = wsk % 13;
-		
+
 		a.poprzedni = n;
 		//a.wartosc = wsk;
 		if (pisz) printInt(a.wartosc);
 		wsk++;
 	}
 	a.nastepny = null;
-	if (pisz) printString("wygenerowal liste 2kierunkowa dziwna dlugosci :");
+	if (pisz) printString("wygenerowal liste 2kierunkowa dziwna dlugosci:");
 	if (pisz) printInt(dlugoscListy);
 	if (pisz) printString("__________");
 	return start;
@@ -109,7 +112,7 @@ Lista generujTablicoListeDoSortowaniaMerge13co7Malejaco(int dlugoscListy, boolea
 
 Lista przejdzSieNaKoniecIWypisuj(Lista start, int dl){
 	Lista a = start, b = start;
-	printString("idziemy na koniec listy (ma byc nierosnaco): ");
+	printString("idziemy na koniec listy (ma byc nierosnaco):");
 	int wsk = 0;
 	while (wsk < dl){
 		printInt(a.wartosc);
@@ -120,10 +123,7 @@ Lista przejdzSieNaKoniecIWypisuj(Lista start, int dl){
 	return b;
 }
 
-class Lista{
-	Lista poprzedni, nastepny;
-	int wartosc;
-}
+
 
 
 

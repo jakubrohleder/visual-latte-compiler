@@ -86,3 +86,5 @@ testGood "samples/extensions/objects1/*"
 testGood "samples/extensions/objects2/*"
 
 testGood "samples/extra/good/virtual/*"
+
+testGood "samples/extra/gr5/*"

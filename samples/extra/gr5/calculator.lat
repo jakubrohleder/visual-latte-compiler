@@ -4,6 +4,13 @@ int main() {
     return 0;
 }
 
+class Node {
+    int value() {
+        error();
+        return 0;
+    }
+}
+
 Node plus(Node n1, Node n2) {
     Operator res = new Plus;
     res.left = n1;
@@ -32,13 +39,6 @@ Node liczba(int l) {
     Liczba res = new Liczba;
     res.v = l;
     return res;
-}
-
-class Node {
-    int value() {
-        error();
-        return 0;
-    }
 }
 
 class Liczba extends Node {

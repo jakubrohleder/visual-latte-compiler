@@ -2,7 +2,7 @@ var Statement = require('./statement');
 var Type = require('latte/core/types/type');
 
 // var parseError = require('latte/error').parseError;
-// var CodeBlock = require('latte/code/code-block');
+var CodeBlock = require('latte/code/code-block');
 
 module.exports = {
   create: create

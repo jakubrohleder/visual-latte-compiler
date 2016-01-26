@@ -102,7 +102,11 @@ function addProperty(property, name) {
   var _this = this;
 
   if (_this.properties[name] === undefined) {
-    property.addressShift = _this.internalSize;
+    if (property.addressShift === undefined) {
+      property.addressShift = _this.internalSize;
+      property.address = property.addressShift + '(%rbx)';
+    }
+
     property.address = property.addressShift + '(%rbx)';
     _this.properties[name] = property;
     _this.internalSize += property.type.size;
@@ -116,7 +120,10 @@ function addFunction(fun, name) {
   var oldFun;
 
   if (_this.functions[name] === undefined) {
-    fun.addressShift = _this.internalSize;
+    if (fun.addressShift === undefined) {
+      fun.addressShift = _this.internalSize;
+    }
+
     _this.functions[name] = fun;
     _this.internalSize += 8;
   } else {
@@ -186,6 +193,7 @@ function semanticCheck(state) {
   } else {
     _.forEach(_this.extends.properties, _this.addProperty.bind(_this));
     _.forEach(_this.extends.functions, _this.addFunction.bind(_this));
+    _this.internalSize = _this.extends.internalSize;
   }
 
   _.forEach(_this.scope.variables, _this.addProperty.bind(_this));
@@ -284,4 +292,3 @@ function binaryOperationCheck(operator, rightType) {
 function toString() {
   return this.name;
 }
-

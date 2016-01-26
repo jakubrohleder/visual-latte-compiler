@@ -5,6 +5,8 @@ var unescape = require('latte/utils').unescape;
 var Type = require('./type').constr;
 var TypeInt = require('latte/core/types/type-int');
 
+var _ = require('lodash');
+
 TypeString.prototype = Object.create(Type.prototype);
 TypeString.prototype.constructor = TypeString;
 TypeString.prototype.semanticCheck = semanticCheck;

@@ -13,6 +13,10 @@ int main(){
 	return 0;
 }
 
+class Lista{
+	Lista poprzedni, nastepny;
+	int wartosc;
+}
 
 ###### krotki test listy:
 # lista to klasa z publicznymi obiektami bez metod
@@ -36,7 +40,7 @@ void listaTest(int dlugoscListy){
 
 Lista przejdzSieNaKoniecIWypisuj(Lista start, int dl){
 	Lista a = start, b = start;
-	printString("idziemy na koniec listy: ");
+	printString("idziemy na koniec listy:");
 	int i = 0;
 	while (i < dl){
 		printInt(a.wartosc);
@@ -49,7 +53,7 @@ Lista przejdzSieNaKoniecIWypisuj(Lista start, int dl){
 
 Lista wrocNaPoczatekIWypisuj(Lista odKonca, int dl){
 	Lista a = odKonca, b;
-	printString("wracamy na poczatek listy: ");
+	printString("wracamy na poczatek listy:");
 	int w = dl;
 	while (w > 0){
 		printInt(a.wartosc);
@@ -60,10 +64,7 @@ Lista wrocNaPoczatekIWypisuj(Lista odKonca, int dl){
 	return b;
 }
 
-class Lista{
-	Lista poprzedni, nastepny;
-	int wartosc;
-}
+
 
 Lista zwrocListeDlugosci(int dlugoscListy){
 	printString("Krotki test listy:");
@@ -81,7 +82,7 @@ Lista zwrocListeDlugosci(int dlugoscListy){
 		wsk++;
 	}
 	a.nastepny = null;
-	printString("wygenerowal liste 2kierunkowa dlugosci :");
+	printString("wygenerowal liste 2kierunkowa dlugosci:");
 	printInt(dlugoscListy);
 	printString("__________");
 	return start;

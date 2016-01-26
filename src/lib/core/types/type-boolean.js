@@ -21,7 +21,7 @@ function TypeBoolean() {
   _this.builtin = true;
   _this.pointer = false;
   _this.name = 'boolean';
-  _this.size = 4;
+  _this.size = 8;
 
   _this.operators.binary = {
     '||': {
