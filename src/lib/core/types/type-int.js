@@ -20,6 +20,7 @@ function TypeInt() {
   Type.call(_this);
 
   _this.builtin = true;
+  _this.pointer = false;
   _this.name = 'int';
   _this.size = 8;
 

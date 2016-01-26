@@ -6,7 +6,8 @@ var TypeInt = require('latte/core/types/type-int');
 var arrayType = {};
 
 module.exports = {
-  create: create
+  create: create,
+  reset: reset
 };
 
 TypeArray.prototype = Object.create(Type.prototype);
@@ -41,6 +42,10 @@ function TypeArray(elementType) {
     type: TypeInt,
     name: 'length'
   }, 'length');
+}
+
+function reset() {
+  arrayType = {};
 }
 
 function create(elementType) {
@@ -106,7 +111,7 @@ function defaultValueExpr(loc, type) {
 function toString() {
   var _this = this;
 
-  return 'array:' + _this.elementType;
+  return 'array_' + _this.elementType;
 }
 
 function compile() {

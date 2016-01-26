@@ -35,9 +35,9 @@ function compile(state) {
   var code = CodeBlock.create(_this)
     .add(_this.ident.compile(state));
 
-  if (getFunctionName(_this.ident) !== 'ExpressionParenthesis') {
+  if (getFunctionName(_this.ident) !== 'ExpressionParenthesis' && getFunctionName(_this.ident) !== 'ExpressionFuncall') {
     code
-     .add('movq (%rax), %rax');
+     .add('movq (%rax), %rax', 'Expression Variable ' + getFunctionName(_this.ident));
   }
 
   return code;

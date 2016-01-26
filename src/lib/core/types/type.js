@@ -74,17 +74,28 @@ function compileNeq() {
   return 'jne';
 }
 
-function eq(argument) {
+function eq(argument, symetrical) {
   var _this = this;
   var isExt = false;
+  var isNull = argument === Null;
   var ext = argument.extends;
 
-  while (!isExt && ext !== undefined) {
+  while (isExt === false && ext !== undefined) {
     isExt = ext === _this;
     ext = ext.extends;
   }
 
-  return argument === _this || argument === Null || isExt;
+  if (symetrical) {
+    isNull = isNull || _this === Null;
+    ext = _this.extends;
+
+    while (isExt === false && ext !== undefined) {
+      isExt = ext === argument;
+      ext = ext.extends;
+    }
+  }
+
+  return argument === _this || isNull || isExt;
 }
 
 function addProperty(property, name) {

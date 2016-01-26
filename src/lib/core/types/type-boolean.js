@@ -19,6 +19,7 @@ function TypeBoolean() {
   Type.call(_this);
 
   _this.builtin = true;
+  _this.pointer = false;
   _this.name = 'boolean';
   _this.size = 4;
 

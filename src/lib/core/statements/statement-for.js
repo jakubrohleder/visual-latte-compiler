@@ -57,7 +57,7 @@ function semanticCheck(state) {
       _this.loc,
       _this
     );
-  } else if (!_this.type.eq(_this.current.type)) {
+  } else if (!_this.current.type.eq(_this.type)) {
     parseError(
       'Wrong index type in \'for\' loop: ' + _this.current.type + ' instead of ' + _this.array.type.elementType,
       _this.loc,
@@ -111,11 +111,21 @@ function compile(state) {
     .add(start + ':', 'start label', -1)
     .add(CodeBlock.create(undefined, 'For condition')
       .add('movq ' + _this.array.address + ', %rax')
-      .add('cmpq ' + counter + ', 8(%rax)')
+      .add('movq ' + counter + ', %rdx')
+      .add('cmpq %rdx, 8(%rax)')
       .add('jle ' + end)
     )
     .add('movq ' + _this.array.address + ', %rax')
-    .add('movq 16(%rax, ' + counter + ', ' + _this.type.size + '), %rax')
+    .add('movq ' + counter + ', %rdx')
+  ;
+
+  if (_this.type.pointer === true) {
+    code.add('leaq 16(%rax, %rdx, ' + _this.type.size + '), %rax');
+  } else {
+    code.add('movq 16(%rax, %rdx, ' + _this.type.size + '), %rax');
+  }
+
+  code
     .add('movq %rax, ' + _this.current.address)
     .add(_this.loop.compile(state))
     .add('incq ' + counter)

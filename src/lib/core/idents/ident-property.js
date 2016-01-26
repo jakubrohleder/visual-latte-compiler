@@ -53,9 +53,12 @@ function compile(state) {
   var _this = this;
 
   var code = CodeBlock.create(_this).add(_this.source.compile(state));
-
-  if (getFunctionName(_this.source) !== 'ExpressionParenthesis' && _this.source !== Self) {
-    code.add('movq (%rax), %rax');
+  if (
+    getFunctionName(_this.source) !== 'ExpressionParenthesis' &&
+    getFunctionName(_this.ident) !== 'ExpressionFuncall' &&
+    _this.source !== Self
+  ) {
+    code.add('movq (%rax), %rax', 'IdentProperty');
   }
 
   code

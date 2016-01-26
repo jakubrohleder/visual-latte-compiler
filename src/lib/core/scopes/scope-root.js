@@ -5,6 +5,7 @@ var FunctionPrintString = require('../functions/function-printString');
 var FunctionReadInt = require('../functions/function-readInt');
 var FunctionReadString = require('../functions/function-readString');
 
+var TypeArray = require('../types/type-array');
 var TypeInt = require('../types/type-int');
 var TypeString = require('../types/type-string');
 var TypeVoid = require('../types/type-void');
@@ -25,6 +26,8 @@ function RootScope(opts) {
   var _this = this;
 
   Scope.call(_this, opts);
+
+  TypeArray.reset();
 
   _this.addType(TypeInt);
   _this.addType(TypeString);

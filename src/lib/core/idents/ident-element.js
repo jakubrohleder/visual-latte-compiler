@@ -45,14 +45,15 @@ function compile(state) {
   var code = CodeBlock.create(_this)
     .add(_this.source.compile(state));
 
-  if (getFunctionName(_this.source) !== 'ExpressionParenthesis') {
-    code.add('movq (%rax), %rax');
+  if (getFunctionName(_this.source) !== 'ExpressionParenthesis' && getFunctionName(_this.source) !== 'ExpressionFuncall') {
+    code.add('movq (%rax), %rax', 'IdentElement');
   }
 
   code
     .add('movq %rax, ' + state.pushRegister())
     .add(_this.expr.compile(state))
-    .add('leaq 16(' + state.popRegister() + ', %rax, ' + _this.type.size + '), %rax')
+    .add('movq ' + state.popRegister() + ', %rdx')
+    .add('leaq 16(%rdx, %rax, ' + _this.type.size + '), %rax')
   ;
 
   return code;

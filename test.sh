@@ -68,18 +68,21 @@ function testBad {
     done
 }
 
-# testGood "samples/mine/*"
+testGood "samples/mine/*"
 
-# testGood "samples/good/*"
+testGood "samples/good/*"
+testGood "samples/extra/good/basic/*"
 
-# testBad "samples/bad/*"
-# testGood "samples/extra/bad/runtime/*"
-# testBad "samples/extra/bad/semantic/*"
+testBad "samples/bad/*"
+testGood "samples/extra/bad/runtime/*"
+testBad "samples/extra/bad/semantic/*"
 
-# testGood "samples/extra/good/arrays/*"
-# testGood "samples/extensions/arrays1/*"
+testGood "samples/extra/good/arrays/*"
+testGood "samples/extensions/arrays1/*"
 
-# testGood "samples/extensions/struct/*"
+testGood "samples/extensions/struct/*"
 
 testGood "samples/extensions/objects1/*"
 testGood "samples/extensions/objects2/*"
+
+testGood "samples/extra/good/virtual/*"

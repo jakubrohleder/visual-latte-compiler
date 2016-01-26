@@ -420,16 +420,6 @@ Expr
         loc: _$
       });
     }
-  | IdentExpression '(' Exprs ')'
-    {
-      $$ = yy.Expressions.Funcall.create({
-        args: $Exprs,
-        ident: $IdentExpression,
-        loc: _$
-      });
-
-      $$.ident.function = true;
-    }
   | '-' Expr %prec UMINUS
     {
       $$ = yy.Expressions.Uminus.create({
@@ -518,6 +508,16 @@ IdentExpression
       $$ = yy.Expressions.Parenthesis.create({
         expr: $Expr
       });
+    }
+  | IdentExpression '(' Exprs ')'
+    {
+      $$ = yy.Expressions.Funcall.create({
+        args: $Exprs,
+        ident: $IdentExpression,
+        loc: _$
+      });
+
+      $$.ident.function = true;
     }
   | SELF
     { $$ = yy.Self; }
