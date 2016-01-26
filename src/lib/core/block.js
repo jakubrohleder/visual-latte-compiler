@@ -16,6 +16,9 @@ Block.prototype.compile = compile;
 
 function Block(elements) {
   var _this = this;
+  var otherDecls = [];
+  var j = 0;
+  var i;
 
   Array.call(_this);
 
@@ -23,8 +26,17 @@ function Block(elements) {
     elements = _.flatten(elements);
     _this.length = elements.length;
 
-    for (var i = 0; i < elements.length; i++) {
-      _this[i] = elements[i];
+    for (i = 0; i < elements.length; i++) {
+      if (getFunctionName(elements[i]) !== 'StatementDeclarationClass') {
+        otherDecls.push(elements[i]);
+      } else {
+        _this[j] = elements[i];
+        j++;
+      }
+    }
+
+    for (i = 0; i < otherDecls.length; i++, j++) {
+      _this[j] = otherDecls[i];
     }
   }
 }
