@@ -2,10 +2,9 @@ var compiler = require('./compiler');
 var fs = require('fs');
 var args = process.argv.slice(2);
 var path = require('path');
-var location = args[1];
 var filepath = process.cwd() + '/' + args[0];
 var filename = path.basename(filepath, '.lat');
-var filedir = location === undefined ? path.dirname(filepath) : location;
+var filedir = path.dirname(filepath);
 var childProcess = require('child_process');
 
 var gcc = process.platform === 'darwin' ? 'gcc-5' : 'gcc';
