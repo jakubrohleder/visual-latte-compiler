@@ -85,3 +85,13 @@ The solution uses [jison](https://github.com/zaach/jison) - bison port to javasc
 The front end is built using [angular](http://angular.io) framework with [semantic-ui](http://semantic-ui.com) css modules and [code mirror](https://codemirror.net/) js code editor.
 
 Cool, awesome and inspiring animated favicon is made with little help of [favico.js](http://lab.ejci.net/favico.js/).
+
+###Implemented latte elements
+
+* core
+* arrays
+* structs
+* objects
+* object with virtual methods
+* registers allocations
+* garbage collecting
