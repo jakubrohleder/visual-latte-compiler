@@ -51,6 +51,7 @@ function semanticCheck(state) {
       type: argument.type,
       ident: argument.ident,
       decl: argument,
+      argument: true,
       address: index * 8 + 16 + '(%rbp)'
     });
 
@@ -87,7 +88,6 @@ function compile(state, shift) {
   var newPos;
   var oldPos;
   var pos;
-  var end;
 
   shift = shift || 0;
 
@@ -105,19 +105,11 @@ function compile(state, shift) {
     newPos = '' + -state.stack.addArgument(argument.variable) + '(%rbp)';
     oldPos = argument.variable.address;
     argument.variable.address = newPos;
-    argsBlock.add('movq ' + oldPos + ', %rax');
-    argsBlock.add('movq %rax, ' + newPos);
-
-    if (argument.type.pointer === true) {
-      end = state.nextLabel();
-      argsBlock
-        .add('movq %rax, %rdx')
-        .add('cmpq $0, %rdx')
-        .add('je ' + end)
-        .add('incq (%rdx)')
-        .add(end + ':')
-      ;
-    }
+    argsBlock
+      .add('movq ' + oldPos + ', %rax')
+      .add('movq %rax, ' + newPos)
+      .add(argument.type.compileRef(state, '%rax'))
+    ;
   });
 
   code = _this.block.compile(state);
@@ -142,15 +134,9 @@ function compile(state, shift) {
   cleanVarsBlock = CodeBlock.create(undefined, 'Cleaning vars references')
     .add('movq %rax, %r8');
   _.forEach(_this.scope.variables, function(variable) {
-    if (variable.type.pointer === true) {
-      end = state.nextLabel();
+    if (variable.argument !== true && variable.property !== true) {
       cleanVarsBlock
-        .add('movq ' + variable.address + ', %rdx', 'Var ' + variable)
-        .add('cmpq $0, %rdx')
-        .add('je ' + end)
-        .add('decq (%rdx)')
-        .add(end + ':')
-      ;
+        .add(variable.type.compileFree(state, variable.address, true));
     }
   });
   cleanVarsBlock.add('movq %r8, %rax');

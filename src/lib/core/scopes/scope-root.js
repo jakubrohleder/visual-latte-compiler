@@ -74,6 +74,12 @@ function compile(state) {
       .add('.ascii "\\12\\0"')
       .add('ERROR_STRING:', undefined, -1)
       .add('.ascii "runtime error\\0"')
+      .add('FREE_STRING_STRING:', undefined, -1)
+      .add('.ascii "freeing string\\0"')
+      .add('FREE_ARRAY_STRING:', undefined, -1)
+      .add('.ascii "freeing array\\0"')
+      .add('FREE_TYPE_STRING:', undefined, -1)
+      .add('.ascii "freeing type\\0"')
     )
     .add('\n.text\n')
     .add(Scope.prototype.compile.call(_this, state));

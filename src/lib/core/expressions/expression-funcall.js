@@ -61,7 +61,7 @@ function compile(state) {
   var _this = this;
   var register;
   var code = CodeBlock.create(_this)
-    .comment('' + _this.ident + ' calling with ' + _this.args.join(', '));
+    .comment('fun_' + _this.ident + ' calling with ' + _this.args.join(', '));
 
 
   state.stack.addFunctionCall(_this);
@@ -80,6 +80,7 @@ function compile(state) {
       .add('movq ' + arg.register + ', %rax')
       .add('movq %rax, ' + register)
     ;
+    arg.register = register;
     state.popRegister();
   });
 
@@ -95,16 +96,18 @@ function compile(state) {
 
   code
     .add('movq %rax, ' + state.pushRegister())
-    .comment('' + _this.ident + ' call end');
+    .comment('fun_' + _this.ident + ' call end');
 
   _.forEach(_this.args, function(arg) {
     code
-      // .add(arg.value.free(state))
+      .add(arg.type.compileFree(state, arg.register))
     ;
   });
 
   code
-    .add('movq ' + state.popRegister() + ', %rax');
+    .add('movq ' + state.popRegister() + ', %rax')
+    .add(_this.type.compileFree(state, '%rax', true, true))
+  ;
 
   return code;
 }

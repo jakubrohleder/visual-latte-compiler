@@ -2,8 +2,13 @@ var Type = require('./type').constr;
 
 TypeVoid.prototype = Object.create(Type.prototype);
 TypeVoid.prototype.constructor = TypeVoid;
-TypeVoid.prototype.semanticCheck = semanticCheck;
+TypeVoid.prototype.compileValue = compileValue;
 TypeVoid.prototype.compile = compile;
+TypeVoid.prototype.compileFree = compileFree;
+TypeVoid.prototype.compileRef = compileRef;
+TypeVoid.prototype.semanticCheck = semanticCheck;
+TypeVoid.prototype.semanticCheckValue = semanticCheckValue;
+TypeVoid.prototype.defaultValueExpr = defaultValueExpr;
 TypeVoid.prototype.eq = eq;
 
 module.exports = new TypeVoid();
@@ -26,5 +31,25 @@ function semanticCheck() {
 }
 
 function compile() {
+  // empty
+}
+
+function compileValue() {
+  // empty
+}
+
+function compileFree() {
+  // empty
+}
+
+function compileRef() {
+  // empty
+}
+
+function semanticCheckValue() {
+  // empty
+}
+
+function defaultValueExpr() {
   // empty
 }

@@ -85,21 +85,10 @@ function compile(state) {
     _this.variable.address = _this.variable.addressShift + '(%rbx)';
   }
 
-  code = CodeBlock.create(_this)
+  return CodeBlock.create(_this)
     .comment('Declaring variable ' + _this.ident + ' on ' + _this.variable.address)
     .add(_this.expr.compile(state))
     .add('movq %rax, ' + _this.variable.address)
+    .add(_this.type.compileRef(state, '%rax'))
   ;
-
-  if (_this.type.pointer === true) {
-    end  = state.nextLabel();
-    code
-      .add('cmpq $0, %rax')
-      .add('je ' + end)
-      .add('incq (%rax)')
-      .add(end + ':')
-    ;
-  }
-
-  return code;
 }

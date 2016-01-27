@@ -106,7 +106,7 @@ function compile(state) {
         .add('movq %r12, %rdi', 'Result string to dest arg')
         .add('movq %r13, %rdx', 'Left string length')
 
-        .add('movq $0, (%rdi)', 'References to 0 pos')
+        .add('movq $1, (%rdi)', 'References to 0 pos')
         .add('movq %r13, 8(%rdi)', 'Length to 8 pos')
         .add('addq $16, %rdi', 'Shift references and length')
 

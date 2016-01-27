@@ -38,38 +38,25 @@ function semanticCheck(state) {
 function compile(state) {
   var _this = this;
   var code;
-  var endDecq = state.nextLabel();
-  var endIncq = state.nextLabel();
+  var exprPointer = state.pushRegister();
+  var identPointer = state.pushRegister();
 
   code = CodeBlock.create(_this)
     .add(_this.expr.compile(state))
-    .add('movq %rax, ' + state.pushRegister())
+    .add('movq %rax, ' + exprPointer)
     .add(_this.ident.compile(state))
-  ;
-
-  if (_this.type.pointer === true) {
-    code
-      .add('movq (%rax), %rdx')
-      .add('cmpq $0, %rdx')
-      .add('je ' + endDecq)
-      .add('decq (%rdx)')
-      .add(endDecq + ':')
-    ;
-  }
-
-  code
-    .add('movq ' + state.popRegister() + ', %rdx')
+    .add('movq %rax, ' + identPointer)
+    .add('movq (%rax), %rax')
+    .add(_this.type.compileFree(state, '%rax', true))
+    .add('movq ' + exprPointer + ', %rdx')
+    .add('movq ' + identPointer + ', %rax')
     .add('movq %rdx, (%rax)', 'save ' + _this.expr + ' on ' + _this.ident)
+    .add(_this.type.compileRef(state, '%rdx'))
   ;
 
-  if (_this.type.pointer === true) {
-    code
-      .add('cmpq $0, %rdx')
-      .add('je ' + endIncq)
-      .add('incq (%rdx)')
-      .add(endIncq + ':')
-    ;
-  }
+
+  state.popRegister();
+  state.popRegister();
 
   return code;
 }

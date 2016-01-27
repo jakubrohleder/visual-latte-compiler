@@ -76,17 +76,15 @@ function compile(state) {
   var _this = this;
   var start = state.nextLabel();
   var end = state.nextLabel();
-  var code = CodeBlock.create(_this)
+
+  return CodeBlock.create(_this)
     .add(start + ':', 'start label', -1)
     .add(_this.cond.compile(state))
+    .add('movq %rax, ' + state.pushRegister())
     .add('cmpq  $0, %rax')
     .add('je ' + end)
     .add(_this.loop.compile(state))
     .add('jmp ' + start)
     .add(end + ':', 'end label', -1)
   ;
-
-  // _this.cond.value.free(state);
-
-  return code;
 }

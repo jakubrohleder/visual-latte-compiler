@@ -8,6 +8,8 @@ TypeBoolean.prototype.constructor = TypeBoolean;
 TypeBoolean.prototype.defaultValueExpr = defaultValueExpr;
 TypeBoolean.prototype.compileValue = compileValue;
 TypeBoolean.prototype.compile = compile;
+TypeBoolean.prototype.compileFree = compileFree;
+TypeBoolean.prototype.compileRef = compileRef;
 TypeBoolean.prototype.semanticCheck = semanticCheck;
 TypeBoolean.prototype.eq = eq;
 
@@ -95,5 +97,13 @@ function semanticCheck() {
 }
 
 function compile() {
+  // empty
+}
+
+function compileFree() {
+  // empty
+}
+
+function compileRef() {
   // empty
 }

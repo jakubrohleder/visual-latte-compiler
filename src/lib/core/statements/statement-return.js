@@ -62,6 +62,7 @@ function compile(state) {
   if (_this.expr !== undefined) {
     code
       .add(_this.expr.compile(state))
+      .add(_this.expr.type.compileRef(state, '%rax'))
     ;
   }
 

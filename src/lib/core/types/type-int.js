@@ -7,6 +7,8 @@ TypeInt.prototype = Object.create(Type.prototype);
 TypeInt.prototype.constructor = TypeInt;
 TypeInt.prototype.compileValue = compileValue;
 TypeInt.prototype.compile = compile;
+TypeInt.prototype.compileFree = compileFree;
+TypeInt.prototype.compileRef = compileRef;
 TypeInt.prototype.semanticCheck = semanticCheck;
 TypeInt.prototype.semanticCheckValue = semanticCheckValue;
 TypeInt.prototype.defaultValueExpr = defaultValueExpr;
@@ -172,5 +174,13 @@ function semanticCheck() {
 }
 
 function compile() {
+  // empty
+}
+
+function compileFree() {
+  // empty
+}
+
+function compileRef() {
   // empty
 }

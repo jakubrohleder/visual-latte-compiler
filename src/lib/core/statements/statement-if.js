@@ -67,8 +67,10 @@ function compile(state) {
   var _this = this;
   var right = state.nextLabel();
   var end = state.nextLabel();
-  var code = CodeBlock.create(_this)
+
+  return CodeBlock.create(_this)
     .add(_this.cond.compile(state))
+    .add('movq %rax, ' + state.pushRegister())
     .add('cmpq  $1, %rax')
     .add('je ' + right)
     .add(_this.wrong.compile(state))
@@ -77,8 +79,4 @@ function compile(state) {
     .add(_this.right.compile(state))
     .add(end + ':', 'end label', -1)
   ;
-
-  // _this.cond.value.free(state);
-
-  return code;
 }

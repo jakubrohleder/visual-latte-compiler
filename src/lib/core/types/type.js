@@ -19,6 +19,8 @@ Type.prototype.binaryOperationCheck = binaryOperationCheck;
 
 Type.prototype.semanticCheckValue = semanticCheckValue;
 Type.prototype.compileValue = compileValue;
+Type.prototype.compileFree = compileFree;
+Type.prototype.compileRef = compileRef;
 
 Type.prototype.semanticCheck = semanticCheck;
 Type.prototype.compile = compile;
@@ -104,9 +106,9 @@ function addProperty(property, name) {
   if (_this.properties[name] === undefined) {
     if (property.addressShift === undefined) {
       property.addressShift = _this.internalSize;
-      property.address = property.addressShift + '(%rbx)';
     }
 
+    property.property = true;
     property.address = property.addressShift + '(%rbx)';
     _this.properties[name] = property;
     _this.internalSize += property.type.size;
@@ -291,4 +293,77 @@ function binaryOperationCheck(operator, rightType) {
 
 function toString() {
   return this.name;
+}
+
+function compileFree(state, address, decq, skip) {
+  // var _this = this;
+  // var end = state.nextLabel();
+  // var free = 'free';
+  // var puts = 'puts';
+  // var printf = 'printf';
+  // var typeRef = state.pushRegister();
+  // var elementsBlock;
+
+  // if (state.os === 'darwin') {
+  //   free = '_' + free;
+  //   printf = '_' + printf;
+  //   puts = '_' + puts;
+  // }
+
+  // elementsBlock = CodeBlock.create(undefined, 'freeing elements');
+
+  // // _.forEach(_this.properties, function(property) {
+  // //   elementsBlock
+  // //     .add('movq ' + typeRef + ', %rax')
+  // //     .add('movq ' + property.addressShift + '(%rax), %rax')
+  // //     .add(property.type.compileFree(state, '%rax', true))
+  // //   ;
+  // // });
+
+  // return CodeBlock.create(undefined, 'compileFree type')
+  //   .add('movq ' + address + ', %rax')
+  //   .add('movq %rax, ' + typeRef)
+  //   .add('cmpq $0, ' + typeRef)
+  //   .add('je ' + end)
+  //   .add('movq ' + typeRef + ', %rax')
+  //   .if(decq, 'decq (%rax)')
+  //   .if(skip, 'jmp ' + end)
+
+  //   .add('cmpq $0, (%rax)')
+  //   .add('jne ' + end)
+
+  //   // .add('leaq FREE_TYPE_STRING(%rip), %rdi')
+  //   // .add('call ' + puts)
+
+  //   // .add(elementsBlock)
+
+  //   .add('movq ' + typeRef + ', %rdi')
+  //   .add('callq ' + free)
+
+  //   .add(end + ':')
+  //   .add('movq ' + typeRef + ', %rax')
+  //   .add('movq %rax, ' + address)
+
+  //   .exec(state.popRegister())
+  // ;
+}
+
+function compileRef(state, address) {
+  var end = state.nextLabel();
+  var elementRef = state.pushRegister();
+
+  return CodeBlock.create(undefined, 'Adding ref')
+    .add('movq ' + address + ', %rax')
+    .add('movq %rax, ' + elementRef)
+
+    .add('cmpq $0, %rax')
+    .add('je ' + end)
+    .add('movq ' + elementRef + ', %rax')
+    .add('incq (%rax)')
+
+    .add(end + ':')
+    .add('movq ' + elementRef + ', %rax')
+    .add('movq %rax, ' + address)
+    .exec(state.popRegister())
+  ;
 }

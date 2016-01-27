@@ -5,13 +5,12 @@ var unescape = require('latte/utils').unescape;
 var Type = require('./type').constr;
 var TypeInt = require('latte/core/types/type-int');
 
-var _ = require('lodash');
-
 TypeString.prototype = Object.create(Type.prototype);
 TypeString.prototype.constructor = TypeString;
 TypeString.prototype.semanticCheck = semanticCheck;
 TypeString.prototype.semanticCheckValue = semanticCheckValue;
 TypeString.prototype.compileValue = compileValue;
+TypeString.prototype.compileFree = compileFree;
 TypeString.prototype.compile = compile;
 TypeString.prototype.defaultValueExpr = defaultValueExpr;
 TypeString.prototype.eq = eq;
@@ -152,4 +151,46 @@ function semanticCheckValue() {
 
 function compile() {
   // empty
+}
+
+function compileFree(state, address, decq, skip) {
+  var end = state.nextLabel();
+  var free = 'free';
+  var puts = 'puts';
+  var printf = 'printf';
+  var stringRef = state.pushRegister();
+
+  if (state.os === 'darwin') {
+    free = '_' + free;
+    printf = '_' + printf;
+    puts = '_' + puts;
+  }
+
+  return CodeBlock.create(undefined, 'compileFree string')
+    .add('movq ' + address + ', %rax')
+    .add('movq %rax, ' + stringRef)
+    .add('cmpq $0, %rax')
+    .add('je ' + end)
+    .add('movq ' + stringRef + ', %rax')
+    .if(decq, 'decq (%rax)')
+    .if(skip, 'jmp ' + end)
+
+    // .add('movq (%r15), %rsi')
+    // .add('leaq PRINT_INT_FORMAT(%rip), %rdi')
+    // .add('call ' + printf)
+
+    .add('movq ' + stringRef + ', %rax')
+    .add('cmpq $0, (%rax)')
+    .add('jne ' + end)
+    .add('movq ' + stringRef + ', %rdi')
+    .add('callq ' + free)
+
+    // .add('leaq FREE_STRING_STRING(%rip), %rdi')
+    // .add('call ' + puts)
+
+    .add(end + ':')
+    .add('movq ' + stringRef + ', %rax')
+    .add('movq %rax, ' + address)
+    .exec(state.popRegister())
+  ;
 }

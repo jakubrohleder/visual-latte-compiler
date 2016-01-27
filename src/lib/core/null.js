@@ -5,6 +5,8 @@ module.exports = new ExpressionNull();
 ExpressionNull.prototype.semanticCheck = semanticCheck;
 ExpressionNull.prototype.compile = compile;
 ExpressionNull.prototype.toString = toString;
+ExpressionNull.prototype.compileFree = compileFree;
+ExpressionNull.prototype.compileRef = compileRef;
 ExpressionNull.prototype.eq = eq;
 
 function ExpressionNull() {
@@ -14,6 +16,14 @@ function ExpressionNull() {
 }
 
 function semanticCheck() {
+// empty
+}
+
+function compileFree() {
+// empty
+}
+
+function compileRef() {
 // empty
 }
 

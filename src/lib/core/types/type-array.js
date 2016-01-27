@@ -14,9 +14,9 @@ TypeArray.prototype = Object.create(Type.prototype);
 TypeArray.prototype.constructor = TypeArray;
 TypeArray.prototype.defaultValueExpr = defaultValueExpr;
 TypeArray.prototype.toString = toString;
-
 TypeArray.prototype.semanticCheck = semanticCheck;
 TypeArray.prototype.compile = compile;
+TypeArray.prototype.compileFree = compileFree;
 TypeArray.prototype.semanticCheckValue = semanticCheckValue;
 TypeArray.prototype.compileValue = compileValue;
 
@@ -124,4 +124,66 @@ function semanticCheck() {
 
 function semanticCheckValue() {
   //
+}
+
+function compileFree(state, address, decq, skip) {
+  var _this = this;
+  var end = state.nextLabel();
+  var loopStart = state.nextLabel();
+  var loopEnd = state.nextLabel();
+  var free = 'free';
+  var puts = 'puts';
+  var printf = 'printf';
+  var arrayRef = state.pushRegister();
+  var elemRef = state.pushRegister();
+
+  if (state.os === 'darwin') {
+    free = '_' + free;
+    printf = '_' + printf;
+    puts = '_' + puts;
+  }
+
+  return CodeBlock.create(undefined, 'compileFree array')
+    .add('movq ' + address + ', %rax')
+    .add('movq %rax, ' + arrayRef)
+    .add('cmpq $0, ' + arrayRef)
+    .add('je ' + end)
+    .add('movq ' + arrayRef + ', %rax')
+    .if(decq, 'decq (%rax)')
+    .if(skip, 'jmp ' + end)
+
+    .add('cmpq $0, (%rax)')
+    .add('jne ' + end)
+
+    // .add('leaq FREE_ARRAY_STRING(%rip), %rdi')
+    // .add('call ' + puts)
+
+    .add(CodeBlock.create(undefined, 'freeing elements')
+      .add('movq $0, ' + elemRef)
+      .add(loopStart + ':', 'loopStart label', -1)
+      .add(CodeBlock.create(undefined, 'For condition')
+        .add('movq ' + arrayRef + ', %rax')
+        .add('movq ' + elemRef + ', %rdx')
+        .add('cmpq %rdx, 8(%rax)')
+        .add('jle ' + loopEnd)
+      )
+      .add('movq ' + arrayRef + ', %rax')
+      .add('movq ' + elemRef + ', %rdx')
+      .add('movq 16(%rax, %rdx, ' + _this.elementType.size + '), %rax')
+      .add(_this.elementType.compileFree(state, '%rax', true))
+      .add('incq ' + elemRef)
+      .add('jmp ' + loopStart)
+      .add(loopEnd + ':', 'loopEnd label', -1)
+    )
+
+    .add('movq ' + arrayRef + ', %rdi')
+    .add('callq ' + free)
+
+    .add(end + ':')
+    .add('movq ' + arrayRef + ', %rax')
+    .add('movq %rax, ' + address)
+
+    .exec(state.popRegister())
+    .exec(state.popRegister())
+  ;
 }
